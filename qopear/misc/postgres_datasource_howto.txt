@@ -1,0 +1,19 @@
+standalone.xml:
+
+<subsystem xmlns="urn:jboss:domain:datasources:5.0">
+            <datasources>           
+                <datasource jta="true" jndi-name="java:/qopDS" pool-name="qopDS" enabled="true" use-ccm="true">
+                    <connection-url>jdbc:postgresql://10.0.0.17:5432/qop</connection-url>
+                    <driver-class>org.postgresql.Driver</driver-class>
+                    <driver>postgresql-42.1.4.jar</driver>
+                    <security>
+                        <user-name>***</user-name>
+                        <password>***</password>
+                    </security>
+                    <validation>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker"/>
+                        <background-validation>true</background-validation>
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter"/>
+                    </validation>
+                </datasource>
+             ...
