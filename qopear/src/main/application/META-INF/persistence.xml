@@ -7,7 +7,9 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>java:/qopDS</jta-data-source>
         <properties>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+            <!-- <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />  -->
+            <property name="hibernate.dialect" value="org.hibernate.spatial.dialect.postgis.PostgisDialect" />
+			<property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.cache.default_cache_concurrency_strategy"
                 value="nonstrict-read-write" />

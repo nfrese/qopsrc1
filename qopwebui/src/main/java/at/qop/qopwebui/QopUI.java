@@ -94,6 +94,10 @@ public class QopUI extends UI {
         				);
 		filtercombo.setDataProvider(dataProvider);
         
+		filtercombo.addSelectionListener(event ->
+	    layout.addComponent(new Label("Selected " +
+	        event.getSelectedItem().get().geom)));
+		
         layout.addComponents(title, filtercombo);
         
         setContent(layout);

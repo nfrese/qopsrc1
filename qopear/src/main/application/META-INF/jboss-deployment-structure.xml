@@ -12,6 +12,7 @@
     <module name="org.dom4j"/> 
     <module name="org.javassist"/> 
     <module name="org.hibernate"/> 
+    <module name="deployment.postgresql-42.1.4.jar" />
         </dependencies>
     </deployment>
 </jboss-deployment-structure>
