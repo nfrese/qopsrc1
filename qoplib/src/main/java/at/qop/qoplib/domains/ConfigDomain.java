@@ -18,11 +18,14 @@ import javax.persistence.Query;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import at.qop.qoplib.dbbatch.DbBatch;
 import at.qop.qoplib.dbbatch.DbRecord;
 import at.qop.qoplib.dbmetadata.QopDBColumn;
 import at.qop.qoplib.dbmetadata.QopDBMetadata;
 import at.qop.qoplib.dbmetadata.QopDBTable;
+import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Config;
 
 @Stateless
@@ -48,6 +51,37 @@ public class ConfigDomain implements IConfigDomain {
 		Criteria crit = hibSess().createCriteria(Config.class);
 		getMetadata();
 		return crit.list();
+	}
+	
+	@Override
+	public List<Address> findAddresses(Geometry filter) {
+		org.hibernate.Query qry = hibSess().createQuery("from Address where geom intersects :filtergeom");
+		qry.setParameter("filtergeom", filter);
+		return qry.list();
+	}
+
+	@Override
+	public List<Address> findAddresses(String searchTxt) {
+		org.hibernate.Query qry = hibSess().createQuery("from Address where name like :searchTxt");
+		qry.setParameter("searchTxt", searchTxt);
+		return qry.list();
+	}
+	
+
+	@Override
+	public List<Address> findAddresses(int offset, int limit, String namePrefix) {
+		System.out.println(offset + " " + limit + " " + namePrefix);
+		org.hibernate.Query qry = hibSess().createQuery("from Address where name like :searchTxt order by name");
+		qry.setParameter("searchTxt", namePrefix + "%");
+		qry.setFetchSize(limit);
+		return qry.list();
+	}
+
+	@Override
+	public int countAddresses(String namePrefix) {
+		org.hibernate.Query qry = hibSess().createQuery("from Address where name like :searchTxt");
+		qry.setParameter("searchTxt", namePrefix + "%");
+		return qry.list().size();
 	}
 	
 	@Override
@@ -129,5 +163,6 @@ public class ConfigDomain implements IConfigDomain {
 		ps.close();
 		//connection.close();				
 	}
+
 
 }

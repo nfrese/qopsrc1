@@ -13,11 +13,7 @@ public class Configuration {
 	public static String TITLE() { 
 		
 		IConfigDomain cd;
-		try {
-			cd = LookupDomains.configDomain();
-		} catch (NamingException e) {
-			throw new RuntimeException(e);
-		}
+		cd = LookupDomains.configDomain();
 		
 		List<Config> confs = cd.readConfiguration();
 		

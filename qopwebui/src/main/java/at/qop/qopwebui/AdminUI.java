@@ -53,11 +53,8 @@ public class AdminUI extends UI {
         	StringBuilder html = new StringBuilder();
         	
     		IConfigDomain cd;
-    		try {
-    			cd = LookupDomains.configDomain();
-    		} catch (NamingException e) {
-    			throw new RuntimeException(e);
-    		}
+   			cd = LookupDomains.configDomain();
+
     		QopDBMetadata meta = cd.getMetadata();
     		for (QopDBTable table : meta.tables)
     		{
@@ -124,11 +121,8 @@ public class AdminUI extends UI {
 		System.out.println(p);
 		
 		IConfigDomain cd;
-		try {
-			cd = LookupDomains.configDomain();
-		} catch (NamingException e) {
-			throw new RuntimeException(e);
-		}
+		cd = LookupDomains.configDomain();
+
 		
 		try {
 			cd.batchUpdate(p);
