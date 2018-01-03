@@ -1,6 +1,6 @@
 package at.qop.qoplib.dbbatch;
 
-public abstract class DbTableReader {
+public abstract class AbstractDbTableReader {
 	
 	public boolean cancelled = false;
 	

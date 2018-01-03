@@ -1,13 +1,21 @@
 package at.qop.qopwebui;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.provider.SortOrder;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
@@ -25,7 +33,7 @@ import at.qop.qoplib.UpdateAddresses;
 import at.qop.qoplib.dbbatch.DbBatch;
 import at.qop.qoplib.dbbatch.DbRecord;
 import at.qop.qoplib.dbbatch.DbTable;
-import at.qop.qoplib.dbbatch.DbTableReader;
+import at.qop.qoplib.dbbatch.AbstractDbTableReader;
 import at.qop.qoplib.dbmetadata.QopDBColumn;
 import at.qop.qoplib.dbmetadata.QopDBMetadata;
 import at.qop.qoplib.dbmetadata.QopDBTable;
@@ -96,7 +104,8 @@ public class AdminUI extends UI {
 						if (event.getValue().size() == 1)
 						{
 							QopDBTable table = event.getValue().iterator().next();
-							//grid.setDataProvider(dataProvider(table));
+							prepareGrid(grid, table);
+							
 						}
 					} );
         	
@@ -133,30 +142,143 @@ public class AdminUI extends UI {
         setContent(layout);
     }
 
-	private DataProvider<DbRecord, ?> dataProvider(QopDBTable table) {
-		try {
+	private void prepareGrid(Grid<DbRecord> grid, QopDBTable table) {
+		
+		String baseSql = "select * from " + table.name;
+		
+		grid.setDataProvider(dataProvider(table, baseSql));
+		grid.removeAllColumns();
+		
 		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
-		DbTableReader tableReader = new DbTableReader() {
+		
+		DbTableScanner tableReader = new DbTableScanner();
+		try {
+			gd_.readTable(baseSql, tableReader);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 
-			@Override
-			public void metadata(DbTable table) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void record(DbRecord record) {
-				// TODO Auto-generated method stub
-				
-			}
+		for (int i = 0; i < tableReader.table.colNames.length; i++)
+		{
+			String colName = tableReader.table.colNames[i];
+			int coltype = tableReader.table.sqlTypes[i];
 			
-		};
-		gd_.readTable("select * from " + table.name, tableReader);
+			final int i_ = i;
+			grid.addColumn(item -> item.values[i_]).setCaption(colName);
+			
+		}
+	}
+
+	public static interface DataService {
+
+		int count();
+
+		Stream<DbRecord> fetch(int offset, int limit, List<String> sortOrders);
+
+		String createSort(String sorted, boolean b);
+		
+	}
+	
+	private final class DbTableReader extends AbstractDbTableReader {
+		
+		public DbTable table = null;
+		public List<DbRecord> records = new ArrayList<>();
+		
+		@Override
+		public void metadata(DbTable table) {
+			this.table = table;
+		}
+
+		@Override
+		public void record(DbRecord record) {
+			records.add(record);
+		}
+	}
+	
+	private final class DbTableScanner extends AbstractDbTableReader {
+		
+		public DbTable table = null;
+		
+		@Override
+		public void metadata(DbTable table) {
+			this.table = table;
+		}
+
+		@Override
+		public void record(DbRecord record) {
+			cancelled = true;
+		}
+	}
+	
+	private DataProvider<DbRecord, ?> dataProvider(QopDBTable table, String baseSql) {
+		try {
+			
+			DataService dataService = new DataService() {
+
+				@Override
+				public int count() {
+					
+					IGenericDomain gd_ = LookupSessionBeans.genericDomain();
+					try {
+						DbTableReader tableReader = new DbTableReader();
+						gd_.readTable("select count(*) from " + table.name, tableReader);
+						return (int)(long)tableReader.records.stream().findFirst().get().values[0];
+					} catch (SQLException e) {
+						throw new RuntimeException(e);
+					}
+				}
+
+				@Override
+				public Stream<DbRecord> fetch(int offset, int limit, List<String> sortOrders) {
+					String orderClause = sortOrders.size() >0 ? "order by " +  sortOrders.stream()
+							 .collect(Collectors.joining(", ")) : "";
+					String sql = baseSql + orderClause;
+					
+					IGenericDomain gd_ = LookupSessionBeans.genericDomain();
+					DbTableReader tableReader = new DbTableReader();
+					try {
+						gd_.readTable(sql, tableReader);
+						return tableReader.records.stream();
+					} catch (SQLException e) {
+						throw new RuntimeException(e);
+					}
+				}
+
+				@Override
+				public String createSort(String sorted, boolean b) {
+					return sorted + (b ? " desc" : "");
+				}
+				
+			};
+			
+			DataProvider<DbRecord, Void> dataProvider = DataProvider.fromCallbacks(
+					  query -> {
+					    List<String> sortOrders = new ArrayList<>();
+					    for(SortOrder<String> queryOrder : query.getSortOrders()) {
+					    	String sort = dataService.createSort(
+					        // The name of the sorted property
+					        queryOrder.getSorted(),
+					        // The sort direction for this property
+					        queryOrder.getDirection() == SortDirection.DESCENDING);
+					      sortOrders.add(sort);
+					    }
+
+					    return dataService.fetch(
+					        query.getOffset(),
+					        query.getLimit(),
+					        sortOrders
+					      );
+					  },
+					  // The number of persons is the same regardless of ordering
+					  query -> dataService.count()
+					);
+			
+
+		return dataProvider;
 		} catch (Exception ex)
 		{
 			throw new RuntimeException(ex);
 		}
-		return null;
 	}
 
 	private void updateAddresses()

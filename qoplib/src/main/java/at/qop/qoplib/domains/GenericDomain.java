@@ -21,7 +21,7 @@ import org.hibernate.EntityMode;
 import at.qop.qoplib.dbbatch.DbBatch;
 import at.qop.qoplib.dbbatch.DbRecord;
 import at.qop.qoplib.dbbatch.DbTable;
-import at.qop.qoplib.dbbatch.DbTableReader;
+import at.qop.qoplib.dbbatch.AbstractDbTableReader;
 import at.qop.qoplib.dbmetadata.QopDBColumn;
 import at.qop.qoplib.dbmetadata.QopDBMetadata;
 import at.qop.qoplib.dbmetadata.QopDBTable;
@@ -50,7 +50,7 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 			while (tableTypes.next())
 			{
 				String TABLE_TYPE = tableTypes.getString(1);
-				System.out.println(TABLE_TYPE);
+				//System.out.println(TABLE_TYPE);
 			}
 			
 			try (ResultSet tables = metadata.getTables(null, null, null, new String[] { "TABLE" } )) {
@@ -60,32 +60,14 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 				while (tables.next())
 				{
 					String TABLE_NAME = tables.getString("TABLE_NAME");
-					System.out.println(TABLE_NAME);
+					//System.out.println(TABLE_NAME);
 					regularTableNames.add(TABLE_NAME);
 				}
 
 				for (String tname : regularTableNames)
 				{
-					QopDBTable t = new QopDBTable();
-					t.name = tname;
+					QopDBTable t = tableMetadata(metadata, tname);
 					metaOut.tables.add(t);
-
-					try (ResultSet columns = metadata.getColumns(null, null, tname, null)) {
-						while (columns.next())
-						{
-							String COLUMN_NAME  = columns.getString("COLUMN_NAME");
-							String TYPE_NAME  = columns.getString("TYPE_NAME");
-
-							System.out.println(tname + "; " + COLUMN_NAME + "; " + TYPE_NAME);
-
-							QopDBColumn c = new QopDBColumn();
-							c.name = COLUMN_NAME;
-							c.typename = TYPE_NAME;
-
-							t.columns.add(c);
-
-						}
-					}
 				}
 			}
 			
@@ -94,6 +76,40 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 		}
 		return metaOut;
 		
+	}
+
+	@Override
+	public QopDBTable tableMetadata(String tname)
+	{
+		try {
+			DatabaseMetaData metadata = hibSessImplementor().connection().getMetaData();
+			return tableMetadata(metadata, tname);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private QopDBTable tableMetadata(DatabaseMetaData metadata, String tname) throws SQLException {
+		QopDBTable t = new QopDBTable();
+		t.name = tname;
+
+		try (ResultSet columns = metadata.getColumns(null, null, tname, null)) {
+			while (columns.next())
+			{
+				String COLUMN_NAME  = columns.getString("COLUMN_NAME");
+				String TYPE_NAME  = columns.getString("TYPE_NAME");
+
+				//System.out.println(tname + "; " + COLUMN_NAME + "; " + TYPE_NAME);
+
+				QopDBColumn c = new QopDBColumn();
+				c.name = COLUMN_NAME;
+				c.typename = TYPE_NAME;
+
+				t.columns.add(c);
+
+			}
+		}
+		return t;
 	}
 	
 	@Override
@@ -116,7 +132,7 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	}
 	
 	@Override
-	public void readTable(String sql, DbTableReader tableReader) throws SQLException
+	public void readTable(String sql, AbstractDbTableReader tableReader) throws SQLException
 	{
 		Connection connection = hibSessImplementor().connection();
 		try (PreparedStatement ps = connection.prepareStatement(sql)) {
