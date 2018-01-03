@@ -2,11 +2,19 @@ package at.qop.qopwebui;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.annotation.WebServlet;
+
+import org.vaadin.addon.leaflet.LFeatureGroup;
+import org.vaadin.addon.leaflet.LMap;
+import org.vaadin.addon.leaflet.LTileLayer;
+import org.vaadin.addon.leaflet.LeafletLayer;
+import org.vaadin.addon.leaflet.util.JTSUtil;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
@@ -27,6 +35,7 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
@@ -46,6 +55,8 @@ public class AdminUI extends UI {
 
 	private static final long serialVersionUID = 1L;
 
+	DbTable currentTable;
+	
 	@Override
     protected void init(VaadinRequest vaadinRequest) {
         final VerticalLayout layout = new VerticalLayout();
@@ -111,7 +122,37 @@ public class AdminUI extends UI {
 						}
 					} );
         	
-        	final HorizontalLayout hl = new HorizontalLayout(listSelect, grid);
+			LMap leafletMap = new LMap();
+			leafletMap.setWidth("600px");
+			leafletMap.setHeight("400px");
+			LTileLayer baseLayerOsm = new LTileLayer();
+			baseLayerOsm.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+			leafletMap.addBaseLayer(baseLayerOsm, "OSM");
+			
+			LFeatureGroup lfg = new LFeatureGroup();
+			leafletMap.addLayer(lfg);
+			
+			grid.addSelectionListener(event -> {
+				
+				lfg.removeAllComponents();
+				
+				Set<DbRecord> selectedItems = event.getAllSelectedItems();
+				for (DbRecord selectedItem : selectedItems){
+					
+					
+
+					Collection<Geometry> geoms = selectedItem.getGeometries(currentTable);
+					for (Geometry geom : geoms)
+					{
+						Collection<LeafletLayer> lPoly = JTSUtil.toLayers(geom);
+						lfg.addComponent(lPoly);
+					}
+				}
+				leafletMap.zoomToContent();
+			});
+			
+			
+        	final HorizontalLayout hl = new HorizontalLayout(listSelect, grid, leafletMap);
         	hl.setMargin(true);
         	tabs.addTab(hl, "Layer Data");
         }        
@@ -160,6 +201,8 @@ public class AdminUI extends UI {
 			throw new RuntimeException(e);
 		}
 
+		currentTable = tableReader.table; 
+		
 		for (int i = 0; i < tableReader.table.colNames.length; i++)
 		{
 			String colName = tableReader.table.colNames[i];
