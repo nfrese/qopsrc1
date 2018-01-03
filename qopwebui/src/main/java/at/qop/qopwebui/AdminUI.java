@@ -27,6 +27,8 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKBReader;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.UpdateAddresses;
@@ -161,12 +163,29 @@ public class AdminUI extends UI {
 		for (int i = 0; i < tableReader.table.colNames.length; i++)
 		{
 			String colName = tableReader.table.colNames[i];
-			int coltype = tableReader.table.sqlTypes[i];
+
 			
 			final int i_ = i;
-			grid.addColumn(item -> item.values[i_]).setCaption(colName);
+			grid.addColumn(item -> stringRepresentation(tableReader.table, i_, item)).setCaption(colName);
 			
 		}
+	}
+
+	private Object stringRepresentation(DbTable table, final int i, DbRecord item) {
+		
+		int coltype = table.sqlTypes[i];
+		if ("geometry".equals(table.typeNames[i]))
+		{
+			WKBReader wkbReader = new WKBReader();  
+			try {
+				return wkbReader.read(WKBReader.hexToBytes(String.valueOf(item.values[i])));
+			} catch (ParseException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		
+		return item.values[i];
 	}
 
 	public static interface DataService {

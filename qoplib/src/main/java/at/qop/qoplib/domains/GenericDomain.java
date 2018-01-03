@@ -148,6 +148,7 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 				for (int i = 0; i< cols; i++)
 				{
 					table.sqlTypes[i] = metaData.getColumnType(i+1);
+					table.typeNames[i] = metaData.getColumnTypeName(i+1);
 					table.colNames[i] = metaData.getColumnName(i+1);
 				}
 

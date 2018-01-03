@@ -7,11 +7,13 @@ public class DbTable {
 	
 	public String[] colNames = EMPTY_STRINGARR;
 	public int[] sqlTypes = EMPTY_INT_ARR;
+	public String[] typeNames = EMPTY_STRINGARR;
 	
 	public void init(int cols)
 	{
 		this.sqlTypes = new int[cols];
-		this.colNames = new String[cols];		
+		this.colNames = new String[cols];	
+		this.typeNames = new String[cols];
 	}
 	
 }
