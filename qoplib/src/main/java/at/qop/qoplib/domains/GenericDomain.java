@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,8 +16,12 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hibernate.EntityMode;
+
 import at.qop.qoplib.dbbatch.DbBatch;
 import at.qop.qoplib.dbbatch.DbRecord;
+import at.qop.qoplib.dbbatch.DbTable;
+import at.qop.qoplib.dbbatch.DbTableReader;
 import at.qop.qoplib.dbmetadata.QopDBColumn;
 import at.qop.qoplib.dbmetadata.QopDBMetadata;
 import at.qop.qoplib.dbmetadata.QopDBTable;
@@ -46,37 +53,39 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 				System.out.println(TABLE_TYPE);
 			}
 			
-			ResultSet tables = metadata.getTables(null, null, null, new String[] { "TABLE" } );
-			
-			Set<String> regularTableNames = new TreeSet<String>();
-			
-			while (tables.next())
-			{
-				String TABLE_NAME = tables.getString("TABLE_NAME");
-				System.out.println(TABLE_NAME);
-				regularTableNames.add(TABLE_NAME);
-			}
-				
-			for (String tname : regularTableNames)
-			{
-				QopDBTable t = new QopDBTable();
-				t.name = tname;
-				metaOut.tables.add(t);
-				
-				ResultSet columns = metadata.getColumns(null, null, tname, null);
-				while (columns.next())
+			try (ResultSet tables = metadata.getTables(null, null, null, new String[] { "TABLE" } )) {
+
+				Set<String> regularTableNames = new TreeSet<String>();
+
+				while (tables.next())
 				{
-					String COLUMN_NAME  = columns.getString("COLUMN_NAME");
-					String TYPE_NAME  = columns.getString("TYPE_NAME");
-					
-					System.out.println(tname + "; " + COLUMN_NAME + "; " + TYPE_NAME);
-					
-					QopDBColumn c = new QopDBColumn();
-					c.name = COLUMN_NAME;
-					c.typename = TYPE_NAME;
-					
-					t.columns.add(c);
-					
+					String TABLE_NAME = tables.getString("TABLE_NAME");
+					System.out.println(TABLE_NAME);
+					regularTableNames.add(TABLE_NAME);
+				}
+
+				for (String tname : regularTableNames)
+				{
+					QopDBTable t = new QopDBTable();
+					t.name = tname;
+					metaOut.tables.add(t);
+
+					try (ResultSet columns = metadata.getColumns(null, null, tname, null)) {
+						while (columns.next())
+						{
+							String COLUMN_NAME  = columns.getString("COLUMN_NAME");
+							String TYPE_NAME  = columns.getString("TYPE_NAME");
+
+							System.out.println(tname + "; " + COLUMN_NAME + "; " + TYPE_NAME);
+
+							QopDBColumn c = new QopDBColumn();
+							c.name = COLUMN_NAME;
+							c.typename = TYPE_NAME;
+
+							t.columns.add(c);
+
+						}
+					}
 				}
 			}
 			
@@ -92,18 +101,56 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 		
 		Connection connection = hibSessImplementor().connection();
 		
-		PreparedStatement ps = connection.prepareStatement(batch.sql);
+		try (PreparedStatement ps = connection.prepareStatement(batch.sql)) {
 
-		for (DbRecord record: batch.records()) {
+			for (DbRecord record: batch.records()) {
 
-			for (int i = 0; i <record.values.length ; i++)
-			{
-				ps.setObject(i + 1, record.values[i], record.sqlTypes[i]);
+				for (int i = 0; i <record.values.length ; i++)
+				{
+					ps.setObject(i + 1, record.values[i], batch.sqlTypes[i]);
+				}
+				ps.addBatch();
 			}
-			ps.addBatch();
+			ps.executeBatch();
 		}
-		ps.executeBatch();
-		ps.close();
+	}
+	
+	@Override
+	public void readTable(String sql, DbTableReader tableReader) throws SQLException
+	{
+		Connection connection = hibSessImplementor().connection();
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
+			try (ResultSet rs = ps.executeQuery()) {
+
+				ResultSetMetaData metaData = rs.getMetaData();
+
+				int cols = metaData.getColumnCount();
+				
+				DbTable table = new DbTable();
+				table.init(cols);
+
+				for (int i = 0; i< cols; i++)
+				{
+					table.sqlTypes[i] = metaData.getColumnType(i+1);
+					table.colNames[i] = metaData.getColumnName(i+1);
+				}
+
+				tableReader.metadata(table);
+				
+				while (!tableReader.cancelled && rs.next()) {
+					DbRecord rec = new DbRecord();
+
+					rec.values = new Object[cols];
+					for (int i = 0; i < cols ; i++)
+					{
+						Object value = rs.getObject(i+1);
+						rec.values[i] = value;
+					}
+					tableReader.record(rec);
+				}
+			}
+		}
+		tableReader.done();
 	}
 
 

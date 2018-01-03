@@ -3,7 +3,7 @@ package at.qop.qoplib.dbbatch;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DbBatch {
+public class DbBatch extends DbTable {
 	
 	public boolean mayFail = false;
 	public String sql;
@@ -47,7 +47,7 @@ public class DbBatch {
 			for (int i = 0; i <record.values.length ; i++)
 			{
 				if (i > 0) sb.append(", ");
-				sb.append( record.values[i] + " {" +  record.sqlTypes[i] + "}");
+				sb.append( record.values[i] + " {" +  this.sqlTypes[i] + "}");
 			}
 			sb.append("\n");
 		}

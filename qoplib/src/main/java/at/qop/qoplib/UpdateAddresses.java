@@ -69,16 +69,14 @@ public class UpdateAddresses extends AbstractUpdater {
 		int zugxIx = this.columnsMap.get("ZUG_X");
 		int zugyIx = this.columnsMap.get("ZUG_Y");
 		
-		//String zuggeom;
-		
 		DbBatch b = new DbBatch();
 		b.sql = "insert into addresses (name, geom, zug_x, zug_y) values (?, ST_GeomFromText(?, 4326), ?, ?)";
-		DbRecord rec = new DbRecord();
-		rec.sqlTypes = new int[] {
+		b.sqlTypes = new int[] {
 				java.sql.Types.VARCHAR, 
 				java.sql.Types.VARCHAR, 
 				java.sql.Types.DOUBLE, 
 				java.sql.Types.DOUBLE};
+		DbRecord rec = new DbRecord();
 		rec.values = new String[] {
 				arr[nameIx], 
 				arr[shapeIx], 

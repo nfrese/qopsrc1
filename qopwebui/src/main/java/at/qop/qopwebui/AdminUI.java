@@ -4,11 +4,16 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.data.provider.DataProvider;
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
@@ -18,6 +23,9 @@ import com.vaadin.ui.themes.ValoTheme;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.UpdateAddresses;
 import at.qop.qoplib.dbbatch.DbBatch;
+import at.qop.qoplib.dbbatch.DbRecord;
+import at.qop.qoplib.dbbatch.DbTable;
+import at.qop.qoplib.dbbatch.DbTableReader;
 import at.qop.qoplib.dbmetadata.QopDBColumn;
 import at.qop.qoplib.dbmetadata.QopDBMetadata;
 import at.qop.qoplib.dbmetadata.QopDBTable;
@@ -66,8 +74,36 @@ public class AdminUI extends UI {
             final VerticalLayout vl = new VerticalLayout(label);
             vl.setMargin(true);
  
-            tabs.addTab(vl, "Data Layers");
+            tabs.addTab(vl, "Layers");
         }
+        {   
+        	IGenericDomain gd = LookupSessionBeans.genericDomain();
+
+    		QopDBMetadata meta = gd.getMetadata();
+    		
+			ListSelect<QopDBTable> listSelect = new ListSelect<QopDBTable>("Layer auswählen...", meta.tables);
+            listSelect.setRows(6);
+            listSelect.setHeight(100.0f, Unit.PERCENTAGE);
+     
+            Grid<DbRecord> grid = new Grid<DbRecord>();
+            grid.setWidth(100.0f, Unit.PERCENTAGE);
+            grid.setHeight(100.0f, Unit.PERCENTAGE);
+            
+            Page page = this.getPage();
+			listSelect.addValueChangeListener(
+					event -> { 
+						new Notification("Value changed:", String.valueOf(event.getValue())).show(page); 
+						if (event.getValue().size() == 1)
+						{
+							QopDBTable table = event.getValue().iterator().next();
+							//grid.setDataProvider(dataProvider(table));
+						}
+					} );
+        	
+        	final HorizontalLayout hl = new HorizontalLayout(listSelect, grid);
+        	hl.setMargin(true);
+        	tabs.addTab(hl, "Layer Data");
+        }        
         {   
         	final VerticalLayout vl = new VerticalLayout();
         	vl.setMargin(true);
@@ -96,6 +132,32 @@ public class AdminUI extends UI {
         
         setContent(layout);
     }
+
+	private DataProvider<DbRecord, ?> dataProvider(QopDBTable table) {
+		try {
+		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
+		DbTableReader tableReader = new DbTableReader() {
+
+			@Override
+			public void metadata(DbTable table) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void record(DbRecord record) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		};
+		gd_.readTable("select * from " + table.name, tableReader);
+		} catch (Exception ex)
+		{
+			throw new RuntimeException(ex);
+		}
+		return null;
+	}
 
 	private void updateAddresses()
 	{

@@ -13,5 +13,10 @@ public class QopDBTable {
 	{
 		return columns.stream().filter(c -> "geometry".equals(c.typename )).count() > 0;
 	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
 
 }
