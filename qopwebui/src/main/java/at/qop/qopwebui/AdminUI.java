@@ -1,35 +1,27 @@
 package at.qop.qopwebui;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
-import javax.naming.NamingException;
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import at.qop.qoplib.Configuration;
-import at.qop.qoplib.LookupDomains;
+import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.UpdateAddresses;
 import at.qop.qoplib.dbbatch.DbBatch;
 import at.qop.qoplib.dbmetadata.QopDBColumn;
 import at.qop.qoplib.dbmetadata.QopDBMetadata;
 import at.qop.qoplib.dbmetadata.QopDBTable;
-import at.qop.qoplib.domains.IConfigDomain;
+import at.qop.qoplib.domains.IGenericDomain;
 
 @Theme("mytheme")
 public class AdminUI extends UI {
@@ -52,10 +44,9 @@ public class AdminUI extends UI {
         {
         	StringBuilder html = new StringBuilder();
         	
-    		IConfigDomain cd;
-   			cd = LookupDomains.configDomain();
+   			IGenericDomain gd = LookupSessionBeans.genericDomain();
 
-    		QopDBMetadata meta = cd.getMetadata();
+    		QopDBMetadata meta = gd.getMetadata();
     		for (QopDBTable table : meta.tables)
     		{
     			if (table.isGeometric())
@@ -120,12 +111,9 @@ public class AdminUI extends UI {
 	private Void forward(DbBatch p) {
 		System.out.println(p);
 		
-		IConfigDomain cd;
-		cd = LookupDomains.configDomain();
-
-		
 		try {
-			cd.batchUpdate(p);
+			IGenericDomain gd = LookupSessionBeans.genericDomain();
+			gd.batchUpdate(p);
 		} catch (Exception ex)
 		{
 			if (p.mayFail)

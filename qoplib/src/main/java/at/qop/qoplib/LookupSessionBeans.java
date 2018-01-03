@@ -5,27 +5,37 @@ import java.util.Properties;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import at.qop.qoplib.domains.AddressDomain;
 import at.qop.qoplib.domains.ConfigDomain;
+import at.qop.qoplib.domains.GenericDomain;
+import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.domains.IConfigDomain;
+import at.qop.qoplib.domains.IGenericDomain;
 
-public class LookupDomains {
+public class LookupSessionBeans {
 
 	public static IConfigDomain configDomain() {
+		return lookupDomain(ConfigDomain.class);
+	}
+
+	public static IAddressDomain addressDomain() {
+		return lookupDomain(AddressDomain.class);
+	}
+
+	public static IGenericDomain genericDomain() {
+		return lookupDomain(GenericDomain.class);
+	}	
+	
+	public static <B> B lookupDomain(Class<B> beanClass) {
 		try {
 			Properties props = new Properties();
 			props.put("java.naming.factory.url.pkgs","org.jboss.ejb.client.naming");
 			InitialContext context = new InitialContext(props);
 
-			String appName = "";        	 
-			String moduleName = "MyAdditionEJB";
-			String distinctName = "";        	 
-			String beanName = ConfigDomain.class.getSimpleName();        	 
-			String interfaceName = IConfigDomain.class.getName();
-			String name = "ejb:" + appName + "/" + moduleName + "/" +  distinctName    + "/" + beanName + "!" + interfaceName;
-			name = "java:app/qoplib/ConfigDomain";
-			name = "java:global/qopear/qoplib/ConfigDomain";
-			System.out.println(name);
-			IConfigDomain bean = (IConfigDomain)context.lookup(name);
+			String beanName = beanClass.getSimpleName();        	 
+			String name = "java:global/qopear/qoplib/" + beanName;
+			@SuppressWarnings("unchecked")
+			B bean = (B)context.lookup(name);
 			return bean;
 		} catch (NamingException e)
 		{

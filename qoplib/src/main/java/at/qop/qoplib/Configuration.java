@@ -3,8 +3,6 @@ package at.qop.qoplib;
 import java.util.List;
 import java.util.Optional;
 
-import javax.naming.NamingException;
-
 import at.qop.qoplib.domains.IConfigDomain;
 import at.qop.qoplib.entities.Config;
 
@@ -13,7 +11,7 @@ public class Configuration {
 	public static String TITLE() { 
 		
 		IConfigDomain cd;
-		cd = LookupDomains.configDomain();
+		cd = LookupSessionBeans.configDomain();
 		
 		List<Config> confs = cd.readConfiguration();
 		
