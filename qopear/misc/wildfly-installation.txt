@@ -1,5 +1,16 @@
-standalone.xml:
+wildfly:
 
+download/install wildfly 11
+
+database driver:
+
+deploy postgresql-42.1.4.jar via the wildfly admin console
+
+datasource:
+
+edit /opt/wildfly-11.0.0.Final/standalone/configuration/standalone.xml:
+
+============
 <subsystem xmlns="urn:jboss:domain:datasources:5.0">
             <datasources>           
                 <datasource jta="true" jndi-name="java:/qopDS" pool-name="qopDS" enabled="true" use-ccm="true">
@@ -17,3 +28,4 @@ standalone.xml:
                     </validation>
                 </datasource>
              ...
+============

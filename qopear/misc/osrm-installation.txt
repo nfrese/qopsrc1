@@ -1,0 +1,34 @@
+OSRM:
+
+installation (Ubuntu 16.04)
+---------------------------
+
+
+osrm as a service 
+-----------------
+
+cd /lib/systemd/system
+sudo nano osrm.service
+
+===========
+[Unit]
+Description=Osrm Router (W)
+After=multi-user.target
+ 
+[Service]
+Type=simple
+ExecStart=/home/routing/build-osrm/osrm-backend-5.14.1/build/osrm-routed /home/routing/osm/Wien.osrm
+Restart=on-abort
+ 
+[Install]
+WantedBy=multi-user.target
+===========
+
+sudo chmod 644 /lib/systemd/system/osrm.service
+
+sudo systemctl daemon-reload
+sudo systemctl enable osrm.service
+sudo systemctl start osrm.service
+
+
+
