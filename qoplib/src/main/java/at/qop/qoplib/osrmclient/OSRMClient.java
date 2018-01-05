@@ -8,7 +8,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class OSRMClient {
 	
@@ -19,7 +24,7 @@ public class OSRMClient {
 
 	private final String hostPort;
 	
-	public String table(LatLon[] sources, LatLon[] destinations) throws IOException {
+	public double[][] table(LonLat[] sources, LonLat[] destinations) throws IOException {
 		// http://router.project-osrm.org/table/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?sources=0'
 		
 		StringBuilder urlSb = new StringBuilder();
@@ -54,10 +59,56 @@ public class OSRMClient {
 			String result = new BufferedReader(new InputStreamReader(is))
 					  .lines().collect(Collectors.joining("\n"));
 			
-			return result;
+			return OSRMClient.parseResult(result);
 		}
 	}
 	
-	
+	public static double[][] parseResult(String json) throws JsonProcessingException, IOException
+	{
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode node = mapper.readTree(json);
+		String code = node.get("code").asText();
+		if (!"Ok".equalsIgnoreCase(code))
+		{
+			throw new RuntimeException("osrm return code != ok");
+		}
+		
+		JsonNode durations = node.get("durations");
+		int rows = 0;
+		int cols = 0;
+
+		{ // count rows and cols
+			Iterator<JsonNode> itRows = durations.iterator();
+			while (itRows.hasNext()) {
+				JsonNode row = itRows.next();
+				Iterator<JsonNode> itCols = row.iterator();
+				cols=0;
+				while (itCols.hasNext()) {
+					JsonNode cell = itCols.next();
+					cols++;
+				}
+				rows++;
+			}
+		}
+		
+		double[][] durationArr = new double[rows][cols];
+		{
+			int r = 0;
+			
+			Iterator<JsonNode> itRows = durations.iterator();
+			while (itRows.hasNext()) {
+				JsonNode row = itRows.next();
+				Iterator<JsonNode> itCols = row.iterator();
+				int c=0;
+				while (itCols.hasNext()) {
+					JsonNode cell = itCols.next();
+					durationArr[r][c] = cell.asDouble();
+					c++;
+				}
+				r++;
+			}
+		}
+		return durationArr;
+	}
 
 }

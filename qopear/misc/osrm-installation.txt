@@ -12,12 +12,12 @@ sudo nano osrm.service
 
 ===========
 [Unit]
-Description=Osrm Router (W)
+Description=Osrm Router (Wien)
 After=multi-user.target
  
 [Service]
 Type=simple
-ExecStart=/home/routing/build-osrm/osrm-backend-5.14.1/build/osrm-routed /home/routing/osm/Wien.osrm
+ExecStart=/home/routing/build-osrm/osrm-backend-5.14.1/build/osrm-routed --max-table-size=3000 /home/routing/osm/Wien.osrm
 Restart=on-abort
  
 [Install]

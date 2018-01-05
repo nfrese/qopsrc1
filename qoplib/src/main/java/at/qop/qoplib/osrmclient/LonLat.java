@@ -1,18 +1,18 @@
 package at.qop.qoplib.osrmclient;
 
-public class LatLon {
+public class LonLat {
 	
-	public double lat;
 	public double lon;
+	public double lat;
 	
-	public LatLon(double lat, double lon) {
+	public LonLat(double lon, double lat) {
 		super();
-		this.lat = lat;
 		this.lon = lon;
+		this.lat = lat;
 	}
 	
 	@Override
 	public String toString() {
-		return lat + "," + lon;
+		return lon + "," + lat;
 	}
 }
