@@ -13,8 +13,8 @@ import org.junit.Test;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
-import at.qop.qoplib.dbbatch.DbRecord;
-import at.qop.qoplib.dbbatch.DbTable;
+import at.qop.qoplib.dbconnector.DbRecord;
+import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.entities.LayerParams;
 import at.qop.qoplib.osrmclient.OSRMClientTest;
 

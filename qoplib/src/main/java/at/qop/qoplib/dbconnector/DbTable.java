@@ -1,11 +1,11 @@
-package at.qop.qoplib.dbbatch;
+package at.qop.qoplib.dbconnector;
 
-import at.qop.qoplib.dbbatch.fieldtypes.DbFloat8Field;
-import at.qop.qoplib.dbbatch.fieldtypes.DbDoubleField;
-import at.qop.qoplib.dbbatch.fieldtypes.DbFieldAbstract;
-import at.qop.qoplib.dbbatch.fieldtypes.DbFloat4Field;
-import at.qop.qoplib.dbbatch.fieldtypes.DbGeometryField;
-import at.qop.qoplib.dbbatch.fieldtypes.DbTextField;
+import at.qop.qoplib.dbconnector.fieldtypes.DbDoubleField;
+import at.qop.qoplib.dbconnector.fieldtypes.DbFieldAbstract;
+import at.qop.qoplib.dbconnector.fieldtypes.DbFloat4Field;
+import at.qop.qoplib.dbconnector.fieldtypes.DbFloat8Field;
+import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
+import at.qop.qoplib.dbconnector.fieldtypes.DbTextField;
 
 public class DbTable {
 

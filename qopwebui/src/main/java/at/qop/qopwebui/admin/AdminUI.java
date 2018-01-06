@@ -42,13 +42,13 @@ import com.vividsolutions.jts.io.WKBReader;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.UpdateAddresses;
-import at.qop.qoplib.dbbatch.DbBatch;
-import at.qop.qoplib.dbbatch.DbRecord;
-import at.qop.qoplib.dbbatch.DbTable;
-import at.qop.qoplib.dbbatch.AbstractDbTableReader;
-import at.qop.qoplib.dbmetadata.QopDBColumn;
-import at.qop.qoplib.dbmetadata.QopDBMetadata;
-import at.qop.qoplib.dbmetadata.QopDBTable;
+import at.qop.qoplib.dbconnector.AbstractDbTableReader;
+import at.qop.qoplib.dbconnector.DbBatch;
+import at.qop.qoplib.dbconnector.DbRecord;
+import at.qop.qoplib.dbconnector.DbTable;
+import at.qop.qoplib.dbconnector.metadata.QopDBColumn;
+import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
+import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
 
 @Theme("mytheme")

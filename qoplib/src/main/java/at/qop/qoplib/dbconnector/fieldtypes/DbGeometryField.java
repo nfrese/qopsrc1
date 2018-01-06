@@ -1,10 +1,10 @@
-package at.qop.qoplib.dbbatch.fieldtypes;
+package at.qop.qoplib.dbconnector.fieldtypes;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
-import at.qop.qoplib.dbbatch.DbRecord;
+import at.qop.qoplib.dbconnector.DbRecord;
 
 public class DbGeometryField extends DbFieldAbstract {
 

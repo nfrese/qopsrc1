@@ -2,8 +2,8 @@ package at.qop.qoplib.calculation;
 
 import java.util.ArrayList;
 
-import at.qop.qoplib.dbbatch.DbRecord;
-import at.qop.qoplib.dbbatch.DbTable;
+import at.qop.qoplib.dbconnector.DbRecord;
+import at.qop.qoplib.dbconnector.DbTable;
 
 public class LayerCalculationP1Result {
 	

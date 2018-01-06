@@ -8,9 +8,9 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.LookupSessionBeans;
-import at.qop.qoplib.dbmetadata.QopDBColumn;
-import at.qop.qoplib.dbmetadata.QopDBMetadata;
-import at.qop.qoplib.dbmetadata.QopDBTable;
+import at.qop.qoplib.dbconnector.metadata.QopDBColumn;
+import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
+import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
 
 public class LayersTab extends AbstractTab {

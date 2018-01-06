@@ -1,8 +1,8 @@
-package at.qop.qoplib.dbbatch.fieldtypes;
+package at.qop.qoplib.dbconnector.fieldtypes;
 
 import java.util.Arrays;
 
-import at.qop.qoplib.dbbatch.DbTable;
+import at.qop.qoplib.dbconnector.DbTable;
 
 /**
  * see https://www.postgresql.org/message-id/AANLkTikkkxN%2B-UUiGVTzj8jdfS4PdpB8_tDONMFHNqHk%40mail.gmail.com

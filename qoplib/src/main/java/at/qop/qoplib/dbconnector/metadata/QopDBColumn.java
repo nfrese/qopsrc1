@@ -1,4 +1,4 @@
-package at.qop.qoplib.dbmetadata;
+package at.qop.qoplib.dbconnector.metadata;
 
 public class QopDBColumn {
 	

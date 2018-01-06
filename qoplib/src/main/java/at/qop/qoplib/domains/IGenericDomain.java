@@ -2,10 +2,10 @@ package at.qop.qoplib.domains;
 
 import java.sql.SQLException;
 
-import at.qop.qoplib.dbbatch.DbBatch;
-import at.qop.qoplib.dbbatch.AbstractDbTableReader;
-import at.qop.qoplib.dbmetadata.QopDBMetadata;
-import at.qop.qoplib.dbmetadata.QopDBTable;
+import at.qop.qoplib.dbconnector.AbstractDbTableReader;
+import at.qop.qoplib.dbconnector.DbBatch;
+import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
+import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 
 public interface IGenericDomain {
 	

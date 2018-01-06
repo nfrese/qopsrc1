@@ -12,9 +12,9 @@ import javax.script.SimpleScriptContext;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.GLO;
-import at.qop.qoplib.dbbatch.DbRecord;
-import at.qop.qoplib.dbbatch.DbTable;
-import at.qop.qoplib.dbbatch.fieldtypes.DbGeometryField;
+import at.qop.qoplib.dbconnector.DbRecord;
+import at.qop.qoplib.dbconnector.DbTable;
+import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
 import at.qop.qoplib.entities.LayerParams;
 
 public class LayerCalculation {

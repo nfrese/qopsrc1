@@ -8,7 +8,7 @@ import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.UpdateAddresses;
-import at.qop.qoplib.dbbatch.DbBatch;
+import at.qop.qoplib.dbconnector.DbBatch;
 import at.qop.qoplib.domains.IGenericDomain;
 
 public class MiscTab extends AbstractTab {

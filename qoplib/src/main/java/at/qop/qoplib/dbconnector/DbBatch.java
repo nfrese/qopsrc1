@@ -1,4 +1,4 @@
-package at.qop.qoplib.dbbatch;
+package at.qop.qoplib.dbconnector;
 
 import java.util.ArrayList;
 import java.util.List;

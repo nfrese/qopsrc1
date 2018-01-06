@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import at.qop.qoplib.dbbatch.DbBatch;
+import at.qop.qoplib.dbconnector.DbBatch;
 
 public class UpdateAddressesTest {
 	

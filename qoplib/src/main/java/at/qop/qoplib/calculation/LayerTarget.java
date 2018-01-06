@@ -2,7 +2,7 @@ package at.qop.qoplib.calculation;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import at.qop.qoplib.dbbatch.DbRecord;
+import at.qop.qoplib.dbconnector.DbRecord;
 
 public class LayerTarget {
 	

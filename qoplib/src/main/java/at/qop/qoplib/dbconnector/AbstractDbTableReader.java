@@ -1,4 +1,4 @@
-package at.qop.qoplib.dbbatch;
+package at.qop.qoplib.dbconnector;
 
 public abstract class AbstractDbTableReader {
 	

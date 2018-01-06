@@ -1,6 +1,6 @@
-package at.qop.qoplib.dbbatch.fieldtypes;
+package at.qop.qoplib.dbconnector.fieldtypes;
 
-import at.qop.qoplib.dbbatch.DbRecord;
+import at.qop.qoplib.dbconnector.DbRecord;
 
 public class DbTextField extends DbFieldAbstract {
 

@@ -1,4 +1,4 @@
-package at.qop.qoplib.dbmetadata;
+package at.qop.qoplib.dbconnector.metadata;
 
 import java.util.ArrayList;
 import java.util.List;

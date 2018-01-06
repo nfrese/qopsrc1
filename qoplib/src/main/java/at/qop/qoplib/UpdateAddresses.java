@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import at.qop.qoplib.dbbatch.DbBatch;
-import at.qop.qoplib.dbbatch.DbRecord;
+import at.qop.qoplib.dbconnector.DbBatch;
+import at.qop.qoplib.dbconnector.DbRecord;
 
 public class UpdateAddresses extends AbstractUpdater {
 	

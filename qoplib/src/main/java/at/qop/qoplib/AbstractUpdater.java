@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import at.qop.qoplib.dbbatch.DbBatch;
-import at.qop.qoplib.dbbatch.DbRecord;
+import at.qop.qoplib.dbconnector.DbBatch;
+import at.qop.qoplib.dbconnector.DbRecord;
 import au.com.bytecode.opencsv.CSVReader;
 
 public abstract class AbstractUpdater {
