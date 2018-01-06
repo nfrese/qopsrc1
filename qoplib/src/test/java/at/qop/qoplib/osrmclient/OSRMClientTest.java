@@ -73,7 +73,7 @@ public class OSRMClientTest {
 
 	}
 
-	private LonLat[] demoData(int size) {
+	public static LonLat[] demoData(int size) {
 
 		ArrayList<LonLat> l= new ArrayList<>();
 
