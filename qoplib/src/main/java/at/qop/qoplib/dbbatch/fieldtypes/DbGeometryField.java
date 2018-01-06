@@ -6,12 +6,12 @@ import com.vividsolutions.jts.io.WKBReader;
 
 import at.qop.qoplib.dbbatch.DbRecord;
 
-public class DbGeometryField extends DbField {
+public class DbGeometryField extends DbFieldAbstract {
 
 	private static WKBReader wkbReader = new WKBReader();
 	
-	public String expectedTypeName() {
-		return "geometry";
+	public String[] expectedTypeName() {
+		return new String[] {"geometry"};
 	}
 	
 	public Geometry get(DbRecord rec)

@@ -5,8 +5,13 @@ import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.script.ScriptContext;
+import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
+
 import com.vividsolutions.jts.geom.Point;
 
+import at.qop.qoplib.GLO;
 import at.qop.qoplib.dbbatch.DbRecord;
 import at.qop.qoplib.dbbatch.DbTable;
 import at.qop.qoplib.dbbatch.fieldtypes.DbGeometryField;
@@ -19,8 +24,8 @@ public class LayerCalculation {
 	
 	public DbTable table;
 	
-	ArrayList<DbRecord> targets;
-	ArrayList<LayerTarget> orderedTargets;
+	public ArrayList<DbRecord> targets;
+	public ArrayList<LayerTarget> orderedTargets;
 	
 	public LayerCalculation(Point start, LayerParams layerParams) {
 		super();
@@ -43,7 +48,7 @@ public class LayerCalculation {
 	
 	public void p2OrderTargets() {
 		
-		DbGeometryField geomField = table.findField(layerParams.geomfield, DbGeometryField.class);
+		DbGeometryField geomField = table.field(layerParams.geomfield, DbGeometryField.class);
 		orderedTargets = new ArrayList<>();
 		
 		for (DbRecord target :targets)
@@ -52,11 +57,29 @@ public class LayerCalculation {
 			
 			lt.geom = geomField.get(target);
 			lt.distance = CRSTransform.singleton.distanceWGS84(start, lt.geom);
-			lt.target = target;
+			lt.rec = target;
 			orderedTargets.add(lt);
 		}
 		
 		Collections.sort(orderedTargets, (t1, t2) -> Double.compare(t1.distance, t2.distance));
+	}
+	
+	public void p3Calculate() {
+		
+		ScriptContext context = new SimpleScriptContext();
+		context.setAttribute("lc", this, ScriptContext.ENGINE_SCOPE);
+		
+		try {
+			GLO.get().jsEngine.eval(layerParams.fn, context);
+		} catch (ScriptException e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+	
+	public void proto(String line)
+	{
+		System.out.println(line);
 	}
 
 }

@@ -6,12 +6,13 @@ import at.qop.qoplib.dbbatch.DbRecord;
 
 public class LayerTarget {
 	
-	Geometry geom;
-	DbRecord target;
-	double distance;
+	public Geometry geom;
+	public DbRecord rec;
+	public double distance;
+	public boolean keep = false;
 	
 	@Override
 	public String toString() {
-		return "LayerTarget [geom=" + geom + ", target=" + target + ", distance=" + distance + "]";
+		return "LayerTarget [geom=" + geom + ", target=" + rec + ", distance=" + distance + "]";
 	}
 }

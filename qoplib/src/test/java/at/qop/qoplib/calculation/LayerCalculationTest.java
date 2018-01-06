@@ -3,6 +3,7 @@ package at.qop.qoplib.calculation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.StringJoiner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -21,10 +22,27 @@ public class LayerCalculationTest {
 
 	@Test
 	public void test() {
-		
+
 		LayerParams params = new LayerParams();
 		params.geomfield = "shape";
-		
+
+		StringJoiner sj = new StringJoiner("\n");
+		sj.add("var cnt=0;");
+		sj.add("var result=0;");
+		sj.add("var valueField=lc.table.doubleField('value');");
+		sj.add("for each (var target in lc.orderedTargets) {"); 
+		sj.add("        if (cnt >= 5) break;"); 
+		sj.add("        lc.proto(target.toString());");
+		sj.add("        target.keep=true;");
+		sj.add("        var value = valueField.get(target.rec);");
+		sj.add("        lc.proto(value);");
+		sj.add("        result += value;");
+		sj.add("        cnt++;");
+		sj.add("};");
+		sj.add("lc.proto('sum=' + result);");
+
+		params.fn = sj.toString(); 
+
 		LayerCalculation lc = new LayerCalculation(
 				CRSTransform.gfWGS84.createPoint(new Coordinate(16.37242655454094,48.2061121366474)),
 				params);
@@ -63,6 +81,7 @@ public class LayerCalculationTest {
 		};
 		lc.p1loadTargets(source);
 		lc.p2OrderTargets();
+		lc.p3Calculate();
 		
 		System.out.println();
 		

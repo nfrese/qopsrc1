@@ -1,6 +1,11 @@
 package at.qop.qoplib.dbbatch;
 
-import at.qop.qoplib.dbbatch.fieldtypes.DbField;
+import at.qop.qoplib.dbbatch.fieldtypes.DbFloat8Field;
+import at.qop.qoplib.dbbatch.fieldtypes.DbDoubleField;
+import at.qop.qoplib.dbbatch.fieldtypes.DbFieldAbstract;
+import at.qop.qoplib.dbbatch.fieldtypes.DbFloat4Field;
+import at.qop.qoplib.dbbatch.fieldtypes.DbGeometryField;
+import at.qop.qoplib.dbbatch.fieldtypes.DbTextField;
 
 public class DbTable {
 
@@ -18,7 +23,27 @@ public class DbTable {
 		this.typeNames = new String[cols];
 	}
 
-	public <T extends DbField> T findField(String colName, Class<T> clazz) {
+	public DbGeometryField geometryField(String colName) {
+		return this.field(colName, DbGeometryField.class);
+	}
+
+	public DbDoubleField doubleField(String colName) {
+		return this.field(colName, DbDoubleField.class);
+	}
+	
+	public DbFloat8Field float8Field(String colName) {
+		return this.field(colName, DbFloat8Field.class);
+	}
+
+	public DbFloat4Field float4Field(String colName) {
+		return this.field(colName, DbFloat4Field.class);
+	}
+	
+	public DbTextField textField(String colName) {
+		return this.field(colName, DbTextField.class);
+	}
+	
+	public <T extends DbFieldAbstract> T field(String colName, Class<T> clazz) {
 		T col;
 		try {
 			col = clazz.newInstance();
