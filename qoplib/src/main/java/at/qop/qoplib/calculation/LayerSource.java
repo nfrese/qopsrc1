@@ -4,10 +4,10 @@ import java.util.concurrent.Future;
 
 import com.vividsolutions.jts.geom.Point;
 
-import at.qop.qoplib.entities.LayerParams;
+import at.qop.qoplib.entities.ProfileLayer;
 
 public interface LayerSource {
 
-	public Future<LayerCalculationP1Result> load(Point start, LayerParams layerParams);
+	public Future<LayerCalculationP1Result> load(Point start, ProfileLayer layerParams);
 
 }

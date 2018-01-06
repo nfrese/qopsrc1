@@ -15,7 +15,7 @@ import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
-import at.qop.qoplib.entities.LayerParams;
+import at.qop.qoplib.entities.ProfileLayer;
 import at.qop.qoplib.osrmclient.OSRMClientTest;
 
 public class LayerCalculationTest {
@@ -23,7 +23,7 @@ public class LayerCalculationTest {
 	@Test
 	public void test() {
 
-		LayerParams params = new LayerParams();
+		ProfileLayer params = new ProfileLayer();
 		params.geomfield = "shape";
 
 		StringJoiner sj = new StringJoiner("\n");
@@ -41,7 +41,7 @@ public class LayerCalculationTest {
 		sj.add("};");
 		sj.add("lc.proto('sum=' + result);");
 
-		params.fn = sj.toString(); 
+		params.evalfn = sj.toString(); 
 
 		LayerCalculation lc = new LayerCalculation(
 				CRSTransform.gfWGS84.createPoint(new Coordinate(16.37242655454094,48.2061121366474)),
@@ -50,7 +50,7 @@ public class LayerCalculationTest {
 		LayerSource source = new LayerSource() {
 
 			@Override
-			public Future<LayerCalculationP1Result> load(Point start, LayerParams layerParams) {
+			public Future<LayerCalculationP1Result> load(Point start, ProfileLayer layerParams) {
 				Callable<LayerCalculationP1Result> callable = new Callable<LayerCalculationP1Result>() {
 
 					@Override

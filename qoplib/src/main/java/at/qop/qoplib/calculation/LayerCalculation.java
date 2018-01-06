@@ -15,26 +15,26 @@ import at.qop.qoplib.GLO;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
-import at.qop.qoplib.entities.LayerParams;
+import at.qop.qoplib.entities.ProfileLayer;
 
 public class LayerCalculation {
 	
 	public final Point start;
-	public final LayerParams layerParams;
+	public final ProfileLayer params;
 	
 	public DbTable table;
 	
 	public ArrayList<DbRecord> targets;
 	public ArrayList<LayerTarget> orderedTargets;
 	
-	public LayerCalculation(Point start, LayerParams layerParams) {
+	public LayerCalculation(Point start, ProfileLayer params) {
 		super();
 		this.start = start;
-		this.layerParams = layerParams;
+		this.params = params;
 	}
 	
 	public void p1loadTargets(LayerSource source) {
-		Future<LayerCalculationP1Result> future = source.load(start, layerParams);
+		Future<LayerCalculationP1Result> future = source.load(start, params);
 		try {
 			
 			LayerCalculationP1Result r = future.get();
@@ -48,10 +48,10 @@ public class LayerCalculation {
 	
 	public void p2OrderTargets() {
 		
-		DbGeometryField geomField = table.field(layerParams.geomfield, DbGeometryField.class);
+		DbGeometryField geomField = table.field(params.geomfield, DbGeometryField.class);
 		orderedTargets = new ArrayList<>();
 		
-		for (DbRecord target :targets)
+		for (DbRecord target : targets)
 		{
 			LayerTarget lt = new LayerTarget();
 			
@@ -70,7 +70,7 @@ public class LayerCalculation {
 		context.setAttribute("lc", this, ScriptContext.ENGINE_SCOPE);
 		
 		try {
-			GLO.get().jsEngine.eval(layerParams.fn, context);
+			GLO.get().jsEngine.eval(params.evalfn, context);
 		} catch (ScriptException e) {
 			throw new RuntimeException(e);
 		}
