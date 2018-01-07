@@ -23,7 +23,7 @@ public class ProfileLayer implements Serializable {
     @JoinColumn(name="profile_name", nullable=false)
 	public Profile profile;
 
-	public int orderhint;
+	//public int orderhint;
 	@Column(length=1024)
 	public String description;
 

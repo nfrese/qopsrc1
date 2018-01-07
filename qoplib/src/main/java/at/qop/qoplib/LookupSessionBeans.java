@@ -11,6 +11,8 @@ import at.qop.qoplib.domains.GenericDomain;
 import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.domains.IConfigDomain;
 import at.qop.qoplib.domains.IGenericDomain;
+import at.qop.qoplib.domains.IProfileDomain;
+import at.qop.qoplib.domains.ProfileDomain;
 
 public class LookupSessionBeans {
 
@@ -22,6 +24,10 @@ public class LookupSessionBeans {
 		return lookupDomain(AddressDomain.class);
 	}
 
+	public static IProfileDomain profileDomain() {
+		return lookupDomain(ProfileDomain.class);
+	}
+	
 	public static IGenericDomain genericDomain() {
 		return lookupDomain(GenericDomain.class);
 	}	
