@@ -33,9 +33,14 @@ public class ProfileDomain extends AbstractDomain implements IProfileDomain {
 
 	@Override
 	public void createProfile(Profile profile) {
+		hibSess().merge(profile);
+		System.out.println(profile);
+	}
+	
+	@Override
+	public void updateProfile(Profile profile) {
 		hibSess().update(profile);
 		System.out.println(profile);
-		//hibSess().persist(profile);
 	}
 
 	@Override

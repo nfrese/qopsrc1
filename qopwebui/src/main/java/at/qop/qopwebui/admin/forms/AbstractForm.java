@@ -1,54 +1,55 @@
-package at.qop.qopwebui.components;
+package at.qop.qopwebui.admin.forms;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-public class ConfirmationDialog extends Window {
-	
+public abstract class AbstractForm extends Window {
+
 	private static final long serialVersionUID = 1L;
 	
-	private String text;
-
 	private ClickListener cl;
-	
-	public ConfirmationDialog(String title, String message)
+
+	public AbstractForm(String title)
 	{
 		super(title);
 		this.setModal(true);
-		this.text = message;
+		Component c = initComponents();
 		VerticalLayout subContent = new VerticalLayout();
+		subContent.addComponent(c);
 		this.setContent(subContent);
 		
-		Label msgLabel = new Label(text);
-		
-		subContent.addComponent(msgLabel);
-		Button okButton = new Button("OK");
+		Button okButton = new Button("Speichern");
 		okButton.addClickListener(e2 -> {
+			saveData();
 			if (cl != null) cl.buttonClick(null);
-			this.close(); 
+			this.close();
 		});
+		subContent.addComponent(okButton);
+		
 		Button cancelButton = new Button("Abbruch");
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});
-		subContent.addComponent(new HorizontalLayout(okButton, cancelButton));
+		subContent.addComponent(cancelButton);
+	}
 
-	}
-	
-	public ConfirmationDialog ok(ClickListener cl)
-	{
-		this.cl = cl;
-		return this;
-	}
-	
 	public void show()
 	{
 		this.center();
 		UI.getCurrent().addWindow(this);
 	}
+	
+	public AbstractForm ok(ClickListener cl)
+	{
+		this.cl = cl;
+		return this;
+	}
+	
+	protected abstract void saveData();
+
+	protected abstract Component initComponents();
 }
