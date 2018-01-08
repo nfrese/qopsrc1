@@ -13,23 +13,23 @@ import org.vaadin.addon.leaflet.LTileLayer;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.DbLayerSource;
-import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerSource;
 import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.entities.Address;
@@ -50,9 +50,10 @@ public class QopUI extends UI {
 
 	private Profile currentProfile;
 	private Address currentAddress;
-	private LFeatureGroup currentLfg;
-	private Grid<LayerCalculation> grid;
-	
+	private LMap leafletMap;
+	private LFeatureGroup lfgResults;
+	private GridLayout grid;
+
 	@Override
 	protected void init(VaadinRequest vaadinRequest) {
 
@@ -103,20 +104,21 @@ public class QopUI extends UI {
 			startCalculation();
 		});
 
-		LMap leafletMap = new LMap();
+		leafletMap = new LMap();
 		leafletMap.setWidth("600px");
 		leafletMap.setHeight("400px");
 		LTileLayer baseLayerOsm = new LTileLayer();
 		baseLayerOsm.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
 		leafletMap.addBaseLayer(baseLayerOsm, "OSM");
 
+
 		LFeatureGroup lfg = new LFeatureGroup();
-		currentLfg = lfg;
 		leafletMap.addLayer(lfg);
 
 		filtercombo.addSelectionListener(event -> {
 
 			lfg.removeAllComponents();
+			lfgResults.removeAllComponents();
 
 			currentAddress = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
 			if (currentAddress != null) {
@@ -126,15 +128,15 @@ public class QopUI extends UI {
 				startCalculation();
 				leafletMap.zoomToContent();
 			}
-			
+
 		});
 
-		grid = new Grid<LayerCalculation>();
-		grid.setSelectionMode(SelectionMode.SINGLE);
-		grid.addColumn(item -> item.params.description).setCaption("Berechnung");
-		grid.addColumn(item -> item.result).setCaption("Resultat");
-		grid.addColumn(item -> "").setCaption("Bewertung");
-		
+		lfgResults = new LFeatureGroup();
+		leafletMap.addLayer(lfgResults);
+
+		grid = new GridLayout(4, 1);
+		grid.setSpacing(true);
+
 		final VerticalLayout layout = new VerticalLayout(title, new HorizontalLayout(new VerticalLayout(profileCombo, filtercombo, grid), leafletMap));
 		layout.setWidth(100, Unit.PERCENTAGE);
 
@@ -147,36 +149,56 @@ public class QopUI extends UI {
 			LayerSource source = new DbLayerSource();
 			Calculation calculation = new Calculation(currentProfile, currentAddress, source);
 			calculation.run();
-			
-			DataProvider<LayerCalculation, ?> dataProvider = new ListDataProvider<LayerCalculation>(calculation.layerCalculations);
-			grid.setDataProvider(dataProvider);
-			
-			if (currentLfg != null)
-			{
-				calculation.layerCalculations.forEach(lc -> lc.keptTargets.stream().forEach(lt -> {
 
-					if (lt.geom instanceof Point)
+			grid.removeAllComponents();
+			grid.addComponent(new Label("<b>Berechnung</b>",  ContentMode.HTML));
+			grid.addComponent(new Label("<b>Resultat</b>",  ContentMode.HTML));
+			grid.addComponent(new Label("<b>Bewertung</b>",  ContentMode.HTML));
+			grid.addComponent(new Label("",  ContentMode.HTML));
+
+			calculation.layerCalculations.forEach(lc -> {
+
+				grid.addComponent(new Label(lc.params.description,  ContentMode.HTML));
+				grid.addComponent(new Label(lc.result +"",  ContentMode.HTML));
+				grid.addComponent(new Label("",  ContentMode.HTML));
+
+				Button button = new Button("show");
+				button.setStyleName(ValoTheme.BUTTON_LINK);
+				//button.setIcon(new ClassResource("/images/button-img.jpg"));
+				button.addClickListener(e -> {
+
+					if (lfgResults != null)
 					{
-						LMarker lm = new LMarker((Point)lt.geom);
-						lm.addStyleName("specialstyle");
-						lm.setIcon(new ExternalResource("https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png"));
-						lm.setIconAnchor(new org.vaadin.addon.leaflet.shared.Point(12, 41));
-						if (lt.caption != null)
-						{
-							lm.setPopup(lt.caption);
-						}
+						lfgResults.removeAllComponents();
 
-						currentLfg.addComponent(lm);
-					}
-				}));
-				
-				calculation.layerCalculations.forEach(lc -> { 
-					if (lc.params.hasRadius()) {
-						LCircle circle = new LCircle(lc.start, lc.params.radius);
-						currentLfg.addComponent(circle);
+						lc.keptTargets.stream().forEach(lt -> {
+
+							if (lt.geom instanceof Point)
+							{
+								LMarker lm = new LMarker((Point)lt.geom);
+								lm.addStyleName("specialstyle");
+								lm.setIcon(new ExternalResource("https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png"));
+								lm.setIconAnchor(new org.vaadin.addon.leaflet.shared.Point(12, 41));
+								if (lt.caption != null)
+								{
+									lm.setPopup(lt.caption);
+								}
+
+								lfgResults.addComponent(lm);
+							}
+						});
+
+
+						if (lc.params.hasRadius()) {
+							LCircle circle = new LCircle(lc.start, lc.params.radius);
+							lfgResults.addComponent(circle);
+						}
+						leafletMap.zoomToContent();
 					}
 				});
-			}
+				grid.addComponent(button);
+
+			});
 		}
 	}
 
