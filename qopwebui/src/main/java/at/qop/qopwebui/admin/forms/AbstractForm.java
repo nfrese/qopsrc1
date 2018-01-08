@@ -3,6 +3,7 @@ package at.qop.qopwebui.admin.forms;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -28,13 +29,12 @@ public abstract class AbstractForm extends Window {
 			if (cl != null) cl.buttonClick(null);
 			this.close();
 		});
-		subContent.addComponent(okButton);
 		
 		Button cancelButton = new Button("Abbruch");
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});
-		subContent.addComponent(cancelButton);
+		subContent.addComponent(new HorizontalLayout(okButton, cancelButton));
 	}
 
 	public void show()

@@ -19,7 +19,8 @@ import com.vaadin.ui.VerticalLayout;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileLayer;
-import at.qop.qopwebui.admin.forms.LayerGroupForm;
+import at.qop.qopwebui.admin.forms.LayerProfileForm;
+import at.qop.qopwebui.admin.forms.ProfileForm;
 import at.qop.qopwebui.components.AddWithNameDialog;
 import at.qop.qopwebui.components.ConfirmationDialog;
 
@@ -30,23 +31,38 @@ public class ProfilesTab extends AbstractTab {
 	@Override
 	public Component initialize(Page page) {
 		
-		List<Profile> profiles = LookupSessionBeans.profileDomain().listProfiles();
-		
-		ListSelect<Profile> listSelect = new ListSelect<Profile>("Profil auswählen...", profiles);
+		ListSelect<Profile> listSelect = new ListSelect<Profile>("Profil auswählen...");
         listSelect.setRows(4);
         listSelect.setHeight(100.0f, Unit.PERCENTAGE);
         listSelect.setWidth(170f, Unit.PIXELS);
+        refreshProfileList(listSelect);
         
         Button addProfileButton = new Button("Profil hinzufügen...");
         addProfileButton.addClickListener(e -> {
 
-        	new AddWithNameDialog("Neues Profil", "Profilnamen eingeben")
-			.ok(e3 -> {
-				Profile profile = new Profile();
-            	profile.name = e3.getValue(); 
+        	Profile profile = new Profile();
+        	
+        	new ProfileForm("Neues Profil", profile).ok(e3 -> {
     			LookupSessionBeans.profileDomain().createProfile(profile);
-    			listSelect.setItems(LookupSessionBeans.profileDomain().listProfiles());
-			}).show();
+    			refreshProfileList(listSelect);
+        	}).show();
+
+        });
+        
+        Button editProfileButton = new Button("Profil bearbeiten...");
+        editProfileButton.setEnabled(false);
+        editProfileButton.addClickListener(e -> {
+
+        	Set<Profile> sel = listSelect.getSelectedItems();
+        	if (sel.size() == 1)
+        	{
+        		Profile profile = sel.iterator().next();
+
+        		new ProfileForm("Profil bearbeiten", profile).ok(e3 -> {
+        			LookupSessionBeans.profileDomain().updateProfile(profile);
+        			refreshProfileList(listSelect);
+        		}).show();
+        	}
 
         });
         
@@ -60,17 +76,16 @@ public class ProfilesTab extends AbstractTab {
         		new ConfirmationDialog("Rückfrage", "Profil " + profile + " wirklich löschen?")
         			.ok(e3 -> {
         				LookupSessionBeans.profileDomain().dropProfile(profile);
-        				listSelect.setItems(LookupSessionBeans.profileDomain().listProfiles());	
+        				refreshProfileList(listSelect);	
         			}).show();
         	}
         });
  
-        final HorizontalLayout hl = new HorizontalLayout(listSelect, addProfileButton, removeProfileButton);
+        final HorizontalLayout hl = new HorizontalLayout(listSelect, addProfileButton, editProfileButton, removeProfileButton);
         hl.setHeight(100.0f, Unit.PERCENTAGE);
         Grid<ProfileLayer> grid = new Grid<ProfileLayer>();
         grid.setWidth(100.0f, Unit.PERCENTAGE);
         grid.setHeight(100.0f, Unit.PERCENTAGE);
-        //grid.getEditor().setEnabled(true);
 
         Button addProfileLayerButton = new Button("Layer hinzufügen...");
         addProfileLayerButton.setEnabled(false);
@@ -79,7 +94,7 @@ public class ProfilesTab extends AbstractTab {
         	ProfileLayer profileLayer = new ProfileLayer();
 			profileLayer.profile = currentProfile;
         	
-    		new LayerGroupForm("Profile-Layer Bearbeiten", currentProfile, profileLayer).ok(dummy -> {
+    		new LayerProfileForm("Profile-Layer Bearbeiten", currentProfile, profileLayer).ok(dummy -> {
     			currentProfile.profileLayer.add(profileLayer);
     			LookupSessionBeans.profileDomain().updateProfile(currentProfile);
     			refreshGrid(grid, currentProfile);
@@ -94,7 +109,7 @@ public class ProfilesTab extends AbstractTab {
         	if (grid.getSelectedItems().size() == 1) {
         		ProfileLayer profileLayer = grid.getSelectedItems().iterator().next();
         		
-        		new LayerGroupForm("Profile-Layer Bearbeiten", currentProfile, profileLayer).ok(dummy -> {
+        		new LayerProfileForm("Profile-Layer Bearbeiten", currentProfile, profileLayer).ok(dummy -> {
         			LookupSessionBeans.profileDomain().updateProfile(currentProfile);
         			refreshGrid(grid, currentProfile);
         		}) .show();
@@ -121,6 +136,7 @@ public class ProfilesTab extends AbstractTab {
 		listSelect.addValueChangeListener(
 				event -> { 
 					removeProfileButton.setEnabled(event.getValue().size() == 1);
+					editProfileButton.setEnabled(event.getValue().size() == 1);
 					addProfileLayerButton.setEnabled(event.getValue().size() == 1);
 					
 					if (event.getValue().size() == 1)
@@ -144,15 +160,18 @@ public class ProfilesTab extends AbstractTab {
 		return vl;
 	}
 
+	private void refreshProfileList(ListSelect<Profile> listSelect) {
+		listSelect.setItems(LookupSessionBeans.profileDomain().listProfiles());
+	}
+
 	private void refreshGrid(Grid<ProfileLayer> grid, Profile profile) {
 		grid.removeAllColumns();
 		
-		grid.addColumn(item -> item.tablename).setCaption("Tabellenname").setEditorComponent(new TextField(), (item, vvalue) -> item.tablename = vvalue);
-		grid.addColumn(item -> item.description).setCaption("Beschreibung").setEditorComponent(new TextField(), (item, vvalue) -> item.description = vvalue);
-		grid.addColumn(item -> item.query).setCaption("SQL").setEditorComponent(new TextField(), (item, vvalue) -> item.query = vvalue);
-		grid.addColumn(item -> item.geomfield).setCaption("Geometrie-Feld").setEditorComponent(new TextField(), (item, vvalue) -> item.geomfield = vvalue);
-		grid.addColumn(item -> item.evalfn).setCaption("Auswertungs-Funktion (Javascript)")
-			.setEditorComponent(new TextArea(), (item, vvalue) -> item.evalfn = vvalue).setMinimumWidth(100);
+		grid.addColumn(item -> item.tablename).setCaption("Tabellenname");
+		grid.addColumn(item -> item.description).setCaption("Beschreibung");
+		grid.addColumn(item -> item.query).setCaption("SQL");
+		grid.addColumn(item -> item.geomfield).setCaption("Geometrie-Feld");
+		grid.addColumn(item -> item.evalfn).setCaption("Auswertungs-Funktion (Javascript)");
 		grid.addColumn(item -> item.radius).setCaption("Radius");
 		
 		DataProvider<ProfileLayer, ?> dataProvider = new ListDataProvider<ProfileLayer>(profile.profileLayer);
