@@ -27,6 +27,9 @@ public class LayerCalculation {
 	
 	public Collection<DbRecord> targets;
 	public ArrayList<LayerTarget> orderedTargets;
+	public ArrayList<LayerTarget> keptTargets = new ArrayList<>();
+	
+	public double result;
 	
 	public LayerCalculation(Point start, ProfileLayer params) {
 		super();
@@ -81,6 +84,11 @@ public class LayerCalculation {
 	public void proto(String line)
 	{
 		System.out.println(line);
+	}
+	
+	public void keep(LayerTarget target)
+	{
+		keptTargets.add(target);
 	}
 
 }

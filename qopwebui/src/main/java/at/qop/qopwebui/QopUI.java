@@ -13,10 +13,13 @@ import org.vaadin.addon.leaflet.LTileLayer;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
@@ -26,6 +29,7 @@ import com.vividsolutions.jts.geom.Point;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.DbLayerSource;
+import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerSource;
 import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.entities.Address;
@@ -47,7 +51,8 @@ public class QopUI extends UI {
 	private Profile currentProfile;
 	private Address currentAddress;
 	private LFeatureGroup currentLfg;
-
+	private Grid<LayerCalculation> grid;
+	
 	@Override
 	protected void init(VaadinRequest vaadinRequest) {
 
@@ -124,7 +129,13 @@ public class QopUI extends UI {
 			
 		});
 
-		final VerticalLayout layout = new VerticalLayout(title, new HorizontalLayout(new VerticalLayout(profileCombo, filtercombo), leafletMap));
+		grid = new Grid<LayerCalculation>();
+		grid.setSelectionMode(SelectionMode.SINGLE);
+		grid.addColumn(item -> item.params.description).setCaption("Berechnung");
+		grid.addColumn(item -> item.result).setCaption("Resultat");
+		grid.addColumn(item -> "").setCaption("Bewertung");
+		
+		final VerticalLayout layout = new VerticalLayout(title, new HorizontalLayout(new VerticalLayout(profileCombo, filtercombo, grid), leafletMap));
 		layout.setWidth(100, Unit.PERCENTAGE);
 
 		setContent(layout);
@@ -136,9 +147,13 @@ public class QopUI extends UI {
 			LayerSource source = new DbLayerSource();
 			Calculation calculation = new Calculation(currentProfile, currentAddress, source);
 			calculation.run();
+			
+			DataProvider<LayerCalculation, ?> dataProvider = new ListDataProvider<LayerCalculation>(calculation.layerCalculations);
+			grid.setDataProvider(dataProvider);
+			
 			if (currentLfg != null)
 			{
-				calculation.layerCalculations.forEach(lc -> lc.orderedTargets.stream().filter(lt -> lt.keep).forEach(lt -> {
+				calculation.layerCalculations.forEach(lc -> lc.keptTargets.stream().forEach(lt -> {
 
 					if (lt.geom instanceof Point)
 					{

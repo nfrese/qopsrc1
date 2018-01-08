@@ -9,8 +9,12 @@ public class LayerTarget {
 	public Geometry geom;
 	public DbRecord rec;
 	public double distance;
-	public boolean keep = false;
+	public double time;
+	
+	// calculated in Javascript
 	public String caption;
+	public double value;
+	public String unit;
 	
 	@Override
 	public String toString() {

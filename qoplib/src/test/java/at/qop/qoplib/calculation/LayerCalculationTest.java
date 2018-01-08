@@ -17,6 +17,7 @@ import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.entities.ProfileLayer;
 import at.qop.qoplib.osrmclient.OSRMClientTest;
+import org.junit.Assert;
 
 public class LayerCalculationTest {
 
@@ -33,12 +34,13 @@ public class LayerCalculationTest {
 		sj.add("for each (var target in lc.orderedTargets) {"); 
 		sj.add("        if (cnt >= 5) break;"); 
 		sj.add("        lc.proto(target.toString());");
-		sj.add("        target.keep=true;");
 		sj.add("        var value = valueField.get(target.rec);");
 		sj.add("        lc.proto(value);");
 		sj.add("        result += value;");
+		sj.add("        lc.keep(target);");
 		sj.add("        cnt++;");
 		sj.add("};");
+		sj.add("lc.result = result");
 		sj.add("lc.proto('sum=' + result);");
 
 		params.evalfn = sj.toString(); 
@@ -83,7 +85,7 @@ public class LayerCalculationTest {
 		lc.p2OrderTargets();
 		lc.p3Calculate();
 		
-		System.out.println();
+		Assert.assertEquals(1.86511, lc.result, 0.01);
 		
 	}
 
