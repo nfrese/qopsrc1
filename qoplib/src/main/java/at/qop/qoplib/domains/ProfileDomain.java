@@ -52,7 +52,8 @@ public class ProfileDomain extends AbstractDomain implements IProfileDomain {
 	
 	@Override
 	public void dropProfile(Profile profile) {
-		hibSess().refresh(profile);
+		profile.profileLayer.clear();
+		hibSess().update(profile);
 		hibSess().delete(profile);
 	}
 	

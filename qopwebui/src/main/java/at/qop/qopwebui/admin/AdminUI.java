@@ -1,55 +1,17 @@
 package at.qop.qopwebui.admin;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import javax.servlet.annotation.WebServlet;
-
-import org.vaadin.addon.leaflet.LFeatureGroup;
-import org.vaadin.addon.leaflet.LMap;
-import org.vaadin.addon.leaflet.LTileLayer;
-import org.vaadin.addon.leaflet.LeafletLayer;
-import org.vaadin.addon.leaflet.util.JTSUtil;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.SortOrder;
-import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.shared.data.sort.SortDirection;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
-
-import at.qop.qoplib.LookupSessionBeans;
-import at.qop.qoplib.UpdateAddresses;
-import at.qop.qoplib.dbconnector.AbstractDbTableReader;
-import at.qop.qoplib.dbconnector.DbBatch;
-import at.qop.qoplib.dbconnector.DbRecord;
-import at.qop.qoplib.dbconnector.DbTable;
-import at.qop.qoplib.dbconnector.metadata.QopDBColumn;
-import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
-import at.qop.qoplib.dbconnector.metadata.QopDBTable;
-import at.qop.qoplib.domains.IGenericDomain;
 
 @Theme("mytheme")
 public class AdminUI extends UI {

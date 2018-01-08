@@ -1,6 +1,7 @@
 package at.qop.qoplib.calculation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -24,7 +25,7 @@ public class LayerCalculation {
 	
 	public DbTable table;
 	
-	public ArrayList<DbRecord> targets;
+	public Collection<DbRecord> targets;
 	public ArrayList<LayerTarget> orderedTargets;
 	
 	public LayerCalculation(Point start, ProfileLayer params) {
@@ -39,7 +40,7 @@ public class LayerCalculation {
 			
 			LayerCalculationP1Result r = future.get();
 			table = r.table;
-			targets = r.targets;
+			targets = r.records;
 			
 		} catch (InterruptedException | ExecutionException e) {
 			throw new RuntimeException(e);

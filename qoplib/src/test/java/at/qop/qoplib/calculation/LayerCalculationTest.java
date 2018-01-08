@@ -60,12 +60,12 @@ public class LayerCalculationTest {
 						r.table.colNames = new String[] { "shape", "value" };
 						r.table.typeNames = new String[] { "geometry", "double" };
 						
-						r.targets = new ArrayList<>();
+						r.records = new ArrayList<>();
 						
 						Random rand = new Random(666);
 						
 						Arrays.stream(OSRMClientTest.demoData(-1)).forEach(
-								d -> r.targets.add(
+								d -> r.records.add(
 										new DbRecord(
 												CRSTransform.gfWGS84.createPoint(
 														new Coordinate(d.lon, d.lat)), 

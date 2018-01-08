@@ -1,6 +1,6 @@
 package at.qop.qopwebui.admin;
 
-import java.util.List;
+import java.util.Collections;
 import java.util.Set;
 
 import com.vaadin.data.provider.DataProvider;
@@ -12,8 +12,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.LookupSessionBeans;
@@ -21,12 +19,11 @@ import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileLayer;
 import at.qop.qopwebui.admin.forms.LayerProfileForm;
 import at.qop.qopwebui.admin.forms.ProfileForm;
-import at.qop.qopwebui.components.AddWithNameDialog;
 import at.qop.qopwebui.components.ConfirmationDialog;
 
 public class ProfilesTab extends AbstractTab {
 
-	Profile currentProfile;
+	private Profile currentProfile;
 	
 	@Override
 	public Component initialize(Page page) {
@@ -92,13 +89,12 @@ public class ProfilesTab extends AbstractTab {
         addProfileLayerButton.addClickListener(e -> {
         	
         	ProfileLayer profileLayer = new ProfileLayer();
-			profileLayer.profile = currentProfile;
+			//profileLayer.profile = currentProfile;
         	
     		new LayerProfileForm("Profile-Layer Bearbeiten", currentProfile, profileLayer).ok(dummy -> {
     			currentProfile.profileLayer.add(profileLayer);
     			LookupSessionBeans.profileDomain().updateProfile(currentProfile);
-    			refreshGrid(grid, currentProfile);
-    			
+    			refreshGrid(grid);
     		}) .show();
 
         });
@@ -111,7 +107,7 @@ public class ProfilesTab extends AbstractTab {
         		
         		new LayerProfileForm("Profile-Layer Bearbeiten", currentProfile, profileLayer).ok(dummy -> {
         			LookupSessionBeans.profileDomain().updateProfile(currentProfile);
-        			refreshGrid(grid, currentProfile);
+        			refreshGrid(grid);
         		}) .show();
         		
         	}
@@ -126,7 +122,7 @@ public class ProfilesTab extends AbstractTab {
             			.ok(e3 -> {
             				currentProfile.profileLayer.remove(profileLayer);
             				LookupSessionBeans.profileDomain().updateProfile(currentProfile);
-            				refreshGrid(grid, currentProfile);
+            				refreshGrid(grid);
             			}).show();
             	}
         		
@@ -144,8 +140,12 @@ public class ProfilesTab extends AbstractTab {
 						Profile profile = event.getValue().iterator().next();
 						currentProfile = profile;
 						
-						refreshGrid(grid, profile);
 					}
+					else
+					{
+						currentProfile = null;
+					}
+					refreshGrid(grid);
 				} );
 		
 		grid.addSelectionListener(event -> {
@@ -164,18 +164,24 @@ public class ProfilesTab extends AbstractTab {
 		listSelect.setItems(LookupSessionBeans.profileDomain().listProfiles());
 	}
 
-	private void refreshGrid(Grid<ProfileLayer> grid, Profile profile) {
+	private void refreshGrid(Grid<ProfileLayer> grid) {
 		grid.removeAllColumns();
-		
-		grid.addColumn(item -> item.tablename).setCaption("Tabellenname");
-		grid.addColumn(item -> item.description).setCaption("Beschreibung");
-		grid.addColumn(item -> item.query).setCaption("SQL");
-		grid.addColumn(item -> item.geomfield).setCaption("Geometrie-Feld");
-		grid.addColumn(item -> item.evalfn).setCaption("Auswertungs-Funktion (Javascript)");
-		grid.addColumn(item -> item.radius).setCaption("Radius");
-		
-		DataProvider<ProfileLayer, ?> dataProvider = new ListDataProvider<ProfileLayer>(profile.profileLayer);
-		grid.setDataProvider(dataProvider);
+		if (currentProfile != null)
+		{
+			grid.addColumn(item -> item.tablename).setCaption("Tabellenname");
+			grid.addColumn(item -> item.description).setCaption("Beschreibung");
+			grid.addColumn(item -> item.query).setCaption("SQL");
+			grid.addColumn(item -> item.geomfield).setCaption("Geometrie-Feld");
+			grid.addColumn(item -> item.evalfn).setCaption("Auswertungs-Funktion (Javascript)");
+			grid.addColumn(item -> item.radius).setCaption("Radius");
+
+			DataProvider<ProfileLayer, ?> dataProvider = new ListDataProvider<ProfileLayer>(currentProfile.profileLayer);
+			grid.setDataProvider(dataProvider);
+		}
+		else
+		{
+			grid.setDataProvider(new ListDataProvider<ProfileLayer>(Collections.emptyList()));
+		}
 	}
 
 }

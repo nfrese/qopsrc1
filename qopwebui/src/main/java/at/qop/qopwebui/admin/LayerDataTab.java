@@ -29,9 +29,10 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
 import at.qop.qoplib.LookupSessionBeans;
-import at.qop.qoplib.dbconnector.AbstractDbTableReader;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
+import at.qop.qoplib.dbconnector.DbTableReader;
+import at.qop.qoplib.dbconnector.DbTableScanner;
 import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
@@ -108,37 +109,6 @@ public class LayerDataTab extends AbstractTab {
 
 		String createSort(String sorted, boolean b);
 		
-	}
-	
-	private final class DbTableReader extends AbstractDbTableReader {
-		
-		public DbTable table = null;
-		public List<DbRecord> records = new ArrayList<>();
-		
-		@Override
-		public void metadata(DbTable table) {
-			this.table = table;
-		}
-
-		@Override
-		public void record(DbRecord record) {
-			records.add(record);
-		}
-	}
-	
-	private final class DbTableScanner extends AbstractDbTableReader {
-		
-		public DbTable table = null;
-		
-		@Override
-		public void metadata(DbTable table) {
-			this.table = table;
-		}
-
-		@Override
-		public void record(DbRecord record) {
-			cancelled = true;
-		}
 	}
 	
 	private DataProvider<DbRecord, ?> dataProvider(QopDBTable table, String baseSql) {

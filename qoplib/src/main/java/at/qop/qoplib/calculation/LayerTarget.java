@@ -10,6 +10,7 @@ public class LayerTarget {
 	public DbRecord rec;
 	public double distance;
 	public boolean keep = false;
+	public String caption;
 	
 	@Override
 	public String toString() {
