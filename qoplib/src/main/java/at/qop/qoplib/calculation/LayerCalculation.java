@@ -16,12 +16,12 @@ import at.qop.qoplib.GLO;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
-import at.qop.qoplib.entities.ProfileLayer;
+import at.qop.qoplib.entities.Analysis;
 
 public class LayerCalculation {
 	
 	public final Point start;
-	public final ProfileLayer params;
+	public final Analysis params;
 	
 	public DbTable table;
 	
@@ -31,7 +31,7 @@ public class LayerCalculation {
 	
 	public double result;
 	
-	public LayerCalculation(Point start, ProfileLayer params) {
+	public LayerCalculation(Point start, Analysis params) {
 		super();
 		this.start = start;
 		this.params = params;

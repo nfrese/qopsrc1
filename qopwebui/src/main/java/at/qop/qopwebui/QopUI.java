@@ -162,7 +162,7 @@ public class QopUI extends UI {
 				grid.addComponent(new Label(lc.result +"",  ContentMode.HTML));
 				grid.addComponent(new Label("",  ContentMode.HTML));
 
-				Button button = new Button("show");
+				Button button = new Button("Karte >");
 				button.setStyleName(ValoTheme.BUTTON_LINK);
 				//button.setIcon(new ClassResource("/images/button-img.jpg"));
 				button.addClickListener(e -> {

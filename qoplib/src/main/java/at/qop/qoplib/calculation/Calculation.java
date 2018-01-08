@@ -5,7 +5,7 @@ import java.util.List;
 
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
-import at.qop.qoplib.entities.ProfileLayer;
+import at.qop.qoplib.entities.Analysis;
 
 public class Calculation {
 	
@@ -25,9 +25,9 @@ public class Calculation {
 	
 	public void run()
 	{
-		for (ProfileLayer profileLayer : profile.profileLayer) {
+		for (Analysis analysis : profile.listAnalysis()) {
 		
-			LayerCalculation lc = new LayerCalculation(address.geom, profileLayer);
+			LayerCalculation lc = new LayerCalculation(address.geom, analysis);
 			layerCalculations.add(lc);
 			lc.p1loadTargets(source);
 			lc.p2OrderTargets();

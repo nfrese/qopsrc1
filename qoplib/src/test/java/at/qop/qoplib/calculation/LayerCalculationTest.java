@@ -15,7 +15,7 @@ import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
-import at.qop.qoplib.entities.ProfileLayer;
+import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.osrmclient.OSRMClientTest;
 import org.junit.Assert;
 
@@ -24,7 +24,7 @@ public class LayerCalculationTest {
 	@Test
 	public void test() {
 
-		ProfileLayer params = new ProfileLayer();
+		Analysis params = new Analysis();
 		params.geomfield = "shape";
 
 		StringJoiner sj = new StringJoiner("\n");
@@ -52,7 +52,7 @@ public class LayerCalculationTest {
 		LayerSource source = new LayerSource() {
 
 			@Override
-			public Future<LayerCalculationP1Result> load(Point start, ProfileLayer layerParams) {
+			public Future<LayerCalculationP1Result> load(Point start, Analysis layerParams) {
 				Callable<LayerCalculationP1Result> callable = new Callable<LayerCalculationP1Result>() {
 
 					@Override

@@ -9,20 +9,17 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
-import at.qop.qoplib.entities.Profile;
-import at.qop.qoplib.entities.ProfileLayer;
+import at.qop.qoplib.entities.Analysis;
 
 public class LayerProfileForm extends AbstractForm {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private final Profile profile;
-	private final ProfileLayer profileLayer;
-	private Binder<ProfileLayer> binder;
+	private final Analysis profileLayer;
+	private Binder<Analysis> binder;
 	
-	public LayerProfileForm(String title, Profile profile, ProfileLayer profileLayer) {
+	public LayerProfileForm(String title, Analysis profileLayer) {
 		super(title);
-		this.profile = profile;
 		this.profileLayer = profileLayer;
 		binder.readBean(profileLayer);
 	}
@@ -37,7 +34,7 @@ public class LayerProfileForm extends AbstractForm {
 		{
 			TextField textField = new TextField("Tabellenname");
 			vl.addComponent(textField);
-			binder.bind(textField, o -> o.tablename, (o,v) -> o.tablename = v);
+			binder.bind(textField, o -> o.name, (o,v) -> o.name = v);
 		}	
 		{
 			TextField textField = new TextField("Beschreibung");

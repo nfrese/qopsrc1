@@ -47,6 +47,11 @@ public class AdminUI extends UI {
         	Component c = tab.initialize(this.getPage());
         	tabs.addTab(c, "Profiles");
         }
+        {   
+        	AnalysisTab tab = new AnalysisTab();
+        	Component c = tab.initialize(this.getPage());
+        	tabs.addTab(c, "Auswertungen");
+        }
         {
         	MiscTab tab = new MiscTab();
         	Component c = tab.initialize(this.getPage());

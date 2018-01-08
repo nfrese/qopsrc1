@@ -10,12 +10,12 @@ import com.vividsolutions.jts.geom.Point;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.dbconnector.DbTableReader;
 import at.qop.qoplib.domains.IGenericDomain;
-import at.qop.qoplib.entities.ProfileLayer;
+import at.qop.qoplib.entities.Analysis;
 
 public class DbLayerSource implements LayerSource {
 
 	@Override
-	public Future<LayerCalculationP1Result> load(Point start, ProfileLayer layerParams) {
+	public Future<LayerCalculationP1Result> load(Point start, Analysis layerParams) {
 		Callable<LayerCalculationP1Result> callable = new Callable<LayerCalculationP1Result>() {
 
 			@Override

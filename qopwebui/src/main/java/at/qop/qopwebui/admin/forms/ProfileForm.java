@@ -10,7 +10,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.entities.Profile;
-import at.qop.qoplib.entities.ProfileLayer;
+import at.qop.qoplib.entities.Analysis;
 
 public class ProfileForm extends AbstractForm {
 	
