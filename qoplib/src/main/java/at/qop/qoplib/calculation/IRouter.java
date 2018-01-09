@@ -9,4 +9,6 @@ public interface IRouter {
 
 	double[][] table(ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException;
 
+	LonLat[] route(ModeEnum mode, LonLat[] points) throws IOException;
+
 }

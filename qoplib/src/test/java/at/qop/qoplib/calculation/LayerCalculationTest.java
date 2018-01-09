@@ -82,10 +82,10 @@ public class LayerCalculationTest {
 			}
 		};
 		lc.p0loadTargets(source);
-		lc.p0calcDistances();
-		lc.p1routeTargets(null);
-		lc.p2OrderTargets();
-		lc.p3Calculate();
+		lc.p1calcDistances();
+		lc.p2travelTime(null);
+		lc.p3OrderTargets();
+		lc.p4Calculate();
 		
 		Assert.assertEquals(1.86511, lc.result, 0.01);
 		

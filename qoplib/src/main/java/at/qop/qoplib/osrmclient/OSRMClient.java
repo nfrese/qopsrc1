@@ -35,10 +35,10 @@ public class OSRMClient implements IRouter {
 		urlSb.append(hostPort);
 		urlSb.append("/table/v1/" + mode.osrmProfile + "/");
 		
-		String sourcesStr = Arrays.stream(sources).map(x -> x.toString()).collect(Collectors.joining(";"));
+		String sourcesStr = Arrays.stream(sources).map(p -> p.toString()).collect(Collectors.joining(";"));
 		urlSb.append(sourcesStr);
 		urlSb.append(';');
-		String targetsStr = Arrays.stream(destinations).map(x -> x.toString()).collect(Collectors.joining(";"));
+		String targetsStr = Arrays.stream(destinations).map(p -> p.toString()).collect(Collectors.joining(";"));
 		urlSb.append(targetsStr);
 		int cnt = 0;
 		urlSb.append("?sources=");
@@ -63,11 +63,11 @@ public class OSRMClient implements IRouter {
 			String result = new BufferedReader(new InputStreamReader(is))
 					  .lines().collect(Collectors.joining("\n"));
 			
-			return OSRMClient.parseResult(result);
+			return OSRMClient.parseTableResult(result);
 		}
 	}
 	
-	public static double[][] parseResult(String json) throws JsonProcessingException, IOException
+	public static double[][] parseTableResult(String json) throws JsonProcessingException, IOException
 	{
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode node = mapper.readTree(json);
@@ -115,4 +115,65 @@ public class OSRMClient implements IRouter {
 		return durationArr;
 	}
 
+	@Override
+	public LonLat[] route(ModeEnum mode, LonLat[] points) throws IOException {
+		
+		StringBuilder urlSb = new StringBuilder();
+		urlSb.append(hostPort);
+		urlSb.append("/route/v1/" + mode.osrmProfile + "/");
+		
+		String sourcesStr = Arrays.stream(points).map(x -> x.toString()).collect(Collectors.joining(";"));
+		urlSb.append(sourcesStr);
+		urlSb.append("?geometries=geojson");
+		URL url = new URL(urlSb.toString());
+		System.out.println(url);
+		
+		URLConnection con = url.openConnection();
+			
+		try (InputStream is= con.getInputStream()) {
+			String result = new BufferedReader(new InputStreamReader(is))
+					  .lines().collect(Collectors.joining("\n"));
+			
+			return OSRMClient.parseRouteResult(result);
+		}
+	}
+
+	public static LonLat[] parseRouteResult(String json) throws JsonProcessingException, IOException {
+		
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode node = mapper.readTree(json);
+		String code = node.get("code").asText();
+		if (!"Ok".equalsIgnoreCase(code))
+		{
+			throw new RuntimeException("osrm return code != ok");
+		}
+		
+		JsonNode coordsNode = node.get("routes").iterator().next().get("geometry").get("coordinates");
+		int rows = 0;
+
+		{ // count 
+			Iterator<JsonNode> itRows = coordsNode.iterator();
+			while (itRows.hasNext()) {
+				itRows.next();
+				rows++;
+			}
+		}
+
+		LonLat[] vertices = new LonLat[rows];  
+		
+		int i=0;
+		{ // fill 
+			Iterator<JsonNode> itRows = coordsNode.iterator();
+			while (itRows.hasNext()) {
+				JsonNode loc = itRows.next();
+				Iterator<JsonNode> it = loc.iterator();
+				double lon = it.next().asDouble();
+				double lat = it.next().asDouble();
+				vertices[i] = new LonLat(lon, lat); 
+				i++;
+			}
+		}
+		return vertices;
+	}
+	
 }

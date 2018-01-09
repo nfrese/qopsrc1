@@ -32,10 +32,11 @@ public class Calculation {
 			LayerCalculation lc = new LayerCalculation(address.geom, analysis);
 			layerCalculations.add(lc);
 			lc.p0loadTargets(source);
-			lc.p0calcDistances();
-			lc.p1routeTargets(router);
-			lc.p2OrderTargets();
-			lc.p3Calculate();
+			lc.p1calcDistances();
+			lc.p2travelTime(router);
+			lc.p3OrderTargets();
+			lc.p4Calculate();
+			lc.p5route(router);
 		}
 	}
 

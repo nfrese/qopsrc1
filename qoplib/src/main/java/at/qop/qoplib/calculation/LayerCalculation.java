@@ -2,16 +2,21 @@ package at.qop.qoplib.calculation;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.script.ScriptContext;
 import javax.script.ScriptException;
 import javax.script.SimpleScriptContext;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.GLO;
@@ -54,7 +59,7 @@ public class LayerCalculation {
 		}
 	}
 
-	public void p0calcDistances() {
+	public void p1calcDistances() {
 		DbGeometryField geomField = table.field(params.geomfield, DbGeometryField.class);
 		orderedTargets = new ArrayList<>();
 		
@@ -69,11 +74,11 @@ public class LayerCalculation {
 		}
 	}
 	
-	public void p1routeTargets(IRouter router) {
-		if (routingRequired())
+	public void p2travelTime(IRouter router) {
+		if (travelTimeRequired())
 		{
 			LonLat[] sources = new LonLat[1];
-			sources[0] = new LonLat(start.getCoordinate().x, start.getCoordinate().y); 
+			sources[0] = lonLat(start); 
 
 			LonLat[] destinations = new LonLat[orderedTargets.size()];
 			int i = 0;
@@ -94,19 +99,19 @@ public class LayerCalculation {
 		}
 	}
 	
-	public void p2OrderTargets() {
-		if (routingRequired()) {
+	public void p3OrderTargets() {
+		if (travelTimeRequired()) {
 			Collections.sort(orderedTargets, (t1, t2) -> Double.compare(t1.time, t2.time));
 		} else {
 			Collections.sort(orderedTargets, (t1, t2) -> Double.compare(t1.distance, t2.distance));
 		}
 	}
 	
-	private boolean routingRequired() {
+	private boolean travelTimeRequired() {
 		return params.mode != null && params.mode != ModeEnum.air;
 	}
 	
-	public void p3Calculate() {
+	public void p4Calculate() {
 		
 		ScriptContext context = new SimpleScriptContext();
 		context.setAttribute("lc", this, ScriptContext.ENGINE_SCOPE);
@@ -119,6 +124,30 @@ public class LayerCalculation {
 		
 	}
 	
+	public void p5route(IRouter router) {
+		if (routingRequired())
+		{
+			for (LayerTarget target : keptTargets)
+			{
+				LonLat[] points = new LonLat[2];
+				points[0] = lonLat(start);
+				Coordinate c = target.geom.getCoordinate();
+				points[1] = new LonLat(c.x, c.y);
+				try {
+					LonLat[] lonLatArr = router.route(params.mode, points);
+					List<Coordinate> list = Arrays.stream(lonLatArr).map(lonLat -> new Coordinate(lonLat.lon, lonLat.lat)).collect(Collectors.toList());
+					target.route = CRSTransform.gfWGS84.createLineString(list.toArray(new Coordinate[list.size()]));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+	}
+	
+	private boolean routingRequired() {
+		return travelTimeRequired();
+	}
+
 	public void proto(String line)
 	{
 		System.out.println(line);
@@ -128,5 +157,9 @@ public class LayerCalculation {
 	{
 		keptTargets.add(target);
 	}
+	
+	private static LonLat lonLat(Point p) {
+		return new LonLat(p.getCoordinate().x, p.getCoordinate().y);
+	}	
 
 }

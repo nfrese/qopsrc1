@@ -8,6 +8,7 @@ import org.vaadin.addon.leaflet.LCircle;
 import org.vaadin.addon.leaflet.LFeatureGroup;
 import org.vaadin.addon.leaflet.LMap;
 import org.vaadin.addon.leaflet.LMarker;
+import org.vaadin.addon.leaflet.LPolyline;
 import org.vaadin.addon.leaflet.LTileLayer;
 
 import com.vaadin.annotations.Theme;
@@ -174,6 +175,15 @@ public class QopUI extends UI {
 					{
 						lfgResults.removeAllComponents();
 
+						lc.keptTargets.stream().forEach(lt -> {
+							if (lt.route != null)
+							{
+								LPolyline lp = new LPolyline(lt.route);
+								lp.setColor("#ff7070");
+								lfgResults.addComponent(lp);
+							}
+						});
+						
 						lc.keptTargets.stream().forEach(lt -> {
 
 							if (lt.geom instanceof Point)
