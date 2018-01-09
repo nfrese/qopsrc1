@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.LookupSessionBeans;
@@ -24,7 +25,16 @@ public class DbLayerSource implements LayerSource {
 				IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 				try {
 					DbTableReader tableReader = new DbTableReader();
-					gd_.readTable(layerParams.query, tableReader);
+					
+					String sql = layerParams.query;
+					if (layerParams.hasRadius())
+					{
+						Geometry buffer = CRSTransform.singleton.bufferWGS84(start, layerParams.radius);
+						
+						sql += " WHERE ST_Intersects(" + layerParams.geomfield + ", 'SRID=4326;" + buffer + "'::geometry)";
+					}
+					System.out.println(sql);
+					gd_.readTable(sql, tableReader);
 					LayerCalculationP1Result r = new LayerCalculationP1Result();
 					r.table = tableReader.table;
 					r.records = tableReader.records;

@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -30,6 +32,9 @@ public class Analysis implements Serializable {
 	@Column(columnDefinition="TEXT")
 	public String evalfn;
 	public double radius;
+	
+	@Enumerated(EnumType.STRING)
+	public ModeEnum mode = ModeEnum.air;
 	
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "analysis")
 	public List<ProfileAnalysis> profileAnalysis = new ArrayList<>();

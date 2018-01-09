@@ -92,7 +92,6 @@ public class ProfilesTab extends AbstractTab {
         
         TextField weightField = new TextField();  
         
-    	// Handle value changes
     	twinSelect.addSelectionListener(event -> {
     		if (!twinSelectSilent)
     		{
@@ -120,13 +119,12 @@ public class ProfilesTab extends AbstractTab {
 					if (event.getValue().size() == 1)
 					{
 						currentProfile = event.getValue().iterator().next();
-						
 						updateTwinSelect(twinSelect);
 					}
 					else
 					{
 						currentProfile = null;
-						twinSelect.setItems(Collections.emptyList());
+						updateTwinSelect(twinSelect);
 					}
 				} );
 		
@@ -137,6 +135,11 @@ public class ProfilesTab extends AbstractTab {
 	private void updateTwinSelect(TwinColSelect<ProfileAnalysis> twinSelect) {
 		
 		twinSelectSilent = true;
+		if (currentProfile == null)
+		{
+			twinSelect.setItems(Collections.emptyList());
+			return;
+		}
 		
 		currentProfile = LookupSessionBeans.profileDomain().listProfiles().stream().filter(p -> p.name.equals(currentProfile.name)).findFirst().get();
 		

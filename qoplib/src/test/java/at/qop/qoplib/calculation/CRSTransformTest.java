@@ -1,10 +1,13 @@
 package at.qop.qoplib.calculation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 public class CRSTransformTest {
@@ -40,6 +43,23 @@ public class CRSTransformTest {
 		double d = crst.distanceWGS84(p1, p2);
 		
 		assertEquals(703.61, d, 0.01);
+	}
+	
+	@Test
+	public void testBufferWGS84() {
+		CRSTransform crst = CRSTransform.singleton;
+		Point p1 = CRSTransform.gfWGS84.createPoint(new Coordinate(16.369561009437817, 48.20423271310815));
+		Point p2 = CRSTransform.gfWGS84.createPoint(new Coordinate(16.37741831002266, 48.20776186641345));
+		
+		double d = crst.distanceWGS84(p1, p2);
+		
+		Geometry buffered = crst.bufferWGS84(p1, d+1);
+		
+		assertTrue(p2.intersects(buffered));
+		
+		Geometry bufferedSmall = crst.bufferWGS84(p1, d-1);
+		
+		assertFalse(p2.intersects(bufferedSmall));
 	}
 
 }

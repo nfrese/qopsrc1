@@ -14,7 +14,7 @@ import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.entities.Analysis;
-import at.qop.qopwebui.admin.forms.LayerProfileForm;
+import at.qop.qopwebui.admin.forms.AnalysisForm;
 import at.qop.qopwebui.components.ConfirmationDialog;
 
 public class AnalysisTab extends AbstractTab {
@@ -31,7 +31,7 @@ public class AnalysisTab extends AbstractTab {
         	
         	Analysis analysis = new Analysis();
         	
-    		new LayerProfileForm("Auswertung hinzufügen", analysis).ok(dummy -> {
+    		new AnalysisForm("Auswertung hinzufügen", analysis).ok(dummy -> {
     			LookupSessionBeans.profileDomain().createAnalysis(analysis);
     			refreshGrid(grid);
     		}) .show();
@@ -44,7 +44,7 @@ public class AnalysisTab extends AbstractTab {
         	if (grid.getSelectedItems().size() == 1) {
         		Analysis analysis = grid.getSelectedItems().iterator().next();
         		
-        		new LayerProfileForm("Auswertung bearbeiten", analysis).ok(dummy -> {
+        		new AnalysisForm("Auswertung bearbeiten", analysis).ok(dummy -> {
         			LookupSessionBeans.profileDomain().updateAnalysis(analysis);
         			refreshGrid(grid);
         		}) .show();
@@ -76,6 +76,9 @@ public class AnalysisTab extends AbstractTab {
 		
     	final VerticalLayout vl = new VerticalLayout(grid, new HorizontalLayout(addanalysisButton, editanalysisButton, deleteanalysisButton));
     	vl.setMargin(true);
+    	
+    	refreshGrid(grid);
+    	
 		return vl;
 	}
 
@@ -83,9 +86,10 @@ public class AnalysisTab extends AbstractTab {
 		grid.removeAllColumns();
 		grid.addColumn(item -> item.name).setCaption("Tabellenname");
 		grid.addColumn(item -> item.description).setCaption("Beschreibung");
-		grid.addColumn(item -> item.query).setCaption("SQL");
+		grid.addColumn(item -> item.query).setCaption("SQL").setMaximumWidth(300);
 		grid.addColumn(item -> item.geomfield).setCaption("Geometrie-Feld");
-		grid.addColumn(item -> item.evalfn).setCaption("Auswertungs-Funktion (Javascript)");
+		grid.addColumn(item -> (item.mode != null ? item.mode.desc : "")).setCaption("Routing Modus");
+		grid.addColumn(item -> item.evalfn).setCaption("Auswertungs-Funktion (Javascript)").setMaximumWidth(300);
 		grid.addColumn(item -> item.radius).setCaption("Radius");
 
 		DataProvider<Analysis, ?> dataProvider = new ListDataProvider<Analysis>(LookupSessionBeans.profileDomain().listAnalyses());

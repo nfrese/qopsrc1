@@ -70,4 +70,10 @@ public class CRSTransform {
 		return fromWGS84(g1).distance(fromWGS84(g2));
 	}
 	
+	public Geometry bufferWGS84(Geometry g1, double meter) {
+		Geometry pGeom = fromWGS84(g1);
+		Geometry buffered = pGeom.buffer(meter);
+		return toWGS84(buffered);
+	}
+	
 }
