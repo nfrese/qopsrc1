@@ -12,14 +12,16 @@ public class Calculation {
 	private final Profile profile;
 	private final Address address;
 	private final LayerSource source;
+	private final IRouter router;
 	
 	public List<LayerCalculation> layerCalculations = new ArrayList<>();
 	
-	public Calculation(Profile profile, Address address, LayerSource source) {
+	public Calculation(Profile profile, Address address, LayerSource source, IRouter router) {
 		super();
 		this.profile = profile;
 		this.address = address;
 		this.source = source;
+		this.router = router;
 	}
 	
 	
@@ -29,7 +31,9 @@ public class Calculation {
 		
 			LayerCalculation lc = new LayerCalculation(address.geom, analysis);
 			layerCalculations.add(lc);
-			lc.p1loadTargets(source);
+			lc.p0loadTargets(source);
+			lc.p0calcDistances();
+			lc.p1routeTargets(router);
 			lc.p2OrderTargets();
 			lc.p3Calculate();
 		}

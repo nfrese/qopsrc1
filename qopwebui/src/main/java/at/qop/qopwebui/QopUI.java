@@ -30,10 +30,12 @@ import com.vividsolutions.jts.geom.Point;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.DbLayerSource;
+import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.calculation.LayerSource;
 import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
+import at.qop.qoplib.osrmclient.OSRMClient;
 
 @Theme("mytheme")
 public class QopUI extends UI {
@@ -147,7 +149,8 @@ public class QopUI extends UI {
 		if (currentProfile != null && currentAddress != null)
 		{
 			LayerSource source = new DbLayerSource();
-			Calculation calculation = new Calculation(currentProfile, currentAddress, source);
+			IRouter router = new OSRMClient("http://10.0.0.17:5000");
+			Calculation calculation = new Calculation(currentProfile, currentAddress, source, router);
 			calculation.run();
 
 			grid.removeAllComponents();

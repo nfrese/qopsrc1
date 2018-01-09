@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import at.qop.qoplib.entities.ModeEnum;
+
 public class OSRMClientTest {
 
 	private static final String OSRM_SERVER = "http://10.0.0.17:5000";
@@ -31,7 +33,7 @@ public class OSRMClientTest {
 
 		LonLat[] sources = new LonLat[] {new LonLat(16.369561009437817, 48.20423271310815)};
 		LonLat[] targets = new LonLat[] {new LonLat(16.37741831002266, 48.20776186641345)};
-		double[][] result = client.table(sources, targets);
+		double[][] result = client.table(ModeEnum.car, sources, targets);
 		System.out.println(result);
 
 	}
@@ -44,7 +46,7 @@ public class OSRMClientTest {
 		LonLat[] sources = demoData(5);
 		LonLat[] targets = demoData(5);
 		
-		double[][] result = client.table(sources, targets);
+		double[][] result = client.table(ModeEnum.car, sources, targets);
 		System.out.println(result);
 	}
 	
@@ -56,7 +58,7 @@ public class OSRMClientTest {
 		LonLat[] sources = demoData(100);
 		LonLat[] targets = demoData(100);
 		
-		double[][] result = client.table(sources, targets);
+		double[][] result = client.table(ModeEnum.car, sources, targets);
 		System.out.println(result);
 
 	}
@@ -68,7 +70,7 @@ public class OSRMClientTest {
 
 		LonLat[] sources = demoData(-1);
 		LonLat[] targets = demoData(-1);
-		double[][] result = client.table(sources, targets);
+		double[][] result = client.table(ModeEnum.car, sources, targets);
 		System.out.println(result.length + "x" + result[0].length);
 
 	}

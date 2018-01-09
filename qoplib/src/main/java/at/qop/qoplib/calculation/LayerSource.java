@@ -8,6 +8,6 @@ import at.qop.qoplib.entities.Analysis;
 
 public interface LayerSource {
 
-	public Future<LayerCalculationP1Result> load(Point start, Analysis layerParams);
+	public Future<LayerCalculationP1Result> load(Point start, ILayerCalculationP1Params layerParams);
 
 }

@@ -12,10 +12,13 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import at.qop.qoplib.calculation.ILayerCalculationP1Params;
 
 @Entity
 @Table(name="analysis")
-public class Analysis implements Serializable {
+public class Analysis implements Serializable, ILayerCalculationP1Params {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -41,6 +44,24 @@ public class Analysis implements Serializable {
 	
 	public boolean hasRadius() {
 		return radius != 0.0;
+	}
+
+	@Override
+	@Transient
+	public String getQuery() {
+		return query;
+	}
+
+	@Override
+	@Transient
+	public double getRadius() {
+		return radius;
+	}
+
+	@Override
+	@Transient
+	public String getGeomfield() {
+		return geomfield;
 	}
 	
 }

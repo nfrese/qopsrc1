@@ -15,7 +15,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class OSRMClient {
+import at.qop.qoplib.calculation.IRouter;
+import at.qop.qoplib.entities.ModeEnum;
+
+public class OSRMClient implements IRouter {
 	
 	public OSRMClient(String hostPort) {
 		super();
@@ -24,12 +27,13 @@ public class OSRMClient {
 
 	private final String hostPort;
 	
-	public double[][] table(LonLat[] sources, LonLat[] destinations) throws IOException {
+	@Override
+	public double[][] table(ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
 		// http://router.project-osrm.org/table/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?sources=0'
 		
 		StringBuilder urlSb = new StringBuilder();
 		urlSb.append(hostPort);
-		urlSb.append("/table/v1/driving/");
+		urlSb.append("/table/v1/" + mode.osrmProfile + "/");
 		
 		String sourcesStr = Arrays.stream(sources).map(x -> x.toString()).collect(Collectors.joining(";"));
 		urlSb.append(sourcesStr);

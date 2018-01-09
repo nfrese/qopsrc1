@@ -52,7 +52,7 @@ public class LayerCalculationTest {
 		LayerSource source = new LayerSource() {
 
 			@Override
-			public Future<LayerCalculationP1Result> load(Point start, Analysis layerParams) {
+			public Future<LayerCalculationP1Result> load(Point start, ILayerCalculationP1Params layerParams) {
 				Callable<LayerCalculationP1Result> callable = new Callable<LayerCalculationP1Result>() {
 
 					@Override
@@ -81,7 +81,9 @@ public class LayerCalculationTest {
 				return ft;
 			}
 		};
-		lc.p1loadTargets(source);
+		lc.p0loadTargets(source);
+		lc.p0calcDistances();
+		lc.p1routeTargets(null);
 		lc.p2OrderTargets();
 		lc.p3Calculate();
 		

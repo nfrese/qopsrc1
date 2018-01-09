@@ -16,7 +16,7 @@ import at.qop.qoplib.entities.Analysis;
 public class DbLayerSource implements LayerSource {
 
 	@Override
-	public Future<LayerCalculationP1Result> load(Point start, Analysis layerParams) {
+	public Future<LayerCalculationP1Result> load(Point start, ILayerCalculationP1Params layerParams) {
 		Callable<LayerCalculationP1Result> callable = new Callable<LayerCalculationP1Result>() {
 
 			@Override
@@ -26,12 +26,12 @@ public class DbLayerSource implements LayerSource {
 				try {
 					DbTableReader tableReader = new DbTableReader();
 					
-					String sql = layerParams.query;
+					String sql = layerParams.getQuery();
 					if (layerParams.hasRadius())
 					{
-						Geometry buffer = CRSTransform.singleton.bufferWGS84(start, layerParams.radius);
+						Geometry buffer = CRSTransform.singleton.bufferWGS84(start, layerParams.getRadius());
 						
-						sql += " WHERE ST_Intersects(" + layerParams.geomfield + ", 'SRID=4326;" + buffer + "'::geometry)";
+						sql += " WHERE ST_Intersects(" + layerParams.getGeomfield() + ", 'SRID=4326;" + buffer + "'::geometry)";
 					}
 					System.out.println(sql);
 					gd_.readTable(sql, tableReader);

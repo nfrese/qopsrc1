@@ -1,0 +1,101 @@
+=====
+
+var cnt=0;
+var result=0;
+var valueField=lc.table.doubleField('flaeche');
+var descriptionField=lc.table.textField('sportstaet');
+for each (var target in lc.orderedTargets) {
+        if (cnt >= 5) break;
+        lc.proto(target.toString());
+        var value = valueField.get(target.rec);
+        var description = descriptionField.get(target.rec);
+
+        target.caption = "<b>" + description 
+               + "</b><br>Fläche " + value + " m2"  
+               + "<br>Luftlinendistanz: " + target.distance ;
+        lc.proto(value);
+        result += value;
+        lc.keep(target);
+        cnt++;
+};
+lc.proto('sum=' + result);
+lc.result = result;
+
+=====
+
+var cnt=0;
+var descriptionField=lc.table.textField('name');
+for each (var target in lc.orderedTargets) {
+        if (target.distance > 100) break;
+        lc.proto(target.toString());
+        var description = descriptionField.get(target.rec);
+        target.caption = "<b>" + description 
+               + "</b><br>Reihenfolge: " + cnt;
+        lc.proto(target.caption);
+        lc.keep(target);
+        cnt++;
+};
+lc.proto('sum=' + cnt);
+lc.result = cnt;
+
+
+
+
+
+"TEST1";"Flächensumme der 5 nächsten Sportstätten";"var cnt=0;
+var result=0;
+var valueField=lc.table.doubleField('flaeche');
+var descriptionField=lc.table.textField('sportstaet');
+for each (var target in lc.orderedTargets) {
+        if (cnt >= 5) break;
+        lc.proto(target.toString());
+        var value = valueField.get(target.rec);
+        var description = descriptionField.get(target.rec);
+
+        target.caption = "<b>" + description 
+               + "</b><br>Fläche " + value + " m2"  
+               + "<br>Luftlinendistanz: " + target.distance ;
+        lc.proto(value);
+        result += value;
+        lc.keep(target);
+        cnt++;
+};
+lc.proto('sum=' + result);
+lc.result = result;";"geom";"select * from sportstaetten";500;"sportstaetten"
+"TEST1";"(Adressdichte) Anzahl derAdressen in 100m Entfernung";"var cnt=0;
+var descriptionField=lc.table.textField('name');
+for each (var target in lc.orderedTargets) {
+        if (target.distance > 100) break;
+        lc.proto(target.toString());
+        var description = descriptionField.get(target.rec);
+        target.caption = "<b>" + description 
+               + "</b><br>Reihenfolge: " + cnt;
+        lc.proto(target.caption);
+        lc.keep(target);
+        cnt++;
+};
+lc.proto('sum=' + cnt);
+lc.result = cnt;";"geom";"select * from addresses";100;"anzahladressen"
+
+
+"naechste_sportstaetten";"Fläche der naechsten Sportstaetten";"var cnt=0;
+var result=0;
+var valueField=lc.table.doubleField('area');
+var descriptionField=lc.table.textField('description');
+for each (var target in lc.orderedTargets) {
+        if (cnt >= 5) break;
+        lc.proto(target.toString());
+        var value = valueField.get(target.rec);
+        var description = descriptionField.get(target.rec);
+
+        target.caption = "<b>" + description 
+               + "</b><br>Fläche " + value + " m2"  
+               + "<br>Luftlinendistanz: " + target.distance ;
+        lc.proto(value);
+        result += value;
+        lc.keep(target);
+        cnt++;
+};
+lc.proto('sum=' + result);
+lc.result = result;
+";"geom";"select flaeche as area, sportstaet as description, geom from sportstaetten";500
