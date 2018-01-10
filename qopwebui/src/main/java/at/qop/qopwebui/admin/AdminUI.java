@@ -41,6 +41,11 @@ public class AdminUI extends UI {
         	tabs.addTab(c, "Auswertungen");
         }
         {   
+        	AnalysisFunctionTab tab = new AnalysisFunctionTab();
+        	Component c = tab.initialize(this.getPage());
+        	tabs.addTab(c, "Auswertungsfunktionen");
+        }
+        {   
         	LayerDataTab tab = new LayerDataTab();
         	Component c = tab.initialize(this.getPage());
         	tabs.addTab(c, "Daten");

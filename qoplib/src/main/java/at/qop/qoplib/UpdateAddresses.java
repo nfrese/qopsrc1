@@ -6,6 +6,7 @@ import java.net.URL;
 
 import at.qop.qoplib.dbconnector.DbBatch;
 import at.qop.qoplib.dbconnector.DbRecord;
+import at.qop.qoplib.entities.Address;
 
 public class UpdateAddresses extends AbstractUpdater {
 	
@@ -20,25 +21,25 @@ public class UpdateAddresses extends AbstractUpdater {
 	protected void before() {
 		{
 			String sql;
-			sql = "DROP TABLE public.addresses";
+			sql = "DROP TABLE public.q_addresses";
 			ddl(sql, true);
 		}
 
 		{
 			String sql;
-			sql = "DROP INDEX public.addresses_geom_gist";
+			sql = "DROP INDEX public.q_addresses_geom_gist";
 			ddl(sql, true);
 		}
 		
 		{
-			String sql = "CREATE TABLE public.addresses"
+			String sql = "CREATE TABLE public.q_addresses"
 					+ " ("
 					+ "  gid serial,"
 					+ "  name character varying(254),"
 					+ "  geom geometry(Point),"
 					+ "  zug_x numeric,"
 					+ "  zug_y numeric,"
-					+ "  CONSTRAINT addresses_pkey PRIMARY KEY (gid)"
+					+ "  CONSTRAINT q_addresses_pkey PRIMARY KEY (gid)"
 					+ ")"
 					+ "WITH ("
 					+ "OIDS=FALSE"
@@ -46,14 +47,14 @@ public class UpdateAddresses extends AbstractUpdater {
 			ddl(sql, false);
 		}
 		{
-			String sql = "ALTER TABLE public.addresses"
+			String sql = "ALTER TABLE public.q_addresses"
 					+ " OWNER TO qopuser";
 			ddl(sql, false);
 		}
 
 		{
-			String sql = "CREATE INDEX addresses_geom_gist"
-					+ " ON public.addresses"
+			String sql = "CREATE INDEX q_addresses_geom_gist"
+					+ " ON public.q_addresses"
 					+ " USING gist"
 					+ "(geom);";
 			ddl(sql, false);
@@ -81,7 +82,7 @@ public class UpdateAddresses extends AbstractUpdater {
 		int zugyIx = this.columnsMap.get("ZUG_Y");
 		
 		DbBatch b = new DbBatch();
-		b.sql = "insert into addresses (name, geom, zug_x, zug_y) values (?, ST_GeomFromText(?, 4326), ?, ?)";
+		b.sql = "insert into " + Address.TABLENAME + " (name, geom, zug_x, zug_y) values (?, ST_GeomFromText(?, 4326), ?, ?)";
 		b.sqlTypes = new int[] {
 				java.sql.Types.VARCHAR, 
 				java.sql.Types.VARCHAR, 

@@ -14,11 +14,11 @@ public abstract class AbstractForm extends Window {
 	
 	private ClickListener cl;
 
-	public AbstractForm(String title)
+	public AbstractForm(String title, boolean create)
 	{
 		super(title);
 		this.setModal(true);
-		Component c = initComponents();
+		Component c = initComponents(create);
 		VerticalLayout subContent = new VerticalLayout();
 		subContent.addComponent(c);
 		this.setContent(subContent);
@@ -51,5 +51,5 @@ public abstract class AbstractForm extends Window {
 	
 	protected abstract void saveData();
 
-	protected abstract Component initComponents();
+	protected abstract Component initComponents(boolean create);
 }

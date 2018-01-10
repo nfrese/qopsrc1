@@ -31,7 +31,7 @@ public class AnalysisTab extends AbstractTab {
         	
         	Analysis analysis = new Analysis();
         	
-    		new AnalysisForm("Auswertung hinzufügen", analysis).ok(dummy -> {
+    		new AnalysisForm("Auswertung hinzufügen", analysis, true).ok(dummy -> {
     			LookupSessionBeans.profileDomain().createAnalysis(analysis);
     			refreshGrid(grid);
     		}) .show();
@@ -44,7 +44,7 @@ public class AnalysisTab extends AbstractTab {
         	if (grid.getSelectedItems().size() == 1) {
         		Analysis analysis = grid.getSelectedItems().iterator().next();
         		
-        		new AnalysisForm("Auswertung bearbeiten", analysis).ok(dummy -> {
+        		new AnalysisForm("Auswertung bearbeiten", analysis, false).ok(dummy -> {
         			LookupSessionBeans.profileDomain().updateAnalysis(analysis);
         			refreshGrid(grid);
         		}) .show();
@@ -91,7 +91,8 @@ public class AnalysisTab extends AbstractTab {
 		grid.addColumn(item -> item.query).setCaption("SQL").setMaximumWidth(300);
 		grid.addColumn(item -> item.geomfield).setCaption("Geometrie-Feld");
 		grid.addColumn(item -> (item.mode != null ? item.mode.desc : "")).setCaption("Routing Modus");
-		grid.addColumn(item -> item.evalfn).setCaption("Auswertungs-Funktion (Javascript)").setMaximumWidth(300);
+		grid.addColumn(item -> item.analysisfunction).setCaption("Auswertungs-Funktion");
+		grid.addColumn(item -> item.ratingfunc).setCaption("Rating-Funktion (Javascript)").setMaximumWidth(300);
 		grid.addColumn(item -> item.radius).setCaption("Radius");
 
 		DataProvider<Analysis, ?> dataProvider = new ListDataProvider<Analysis>(LookupSessionBeans.profileDomain().listAnalyses());

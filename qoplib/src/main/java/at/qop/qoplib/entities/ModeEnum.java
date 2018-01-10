@@ -1,6 +1,8 @@
 package at.qop.qoplib.entities;
 
-public enum ModeEnum {
+import java.io.Serializable;
+
+public enum ModeEnum implements Serializable {
 	
 	car("PKW", "driving"),
 	bike("Fahrrad", "bike"), 

@@ -14,6 +14,7 @@ import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.entities.Analysis;
+import at.qop.qoplib.entities.AnalysisFunction;
 
 @Stateless
 @Local (IProfileDomain.class)
@@ -93,6 +94,31 @@ public class ProfileDomain extends AbstractDomain implements IProfileDomain {
 	@Override
 	public void updateProfileAnalysis(ProfileAnalysis pa) {
 		hibSess().update(pa);
+	}
+
+	@Override
+	public List<AnalysisFunction> listAnalysisFunctions() {
+		org.hibernate.Query qry = hibSess().createQuery("from " + AnalysisFunction.class.getSimpleName());
+		return qry.list();
+
+	}
+	
+	@Override
+	public void createAnalysisFunction(AnalysisFunction f) {
+		hibSess().merge(f);
+		System.out.println(f);
+	}
+	
+	@Override
+	public void updateAnalysisFunction(AnalysisFunction f) {
+		hibSess().update(f);
+		System.out.println(f);
+	}
+
+	@Override
+	public void dropAnalysisFunction(AnalysisFunction f) {
+		hibSess().update(f);
+		hibSess().delete(f);
 	}
 
 }

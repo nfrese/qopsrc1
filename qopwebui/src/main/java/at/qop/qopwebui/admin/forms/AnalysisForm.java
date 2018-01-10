@@ -1,6 +1,7 @@
 package at.qop.qopwebui.admin.forms;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.ValidationException;
@@ -12,9 +13,10 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
+import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.entities.Analysis;
+import at.qop.qoplib.entities.AnalysisFunction;
 import at.qop.qoplib.entities.ModeEnum;
-import at.qop.qoplib.entities.Profile;
 
 public class AnalysisForm extends AbstractForm {
 	
@@ -23,14 +25,14 @@ public class AnalysisForm extends AbstractForm {
 	private final Analysis analysis;
 	private Binder<Analysis> binder;
 	
-	public AnalysisForm(String title, Analysis analysis) {
-		super(title);
+	public AnalysisForm(String title, Analysis analysis, boolean create) {
+		super(title, create);
 		this.analysis = analysis;
 		binder.readBean(analysis);
 	}
 	
 	@Override
-	protected Component initComponents() {
+	protected Component initComponents(boolean create) {
 
 		VerticalLayout vl = new VerticalLayout();
 
@@ -39,6 +41,7 @@ public class AnalysisForm extends AbstractForm {
 		{
 			TextField textField = new TextField("Name");
 			textField.setWidth(450, Unit.PIXELS);
+			textField.setEnabled(create);
 			vl.addComponent(textField);
 			binder.bind(textField, o -> o.name, (o,v) -> o.name = v);
 		}	
@@ -64,16 +67,25 @@ public class AnalysisForm extends AbstractForm {
 			TextField textField = new TextField("Geometrie-Feld");
 			vl.addComponent(textField);
 			binder.bind(textField, o -> o.geomfield, (o,v) -> o.geomfield = v);
-		}	
-		{
-			TextArea textArea = new TextArea("Auswertungs-Funktion (Javascript)");
-			textArea.setWidth(600, Unit.PIXELS);
-			textArea.setHeight(200, Unit.PIXELS);
-			vl.addComponent(textArea);
-			binder.bind(textArea, o -> o.evalfn, (o,v) -> o.evalfn = v);
 		}
 		{
-			TextField textField = new TextField("Radius");
+			List<AnalysisFunction> funcs = LookupSessionBeans.profileDomain().listAnalysisFunctions();
+			ComboBox<AnalysisFunction> funcCombo = new ComboBox<>("Auswertungsfunktion", funcs);
+			funcCombo.setEmptySelectionAllowed(false);
+			funcCombo.setTextInputAllowed(false);
+			funcCombo.setWidth(500, Unit.PIXELS);
+			vl.addComponent(funcCombo);
+			binder.bind(funcCombo, o -> o.analysisfunction, (o,v) -> o.analysisfunction = v);
+		}	
+		{
+			TextArea textArea = new TextArea("Rating-Funktion (Javascript)");
+			textArea.setWidth(600, Unit.PIXELS);
+			textArea.setHeight(80, Unit.PIXELS);
+			vl.addComponent(textArea);
+			binder.bind(textArea, o -> o.ratingfunc, (o,v) -> o.ratingfunc = v);
+		}
+		{
+			TextField textField = new TextField("Radius Objektfilterung (0 bedeutet keine Einschränkung)");
 			vl.addComponent(textField);
 			binder.bind(textField, o -> o.radius + "", (o,v) -> o.radius = Double.parseDouble(v));
 		}

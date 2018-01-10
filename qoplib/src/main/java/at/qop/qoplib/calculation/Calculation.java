@@ -6,7 +6,6 @@ import java.util.List;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
-import at.qop.qoplib.entities.Analysis;
 
 public class Calculation {
 	
@@ -25,11 +24,10 @@ public class Calculation {
 		this.router = router;
 	}
 	
-	
 	public void run()
 	{
 		for (ProfileAnalysis profileAnalysis : profile.profileAnalysis) {
-			LayerCalculation lc = new LayerCalculation(address.geom, profileAnalysis.analysis, profileAnalysis.weight);
+			LayerCalculation lc = new LayerCalculation(address.geom, profileAnalysis.analysis, profileAnalysis.weight, profileAnalysis.altratingfunc);
 			layerCalculations.add(lc);
 			lc.p0loadTargets(source);
 			lc.p1calcDistances();

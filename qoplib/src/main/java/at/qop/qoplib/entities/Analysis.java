@@ -10,6 +10,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -17,7 +19,7 @@ import javax.persistence.Transient;
 import at.qop.qoplib.calculation.ILayerCalculationP1Params;
 
 @Entity
-@Table(name="analysis")
+@Table(name="q_analysis")
 public class Analysis implements Serializable, ILayerCalculationP1Params {
 	
 	private static final long serialVersionUID = 1L;
@@ -32,8 +34,13 @@ public class Analysis implements Serializable, ILayerCalculationP1Params {
 	public String query;
 	public String geomfield;
 	
+	@ManyToOne
+    @JoinColumn(name="evalfunction_name", nullable=true)
+	public AnalysisFunction analysisfunction;
+	
 	@Column(columnDefinition="TEXT")
-	public String evalfn;
+	public String ratingfunc;
+	
 	public double radius;
 	
 	@Enumerated(EnumType.STRING)

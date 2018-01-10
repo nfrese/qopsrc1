@@ -6,6 +6,7 @@ import java.util.Set;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.entities.Analysis;
+import at.qop.qoplib.entities.AnalysisFunction;
 
 public interface IProfileDomain {
 	
@@ -30,6 +31,14 @@ public interface IProfileDomain {
 	void removeProfileAnalysis(Set<ProfileAnalysis> pas);
 
 	void updateProfileAnalysis(ProfileAnalysis pa);
+
+	List<AnalysisFunction> listAnalysisFunctions();
+
+	void createAnalysisFunction(AnalysisFunction f);
+
+	void updateAnalysisFunction(AnalysisFunction f);
+
+	void dropAnalysisFunction(AnalysisFunction f);
 
 
 }

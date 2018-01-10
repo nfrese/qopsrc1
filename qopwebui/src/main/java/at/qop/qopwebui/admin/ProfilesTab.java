@@ -47,7 +47,7 @@ public class ProfilesTab extends AbstractTab {
 
         	Profile profile = new Profile();
         	
-        	new ProfileForm("Neues Profil", profile).ok(e3 -> {
+        	new ProfileForm("Neues Profil", profile, true).ok(e3 -> {
     			LookupSessionBeans.profileDomain().createProfile(profile);
     			refreshProfileList(listSelect);
         	}).show();
@@ -63,7 +63,7 @@ public class ProfilesTab extends AbstractTab {
         	{
         		Profile profile = sel.iterator().next();
 
-        		new ProfileForm("Profil bearbeiten", profile).ok(e3 -> {
+        		new ProfileForm("Profil bearbeiten", profile, false).ok(e3 -> {
         			LookupSessionBeans.profileDomain().updateProfile(profile);
         			refreshProfileList(listSelect);
         		}).show();

@@ -9,10 +9,12 @@ import javax.persistence.Table;
 import com.vividsolutions.jts.geom.Point;
 
 @Entity
-@Table(name="addresses")
+@Table(name=Address.TABLENAME)
 public class Address implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+
+	public static final String TABLENAME = "q_addresses";
 
 	@Id
 	public int gid;

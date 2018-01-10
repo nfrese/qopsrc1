@@ -32,6 +32,8 @@ public class LayerCalculation {
 	
 	public final Point start;
 	public final Analysis params;
+	public final double presetWeight;
+	private final String altRatingFunc;
 	
 	public DbTable table;
 	
@@ -41,15 +43,15 @@ public class LayerCalculation {
 	
 	public double result;
 	public double rating=1;
-	public double presetWeight;
 	public double weight;
 	
-	public LayerCalculation(Point start, Analysis params, double presetWeight) {
+	public LayerCalculation(Point start, Analysis params, double presetWeight, String altRatingFunc) {
 		super();
 		this.start = start;
 		this.params = params;
 		this.presetWeight = presetWeight;
 		this.weight = presetWeight;
+		this.altRatingFunc = altRatingFunc;
 	}
 	
 	public void p0loadTargets(LayerSource source) {
@@ -123,7 +125,28 @@ public class LayerCalculation {
 		context.setAttribute("lc", this, ScriptContext.ENGINE_SCOPE);
 		
 		try {
-			GLO.get().jsEngine.eval(params.evalfn, context);
+			if (params.analysisfunction != null && params.analysisfunction.func != null && !params.analysisfunction.func.isEmpty())
+			{
+				GLO.get().jsEngine.eval(params.analysisfunction.func, context);
+			}
+		} catch (ScriptException e) {
+			throw new RuntimeException(e);
+		}
+		
+		try {
+			if (params.ratingfunc != null && !params.ratingfunc.isEmpty())
+			{
+				GLO.get().jsEngine.eval(params.ratingfunc, context);
+			}
+		} catch (ScriptException e) {
+			throw new RuntimeException(e);
+		}
+		
+		try {
+			if (altRatingFunc != null && !altRatingFunc.isEmpty())
+			{
+				GLO.get().jsEngine.eval(altRatingFunc, context);
+			}
 		} catch (ScriptException e) {
 			throw new RuntimeException(e);
 		}

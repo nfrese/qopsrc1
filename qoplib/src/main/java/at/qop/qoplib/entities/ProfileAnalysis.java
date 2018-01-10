@@ -1,5 +1,8 @@
 package at.qop.qoplib.entities;
 
+import java.io.Serializable;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -9,9 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="profileanalysis")
-public class ProfileAnalysis {
-	
+@Table(name="q_profileanalysis")
+public class ProfileAnalysis implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
 	public int id;
@@ -25,5 +30,10 @@ public class ProfileAnalysis {
 	public Analysis analysis;
 
 	public double weight = 1;
+	
+	@Column(columnDefinition="TEXT")
+	public String altratingfunc;
+	
+	public String category;
 	
 }
