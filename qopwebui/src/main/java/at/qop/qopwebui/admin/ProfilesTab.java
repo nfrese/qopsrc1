@@ -8,6 +8,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.data.Binder.Binding;
+import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Button;
@@ -90,7 +93,18 @@ public class ProfilesTab extends AbstractTab {
 
       	twinSelect.setRows(15);
         
-        TextField weightField = new TextField();  
+    	Grid<ProfileAnalysis> grid = new Grid<ProfileAnalysis>("Gewichte festlegen");
+    	grid.getEditor().setEnabled(true);
+        grid.setWidth(100.0f, Unit.PERCENTAGE);
+        grid.setHeight(100.0f, Unit.PERCENTAGE);
+        grid.addColumn(item -> item.analysis.name).setCaption("Name");
+		grid.addColumn(item -> item.analysis.description).setCaption("Beschreibung");
+		grid.addColumn(item -> item.weight  +"").setCaption("Gewicht").setEditorComponent(new TextField(), 
+				(item,v)  -> { 
+					item.weight = Double.valueOf(v); 
+					LookupSessionBeans.profileDomain().updateProfileAnalysis(item);
+				});
+        
         
     	twinSelect.addSelectionListener(event -> {
     		if (!twinSelectSilent)
@@ -99,16 +113,16 @@ public class ProfilesTab extends AbstractTab {
     			LookupSessionBeans.profileDomain().createProfileAnalysis(event.getAddedSelection());
     			LookupSessionBeans.profileDomain().removeProfileAnalysis(event.getRemovedSelection());
     			updateTwinSelect(twinSelect);
+    			refreshGrid(grid);
     		}
     			
     	});
-        
-        final HorizontalLayout hl = new HorizontalLayout(listSelect, new VerticalLayout(addProfileButton, editProfileButton, removeProfileButton), twinSelect);
+
+    	
+        final HorizontalLayout hl = new HorizontalLayout(listSelect, 
+        		new VerticalLayout(addProfileButton, editProfileButton, removeProfileButton), twinSelect, grid);
         hl.setMargin(true);
         hl.setHeight(100.0f, Unit.PERCENTAGE);
-        Grid<Analysis> grid = new Grid<Analysis>();
-        grid.setWidth(100.0f, Unit.PERCENTAGE);
-        grid.setHeight(100.0f, Unit.PERCENTAGE);
         
         
 		listSelect.addValueChangeListener(
@@ -119,13 +133,13 @@ public class ProfilesTab extends AbstractTab {
 					if (event.getValue().size() == 1)
 					{
 						currentProfile = event.getValue().iterator().next();
-						updateTwinSelect(twinSelect);
 					}
 					else
 					{
 						currentProfile = null;
-						updateTwinSelect(twinSelect);
 					}
+					updateTwinSelect(twinSelect);
+					refreshGrid(grid);
 				} );
 		
 		
@@ -166,5 +180,10 @@ public class ProfilesTab extends AbstractTab {
 		listSelect.setItems(LookupSessionBeans.profileDomain().listProfiles());
 	}
 
+	private void refreshGrid(Grid<ProfileAnalysis> grid) {
+		DataProvider<ProfileAnalysis, ?> dataProvider = new ListDataProvider<ProfileAnalysis>(
+				currentProfile != null ? currentProfile.profileAnalysis : Collections.emptyList());
+		grid.setDataProvider(dataProvider);
+	}
 
 }

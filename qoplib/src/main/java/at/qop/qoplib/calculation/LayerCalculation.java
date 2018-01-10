@@ -25,6 +25,7 @@ import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.ModeEnum;
+import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.LonLat;
 
 public class LayerCalculation {
@@ -39,11 +40,16 @@ public class LayerCalculation {
 	public ArrayList<LayerTarget> keptTargets = new ArrayList<>();
 	
 	public double result;
+	public double rating=1;
+	public double presetWeight;
+	public double weight;
 	
-	public LayerCalculation(Point start, Analysis params) {
+	public LayerCalculation(Point start, Analysis params, double presetWeight) {
 		super();
 		this.start = start;
 		this.params = params;
+		this.presetWeight = presetWeight;
+		this.weight = presetWeight;
 	}
 	
 	public void p0loadTargets(LayerSource source) {

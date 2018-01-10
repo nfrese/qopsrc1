@@ -7,6 +7,10 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Restrictions;
+
 import com.vividsolutions.jts.geom.Geometry;
 
 import at.qop.qoplib.entities.Address;
@@ -32,16 +36,15 @@ public class AddressDomain extends AbstractDomain implements IAddressDomain {
 
 	@Override
 	public List<Address> findAddresses(String searchTxt) {
-		org.hibernate.Query qry = hibSess().createQuery("from Address where name like :searchTxt");
+		org.hibernate.Query qry = hibSess().createQuery("from Address where lower(name) like lower(:searchTxt)");
 		qry.setParameter("searchTxt", searchTxt);
 		return qry.list();
 	}
-	
 
 	@Override
 	public List<Address> findAddresses(int offset, int limit, String namePrefix) {
 		System.out.println(offset + " " + limit + " " + namePrefix);
-		org.hibernate.Query qry = hibSess().createQuery("from Address where name like :searchTxt order by name");
+		org.hibernate.Query qry = hibSess().createQuery("from Address where lower(name) like lower(:searchTxt) order by name");
 		qry.setParameter("searchTxt", namePrefix + "%");
 		qry.setFetchSize(limit);
 		return qry.list();
@@ -49,7 +52,7 @@ public class AddressDomain extends AbstractDomain implements IAddressDomain {
 
 	@Override
 	public int countAddresses(String namePrefix) {
-		org.hibernate.Query qry = hibSess().createQuery("from Address where name like :searchTxt");
+		org.hibernate.Query qry = hibSess().createQuery("from Address where lower(name) like lower(:searchTxt)");
 		qry.setParameter("searchTxt", namePrefix + "%");
 		return qry.list().size();
 	}

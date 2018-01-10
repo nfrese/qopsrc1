@@ -1,5 +1,6 @@
 package at.qop.qopwebui;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import javax.servlet.annotation.WebServlet;
@@ -18,11 +19,14 @@ import com.vaadin.server.ExternalResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.shared.ui.slider.SliderOrientation;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Slider;
+import com.vaadin.ui.Slider.ValueOutOfBoundsException;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -56,6 +60,7 @@ public class QopUI extends UI {
 	private LMap leafletMap;
 	private LFeatureGroup lfgResults;
 	private GridLayout grid;
+	private Label overallRatingLabel;
 
 	@Override
 	protected void init(VaadinRequest vaadinRequest) {
@@ -100,6 +105,12 @@ public class QopUI extends UI {
 
 		List<Profile> profiles = LookupSessionBeans.profileDomain().listProfiles();
 		ComboBox<Profile> profileCombo = new ComboBox<>("Profilauswahl", profiles);
+		if (profiles.size() > 0)
+		{
+			profileCombo.setSelectedItem(profiles.get(0));
+			currentProfile = profiles.get(0);
+		}
+		profileCombo.setEmptySelectionAllowed(false);
 		profileCombo.setTextInputAllowed(false);
 
 		profileCombo.addSelectionListener(event -> {
@@ -137,10 +148,10 @@ public class QopUI extends UI {
 		lfgResults = new LFeatureGroup();
 		leafletMap.addLayer(lfgResults);
 
-		grid = new GridLayout(4, 1);
+		grid = new GridLayout(5, 1);
 		grid.setSpacing(true);
 
-		final VerticalLayout layout = new VerticalLayout(title, new HorizontalLayout(new VerticalLayout(profileCombo, filtercombo, grid), leafletMap));
+		final VerticalLayout layout = new VerticalLayout(title, new HorizontalLayout(new VerticalLayout(filtercombo, profileCombo, grid), leafletMap));
 		layout.setWidth(100, Unit.PERCENTAGE);
 
 		setContent(layout);
@@ -158,13 +169,28 @@ public class QopUI extends UI {
 			grid.addComponent(new Label("<b>Berechnung</b>",  ContentMode.HTML));
 			grid.addComponent(new Label("<b>Resultat</b>",  ContentMode.HTML));
 			grid.addComponent(new Label("<b>Bewertung</b>",  ContentMode.HTML));
+			grid.addComponent(new Label("<b>Gewicht</b>",  ContentMode.HTML));
 			grid.addComponent(new Label("",  ContentMode.HTML));
 
 			calculation.layerCalculations.forEach(lc -> {
 
 				grid.addComponent(new Label(lc.params.description,  ContentMode.HTML));
-				grid.addComponent(new Label(lc.result +"",  ContentMode.HTML));
-				grid.addComponent(new Label("",  ContentMode.HTML));
+				grid.addComponent(new Label(formatDouble2Decimal(lc.result) +"",  ContentMode.HTML));
+				grid.addComponent(new Label(formatDouble2Decimal(lc.rating) +"",  ContentMode.HTML));
+				Slider slider = new Slider(0, 2);
+				slider.setResolution(1);
+				slider.setWidth(150, Unit.PIXELS);
+				slider.setOrientation(SliderOrientation.HORIZONTAL);
+				try {
+					slider.setValue(lc.weight);
+					slider.addValueChangeListener(l -> {
+						lc.weight = slider.getValue();
+						refreshOverallRating(calculation);
+					});
+					grid.addComponent(slider);
+				} catch (ValueOutOfBoundsException e) {
+					grid.addComponent(new Label("Bad Value " + lc.weight,  ContentMode.HTML));
+				}				
 
 				Button button = new Button("Karte >");
 				button.setStyleName(ValoTheme.BUTTON_LINK);
@@ -212,7 +238,26 @@ public class QopUI extends UI {
 				grid.addComponent(button);
 
 			});
+			
+			grid.addComponent(new Label("<b><i>Summe</i></b>",  ContentMode.HTML));
+			grid.addComponent(new Label("",  ContentMode.HTML));
+			
+			overallRatingLabel = new Label("",  ContentMode.HTML);
+			
+			grid.addComponent(overallRatingLabel);
+			grid.addComponent(new Label("",  ContentMode.HTML));
+			grid.addComponent(new Label("",  ContentMode.HTML));
+			
+			refreshOverallRating(calculation);
 		}
+	}
+
+	private void refreshOverallRating(Calculation calculation) {
+		overallRatingLabel.setValue("<b><i>" + formatDouble2Decimal(calculation.overallRating()) + "</i></b>");
+	}
+
+	private String formatDouble2Decimal(double d) {
+		return new DecimalFormat("#.##").format(d);
 	}
 
 	@WebServlet(urlPatterns = "/*", name = "QopUIServlet", asyncSupported = true)

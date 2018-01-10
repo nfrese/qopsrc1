@@ -5,6 +5,7 @@ import java.util.List;
 
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
+import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.entities.Analysis;
 
 public class Calculation {
@@ -27,9 +28,8 @@ public class Calculation {
 	
 	public void run()
 	{
-		for (Analysis analysis : profile.listAnalysis()) {
-		
-			LayerCalculation lc = new LayerCalculation(address.geom, analysis);
+		for (ProfileAnalysis profileAnalysis : profile.profileAnalysis) {
+			LayerCalculation lc = new LayerCalculation(address.geom, profileAnalysis.analysis, profileAnalysis.weight);
 			layerCalculations.add(lc);
 			lc.p0loadTargets(source);
 			lc.p1calcDistances();
@@ -37,7 +37,12 @@ public class Calculation {
 			lc.p3OrderTargets();
 			lc.p4Calculate();
 			lc.p5route(router);
-		}
+		};
+	}
+	
+	public double overallRating()
+	{
+		return layerCalculations.stream().mapToDouble(lc -> (lc.rating * lc.weight)).sum();
 	}
 
 }

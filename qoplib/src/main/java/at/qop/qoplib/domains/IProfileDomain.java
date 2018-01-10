@@ -11,23 +11,25 @@ public interface IProfileDomain {
 	
 	List<Profile> listProfiles();
 
-	void createProfile(Profile profile);
+	void createProfile(Profile p);
 	
-	void updateProfile(Profile profile);
+	void updateProfile(Profile p);
 	
-	void dropProfile(Profile profile);
+	void dropProfile(Profile p);
 
 	List<Analysis> listAnalyses();
 	
-	void createAnalysis(Analysis analysis);
+	void createAnalysis(Analysis a);
 
-	void updateAnalysis(Analysis profile);
+	void updateAnalysis(Analysis a);
 	
-	void dropAnalysis(Analysis profile);
+	void dropAnalysis(Analysis a);
 
-	void createProfileAnalysis(Set<ProfileAnalysis> addedSelection);
+	void createProfileAnalysis(Set<ProfileAnalysis> pas);
 
-	void removeProfileAnalysis(Set<ProfileAnalysis> removedSelection);
+	void removeProfileAnalysis(Set<ProfileAnalysis> pas);
+
+	void updateProfileAnalysis(ProfileAnalysis pa);
 
 
 }

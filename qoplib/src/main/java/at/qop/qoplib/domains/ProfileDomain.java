@@ -40,21 +40,21 @@ public class ProfileDomain extends AbstractDomain implements IProfileDomain {
 	}
 	
 	@Override
-	public void createProfile(Profile profile) {
-		hibSess().merge(profile);
-		System.out.println(profile);
+	public void createProfile(Profile p) {
+		hibSess().merge(p);
+		System.out.println(p);
 	}
 	
 	@Override
-	public void updateProfile(Profile profile) {
-		hibSess().update(profile);
-		System.out.println(profile);
+	public void updateProfile(Profile p) {
+		hibSess().update(p);
+		System.out.println(p);
 	}
 
 	@Override
-	public void dropProfile(Profile profile) {
-		hibSess().update(profile);
-		hibSess().delete(profile);
+	public void dropProfile(Profile p) {
+		hibSess().update(p);
+		hibSess().delete(p);
 	}
 	
 	@Override
@@ -88,8 +88,11 @@ public class ProfileDomain extends AbstractDomain implements IProfileDomain {
 		removedSelection.forEach(pa -> {
 			hibSess().createQuery("delete from " + ProfileAnalysis.class.getSimpleName() + " where id = " + pa.id).executeUpdate(); 
 		}); 
-		
 	}
 	
+	@Override
+	public void updateProfileAnalysis(ProfileAnalysis pa) {
+		hibSess().update(pa);
+	}
 
 }

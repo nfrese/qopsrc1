@@ -47,7 +47,7 @@ public class LayerCalculationTest {
 
 		LayerCalculation lc = new LayerCalculation(
 				CRSTransform.gfWGS84.createPoint(new Coordinate(16.37242655454094,48.2061121366474)),
-				params);
+				params, 1);
 		
 		LayerSource source = new LayerSource() {
 
