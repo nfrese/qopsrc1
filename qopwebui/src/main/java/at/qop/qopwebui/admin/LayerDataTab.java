@@ -47,7 +47,7 @@ public class LayerDataTab extends AbstractTab {
 
 		QopDBMetadata meta = gd.getMetadata();
 		
-		ListSelect<QopDBTable> listSelect = new ListSelect<QopDBTable>("Layer auswählen...", meta.tables);
+		ListSelect<QopDBTable> listSelect = new ListSelect<QopDBTable>("Tabelle auswählen...", meta.tables.stream().filter(t->t.isGeometric()).collect(Collectors.toList()));
         listSelect.setRows(6);
         listSelect.setHeight(100.0f, Unit.PERCENTAGE);
  
@@ -94,9 +94,12 @@ public class LayerDataTab extends AbstractTab {
 			}
 			leafletMap.zoomToContent();
 		});
-		
-		
+		leafletMap.setSizeFull();
+		grid.setSizeFull();
     	final HorizontalLayout hl = new HorizontalLayout(listSelect, grid, leafletMap);
+    	hl.setExpandRatio(grid, 3.0f);
+    	hl.setExpandRatio(leafletMap, 1.5f);
+    	hl.setSizeFull();
     	hl.setMargin(true);
     	return hl;
 	}

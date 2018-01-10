@@ -16,9 +16,11 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.slider.SliderOrientation;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -66,7 +68,7 @@ public class QopUI extends UI {
 	protected void init(VaadinRequest vaadinRequest) {
 
 
-		final Label title  = new Label("QOP Standortbewertung");
+		final Label title  = new Label("<big><b>QOP Standortbewertung</b></big>", ContentMode.HTML);
 
 		ComboBox<Address> filtercombo = new ComboBox<>("Adresse nachschlagen");
 		filtercombo.setWidth(400, Unit.PIXELS);
@@ -119,12 +121,12 @@ public class QopUI extends UI {
 		});
 
 		leafletMap = new LMap();
-		leafletMap.setWidth("600px");
-		leafletMap.setHeight("400px");
+		leafletMap.setWidth(100, Unit.PERCENTAGE);
+		leafletMap.setHeight(100, Unit.PERCENTAGE);
 		LTileLayer baseLayerOsm = new LTileLayer();
 		baseLayerOsm.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+		baseLayerOsm.setOpacity(0.9);
 		leafletMap.addBaseLayer(baseLayerOsm, "OSM");
-
 
 		LFeatureGroup lfg = new LFeatureGroup();
 		leafletMap.addLayer(lfg);
@@ -151,10 +153,10 @@ public class QopUI extends UI {
 		grid = new GridLayout(5, 1);
 		grid.setSpacing(true);
 
-		final VerticalLayout layout = new VerticalLayout(title, new HorizontalLayout(new VerticalLayout(filtercombo, profileCombo, grid), leafletMap));
-		layout.setWidth(100, Unit.PERCENTAGE);
-
-		setContent(layout);
+		HorizontalLayout hl = new HorizontalLayout(new VerticalLayout(title, filtercombo, profileCombo, new Label(""), grid), leafletMap);
+		hl.setSizeFull();
+		setContent(hl);
+		
 	}
 
 	private void startCalculation() {
@@ -166,10 +168,10 @@ public class QopUI extends UI {
 			calculation.run();
 
 			grid.removeAllComponents();
-			grid.addComponent(new Label("<b>Berechnung</b>",  ContentMode.HTML));
-			grid.addComponent(new Label("<b>Resultat</b>",  ContentMode.HTML));
-			grid.addComponent(new Label("<b>Bewertung</b>",  ContentMode.HTML));
-			grid.addComponent(new Label("<b>Gewicht</b>",  ContentMode.HTML));
+			grid.addComponent(new Label("<u>Berechnung</u>",  ContentMode.HTML));
+			grid.addComponent(new Label("<u>Resultat</u>",  ContentMode.HTML));
+			grid.addComponent(new Label("<u>Bewertung</u>",  ContentMode.HTML));
+			grid.addComponent(new Label("<u>Gewicht</u>",  ContentMode.HTML));
 			grid.addComponent(new Label("",  ContentMode.HTML));
 
 			calculation.layerCalculations.forEach(lc -> {
@@ -194,7 +196,6 @@ public class QopUI extends UI {
 
 				Button button = new Button("Karte >");
 				button.setStyleName(ValoTheme.BUTTON_LINK);
-				//button.setIcon(new ClassResource("/images/button-img.jpg"));
 				button.addClickListener(e -> {
 
 					if (lfgResults != null)
@@ -205,7 +206,7 @@ public class QopUI extends UI {
 							if (lt.route != null)
 							{
 								LPolyline lp = new LPolyline(lt.route);
-								lp.setColor("#ff7070");
+								lp.setColor("#ff6020");
 								lfgResults.addComponent(lp);
 							}
 						});
@@ -239,7 +240,7 @@ public class QopUI extends UI {
 
 			});
 			
-			grid.addComponent(new Label("<b><i>Summe</i></b>",  ContentMode.HTML));
+			grid.addComponent(new Label("<b>Summe</b>",  ContentMode.HTML));
 			grid.addComponent(new Label("",  ContentMode.HTML));
 			
 			overallRatingLabel = new Label("",  ContentMode.HTML);
@@ -253,7 +254,7 @@ public class QopUI extends UI {
 	}
 
 	private void refreshOverallRating(Calculation calculation) {
-		overallRatingLabel.setValue("<b><i>" + formatDouble2Decimal(calculation.overallRating()) + "</i></b>");
+		overallRatingLabel.setValue("<big><b>" + formatDouble2Decimal(calculation.overallRating()) + "</b></big>");
 	}
 
 	private String formatDouble2Decimal(double d) {

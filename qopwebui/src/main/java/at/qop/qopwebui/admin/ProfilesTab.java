@@ -40,8 +40,6 @@ public class ProfilesTab extends AbstractTab {
 		
 		ListSelect<Profile> listSelect = new ListSelect<Profile>("Profil auswählen...");
         listSelect.setRows(15);
-        listSelect.setHeight(100.0f, Unit.PERCENTAGE);
-        listSelect.setWidth(170f, Unit.PIXELS);
         refreshProfileList(listSelect);
         
         Button addProfileButton = new Button("Profil hinzufügen...");
@@ -117,13 +115,6 @@ public class ProfilesTab extends AbstractTab {
     		}
     			
     	});
-
-    	
-        final HorizontalLayout hl = new HorizontalLayout(listSelect, 
-        		new VerticalLayout(addProfileButton, editProfileButton, removeProfileButton), twinSelect, grid);
-        hl.setMargin(true);
-        hl.setHeight(100.0f, Unit.PERCENTAGE);
-        
         
 		listSelect.addValueChangeListener(
 				event -> { 
@@ -141,7 +132,24 @@ public class ProfilesTab extends AbstractTab {
 					updateTwinSelect(twinSelect);
 					refreshGrid(grid);
 				} );
+		grid.setSizeFull();
 		
+		listSelect.setSizeFull();
+		listSelect.setWidth(170, Unit.PIXELS);
+		
+		twinSelect.setWidth(420, Unit.PIXELS);
+		
+		VerticalLayout vl = new VerticalLayout(listSelect, addProfileButton, editProfileButton, removeProfileButton);
+		vl.setExpandRatio(listSelect, 5.0f);
+		vl.setMargin(false);
+		vl.setHeight(100, Unit.PERCENTAGE);
+		vl.setWidth(180, Unit.PIXELS);
+		final HorizontalLayout hl = new HorizontalLayout( 
+				vl, twinSelect, grid);
+		hl.setExpandRatio(grid, 3.0f);
+		hl.setExpandRatio(twinSelect, 1f);
+		hl.setMargin(true);
+		hl.setSizeFull();
 		
 		return hl;
 	}

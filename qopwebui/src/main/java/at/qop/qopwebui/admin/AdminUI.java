@@ -22,43 +22,36 @@ public class AdminUI extends UI {
 	@Override
     protected void init(VaadinRequest vaadinRequest) {
         final VerticalLayout layout = new VerticalLayout();
-        //layout.setHeight(100.0f, Unit.PERCENTAGE);
-        
-        final Label title  = new Label("QOP Admin area");
-        
+       
         TabSheet tabs = new TabSheet();
-        tabs.setHeight(100.0f, Unit.PERCENTAGE);
+        tabs.setCaption("QOP Admin area");
+        tabs.setHeight(90.0f, Unit.PERCENTAGE);
         tabs.setWidth(100.0f, Unit.PERCENTAGE);
         tabs.addStyleName(ValoTheme.TABSHEET_FRAMED);
         tabs.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
         
-        {
-        	LayersTab tab = new LayersTab();
-        	Component c = tab.initialize(this.getPage());
-            tabs.addTab(c, "Layers");
-        }
-        {   
-        	LayerDataTab tab = new LayerDataTab();
-        	Component c = tab.initialize(this.getPage());
-        	tabs.addTab(c, "Layer Data");
-        }        
         {   
         	ProfilesTab tab = new ProfilesTab();
         	Component c = tab.initialize(this.getPage());
-        	tabs.addTab(c, "Profiles");
+        	tabs.addTab(c, "Profile");
         }
         {   
         	AnalysisTab tab = new AnalysisTab();
         	Component c = tab.initialize(this.getPage());
         	tabs.addTab(c, "Auswertungen");
         }
+        {   
+        	LayerDataTab tab = new LayerDataTab();
+        	Component c = tab.initialize(this.getPage());
+        	tabs.addTab(c, "Daten");
+        }                
         {
         	MiscTab tab = new MiscTab();
         	Component c = tab.initialize(this.getPage());
         	tabs.addTab(c, "Misc");
         }        
-        layout.addComponents(title, tabs);
-        
+        layout.addComponents(tabs);
+        layout.setSizeFull();
         setContent(layout);
     }
 	
