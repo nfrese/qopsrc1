@@ -99,3 +99,15 @@ for each (var target in lc.orderedTargets) {
 lc.proto('sum=' + result);
 lc.result = result;
 ";"geom";"select flaeche as area, sportstaet as description, geom from sportstaetten";500
+
+/* NEXT WITHIN 1m */
+var valueField=lc.table.doubleField('value');
+for each (var target in lc.orderedTargets) {
+        target.value = valueField.get(target.rec);
+        target.caption = "<b>Wert: " + value + "</b>"  
+               + "<br>Luftlinendistanz: " + target.distance;
+        lc.keep(target);
+        lc.result = target.value;
+        break;
+};
+

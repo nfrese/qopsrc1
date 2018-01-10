@@ -137,6 +137,8 @@ public class LayerDataTab extends AbstractTab {
 					String orderClause = sortOrders.size() >0 ? "order by " +  sortOrders.stream()
 							 .collect(Collectors.joining(", ")) : "";
 					String sql = baseSql + orderClause;
+					if (offset != 0) sql += " OFFSET " + offset;
+					if (limit != 0) sql += " LIMIT " + limit;
 					
 					IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 					DbTableReader tableReader = new DbTableReader();
@@ -167,6 +169,8 @@ public class LayerDataTab extends AbstractTab {
 					      sortOrders.add(sort);
 					    }
 
+					    if(query.getLimit() > 1000) throw new RuntimeException("query.getLimit() > 1000");
+					    
 					    return dataService.fetch(
 					        query.getOffset(),
 					        query.getLimit(),
@@ -196,7 +200,7 @@ public class LayerDataTab extends AbstractTab {
 		
 		DbTableScanner tableReader = new DbTableScanner();
 		try {
-			gd_.readTable(baseSql, tableReader);
+			gd_.readTable(baseSql+ " LIMIT 1", tableReader);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

@@ -9,6 +9,13 @@ import at.qop.qoplib.dbconnector.DbRecord;
 
 public class UpdateAddresses extends AbstractUpdater {
 	
+	private final String bezirkfilter;
+	
+	public UpdateAddresses(String bezirkfilter) {
+		super();
+		this.bezirkfilter = bezirkfilter;
+	}
+	
 	@Override
 	protected void before() {
 		{
@@ -55,8 +62,12 @@ public class UpdateAddresses extends AbstractUpdater {
 
 	
 	protected InputStream inputStream() throws IOException {
-		String link = "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien:ADRESSENOGD&srsName=EPSG:4326&outputFormat=csv&cql_filter=GEB_BEZIRK=%2701%27";
-		//link = "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien:ADRESSENOGD&srsName=EPSG:4326&outputFormat=csv";
+		String link = "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien:ADRESSENOGD&srsName=EPSG:4326&outputFormat=csv";
+		if (bezirkfilter != null)
+		{
+			link += "&cql_filter=GEB_BEZIRK='"+ bezirkfilter + "'";
+		}
+				
 		URL url = new URL(link);
 		return url.openConnection().getInputStream();
 	}

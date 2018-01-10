@@ -134,6 +134,7 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	@Override
 	public void readTable(String sql, AbstractDbTableReader tableReader) throws SQLException
 	{
+		System.out.println("readTable:" + sql);
 		Connection connection = hibSessImplementor().connection();
 		try (PreparedStatement ps = connection.prepareStatement(sql)) {
 			try (ResultSet rs = ps.executeQuery()) {

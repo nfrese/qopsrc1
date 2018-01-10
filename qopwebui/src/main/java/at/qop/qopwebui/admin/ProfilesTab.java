@@ -135,7 +135,7 @@ public class ProfilesTab extends AbstractTab {
 		grid.setSizeFull();
 		
 		listSelect.setSizeFull();
-		listSelect.setWidth(170, Unit.PIXELS);
+		listSelect.setWidth(220, Unit.PIXELS);
 		
 		twinSelect.setWidth(420, Unit.PIXELS);
 		
@@ -143,7 +143,7 @@ public class ProfilesTab extends AbstractTab {
 		vl.setExpandRatio(listSelect, 5.0f);
 		vl.setMargin(false);
 		vl.setHeight(100, Unit.PERCENTAGE);
-		vl.setWidth(180, Unit.PIXELS);
+		vl.setWidth(240, Unit.PIXELS);
 		final HorizontalLayout hl = new HorizontalLayout( 
 				vl, twinSelect, grid);
 		hl.setExpandRatio(grid, 3.0f);

@@ -75,6 +75,7 @@ public class AnalysisTab extends AbstractTab {
 		});
 		
     	final VerticalLayout vl = new VerticalLayout(grid, new HorizontalLayout(addanalysisButton, editanalysisButton, deleteanalysisButton));
+    	vl.setExpandRatio(grid, 3.0f);
     	vl.setMargin(true);
     	vl.setSizeFull();
     	
