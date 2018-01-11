@@ -163,7 +163,7 @@ public class QopUI extends UI {
 		if (currentProfile != null && currentAddress != null)
 		{
 			LayerSource source = new DbLayerSource();
-			IRouter router = new OSRMClient("http://10.0.0.17:5000");
+			IRouter router = new OSRMClient("10.0.0.17", 5000);
 			Calculation calculation = new Calculation(currentProfile, currentAddress, source, router);
 			calculation.run();
 

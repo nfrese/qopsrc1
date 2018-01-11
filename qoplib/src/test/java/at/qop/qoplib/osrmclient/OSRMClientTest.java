@@ -12,7 +12,7 @@ import at.qop.qoplib.entities.ModeEnum;
 
 public class OSRMClientTest {
 
-	private static final String OSRM_SERVER = "http://10.0.0.17:5000";
+	private static final String OSRM_SERVER = "10.0.0.17";
 
 	@Test
 	public void parseResultTest() throws JsonProcessingException, IOException {
@@ -29,7 +29,7 @@ public class OSRMClientTest {
 	@Test
 	public void testSingle() throws IOException {
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER);
+		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000);
 
 		LonLat[] sources = new LonLat[] {new LonLat(16.369561009437817, 48.20423271310815)};
 		LonLat[] targets = new LonLat[] {new LonLat(16.37741831002266, 48.20776186641345)};
@@ -41,7 +41,7 @@ public class OSRMClientTest {
 	@Test
 	public void testMini() throws IOException {
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER);
+		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000);
 
 		LonLat[] sources = demoData(5);
 		LonLat[] targets = demoData(5);
@@ -53,7 +53,7 @@ public class OSRMClientTest {
 	@Test
 	public void testMedium() throws IOException {
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER);
+		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000);
 
 		LonLat[] sources = demoData(100);
 		LonLat[] targets = demoData(100);
@@ -66,7 +66,7 @@ public class OSRMClientTest {
 	@Test
 	public void testBig() throws IOException {
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER);
+		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000);
 
 		LonLat[] sources = demoData(-1);
 		LonLat[] targets = demoData(-1);

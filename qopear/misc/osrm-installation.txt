@@ -3,32 +3,42 @@ OSRM:
 installation (Ubuntu 16.04)
 ---------------------------
 
+https://github.com/Project-OSRM/osrm-backend/wiki/Building-on-Ubuntu
+
+sudo apt install build-essential git cmake pkg-config \
+libbz2-dev libstxxl-dev libstxxl1v5 libxml2-dev \
+libzip-dev libboost-all-dev lua5.2 liblua5.2-dev libtbb-dev
+
+https://github.com/Project-OSRM/osrm-backend/wiki/Building-OSRM 
+cd ~
+mkdir build-osrm
+cd build-osrm
+
+https://github.com/Project-OSRM/osrm-backend/archive/v5.14.1.tar.gz
+
+tar -xzvf v5.14.1.tar.gz 
+cd osrm-backend-5.14.1/
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build .
+
 
 osrm as a service 
 -----------------
 
-cd /lib/systemd/system
-sudo nano osrm.service
+files see osrm folder
 
-===========
-[Unit]
-Description=Osrm Router (Wien)
-After=multi-user.target
- 
-[Service]
-Type=simple
-ExecStart=/home/routing/build-osrm/osrm-backend-5.14.1/build/osrm-routed --max-table-size=3000 /home/routing/osm/Wien.osrm
-Restart=on-abort
- 
-[Install]
-WantedBy=multi-user.target
-===========
-
-sudo chmod 644 /lib/systemd/system/osrm.service
+sudo chmod 644 /lib/systemd/system/osrm-car.service
 
 sudo systemctl daemon-reload
-sudo systemctl enable osrm.service
-sudo systemctl start osrm.service
+sudo systemctl enable osrm-car.service
+sudo systemctl start osrm-car.service
+sudo systemctl status osrm-car.service
 
 
+network-data
+------------
+
+-> create-osrm-data.sh
 

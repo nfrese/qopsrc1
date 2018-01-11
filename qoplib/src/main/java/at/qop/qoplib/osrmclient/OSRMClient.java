@@ -20,19 +20,21 @@ import at.qop.qoplib.entities.ModeEnum;
 
 public class OSRMClient implements IRouter {
 	
-	public OSRMClient(String hostPort) {
+	private final String host;
+	private int baseport;
+	
+	public OSRMClient(String host, int baseport) {
 		super();
-		this.hostPort = hostPort;
+		this.host = host;
+		this.baseport = baseport;
 	}
-
-	private final String hostPort;
 	
 	@Override
 	public double[][] table(ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
 		// http://router.project-osrm.org/table/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?sources=0'
 		
 		StringBuilder urlSb = new StringBuilder();
-		urlSb.append(hostPort);
+		urlSb.append(baseUrl(mode));
 		urlSb.append("/table/v1/" + mode.osrmProfile + "/");
 		
 		String sourcesStr = Arrays.stream(sources).map(p -> p.toString()).collect(Collectors.joining(";"));
@@ -65,6 +67,10 @@ public class OSRMClient implements IRouter {
 			
 			return OSRMClient.parseTableResult(result);
 		}
+	}
+
+	private String baseUrl(ModeEnum mode) {
+		return "http://" + host + ":" + (baseport + mode.osrmPortOffset);
 	}
 	
 	public static double[][] parseTableResult(String json) throws JsonProcessingException, IOException
@@ -119,7 +125,7 @@ public class OSRMClient implements IRouter {
 	public LonLat[] route(ModeEnum mode, LonLat[] points) throws IOException {
 		
 		StringBuilder urlSb = new StringBuilder();
-		urlSb.append(hostPort);
+		urlSb.append(baseUrl(mode));
 		urlSb.append("/route/v1/" + mode.osrmProfile + "/");
 		
 		String sourcesStr = Arrays.stream(points).map(x -> x.toString()).collect(Collectors.joining(";"));

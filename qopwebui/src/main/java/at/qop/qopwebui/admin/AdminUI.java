@@ -24,7 +24,7 @@ public class AdminUI extends UI {
         final VerticalLayout layout = new VerticalLayout();
        
         TabSheet tabs = new TabSheet();
-        tabs.setCaption("QOP Admin area");
+        tabs.setCaption("QOP Admin");
         tabs.setHeight(90.0f, Unit.PERCENTAGE);
         tabs.setWidth(100.0f, Unit.PERCENTAGE);
         tabs.addStyleName(ValoTheme.TABSHEET_FRAMED);

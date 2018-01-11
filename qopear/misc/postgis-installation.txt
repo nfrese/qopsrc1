@@ -1,0 +1,23 @@
+postgres:
+
+sudo apt-get update
+sudo apt-get upgrade
+uname -a
+sudo apt-get install postgis
+
+# - Connection Settings -
+
+su - postgres
+psql
+>
+create DATABASE qop;
+\c qop;
+create user qopuser password '****';
+grant all on all tables in schema public to qopuser;
+
+--> TODO datenbank postgis fähig machen
+
+netwerk:
+/etc/postgresql/9.5/main/postgreql.conf
+
+listen_addresses = '*'  

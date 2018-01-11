@@ -1,0 +1,11 @@
+[Unit]
+Description=Osrm Router (Wien)
+After=multi-user.target
+ 
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/osrm-routed -i 0.0.0.0 -p 5002 --max-table-size=3000 /home/routing/osrm-data/foot/vienna_austria.osrm
+Restart=on-abort
+ 
+[Install]
+WantedBy=multi-user.target

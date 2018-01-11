@@ -99,7 +99,8 @@ public class LayerCalculation {
 			try {
 				double[][] r = router.table(params.mode, sources, destinations);
 				for (i = 0; i < this.orderedTargets.size(); i++) {
-					orderedTargets.get(i).time = r[0][i];
+					double timeMinutes = r[0][i] / 60;  // minutes
+					orderedTargets.get(i).time = ((double)Math.round(timeMinutes * 100)) / 100;  // round 2 decimal places 
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e); 
