@@ -30,8 +30,15 @@ public class DbLayerSource implements LayerSource {
 					if (layerParams.hasRadius())
 					{
 						Geometry buffer = CRSTransform.singleton.bufferWGS84(start, layerParams.getRadius());
-						
-						sql += " WHERE ST_Intersects(" + layerParams.getGeomfield() + ", 'SRID=4326;" + buffer + "'::geometry)";
+						String stIntersectsSql = "ST_Intersects(" + layerParams.getGeomfield() + ", 'SRID=4326;" + buffer + "'::geometry)";
+						if (sql.toUpperCase().contains("WHERE"))
+						{
+							sql += " AND " + stIntersectsSql;
+						}
+						else
+						{
+							sql += " WHERE "+ stIntersectsSql;
+						}
 					}
 					System.out.println(sql);
 					gd_.readTable(sql, tableReader);

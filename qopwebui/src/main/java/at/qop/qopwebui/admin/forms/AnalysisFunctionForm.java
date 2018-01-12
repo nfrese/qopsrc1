@@ -9,7 +9,9 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
+import at.qop.qoplib.JSValidation;
 import at.qop.qoplib.entities.AnalysisFunction;
+import at.qop.qopwebui.components.JsValidator;
 
 public class AnalysisFunctionForm extends AbstractForm {
 	
@@ -48,7 +50,7 @@ public class AnalysisFunctionForm extends AbstractForm {
 			textArea.setWidth(640, Unit.PIXELS);
 			textArea.setHeight(200, Unit.PIXELS);
 			vl.addComponent(textArea);
-			binder.bind(textArea, o -> o.func, (o,v) -> o.func = v);
+			binder.forField(textArea).withValidator(new JsValidator()).bind(o -> o.func, (o,v) -> o.func = v);
 		}
 		{
 			TextField textField = new TextField("Einheit Resultat (zb Minuten, Meter,...)");

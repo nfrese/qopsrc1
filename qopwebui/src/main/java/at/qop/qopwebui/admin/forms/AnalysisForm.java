@@ -17,6 +17,7 @@ import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.AnalysisFunction;
 import at.qop.qoplib.entities.ModeEnum;
+import at.qop.qopwebui.components.JsValidator;
 
 public class AnalysisForm extends AbstractForm {
 	
@@ -82,7 +83,7 @@ public class AnalysisForm extends AbstractForm {
 			textArea.setWidth(600, Unit.PIXELS);
 			textArea.setHeight(80, Unit.PIXELS);
 			vl.addComponent(textArea);
-			binder.bind(textArea, o -> o.ratingfunc, (o,v) -> o.ratingfunc = v);
+			binder.forField(textArea).withValidator(new JsValidator()).bind(o -> o.ratingfunc, (o,v) -> o.ratingfunc = v);
 		}
 		{
 			TextField textField = new TextField("Radius Objektfilterung (0 bedeutet keine Einschränkung)");

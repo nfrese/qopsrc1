@@ -1,5 +1,8 @@
 package at.qop.qopwebui;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -43,6 +46,8 @@ import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.osrmclient.OSRMClient;
+import at.qop.qopwebui.components.ConfirmationDialog;
+import at.qop.qopwebui.components.ExceptionDialog;
 
 @Theme("mytheme")
 public class QopUI extends UI {
@@ -117,7 +122,7 @@ public class QopUI extends UI {
 
 		profileCombo.addSelectionListener(event -> {
 			currentProfile = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
-			startCalculation();
+			startCalculationWCatch();
 		});
 
 		leafletMap = new LMap();
@@ -141,7 +146,7 @@ public class QopUI extends UI {
 				LMarker lm = new LMarker(currentAddress.geom);
 				lm.setCaption("<b>Aktuelle Adresse:</b><br>" + currentAddress.name);
 				lfg.addComponent(lm);
-				startCalculation();
+				startCalculationWCatch();
 				leafletMap.zoomToContent();
 			}
 
@@ -157,6 +162,19 @@ public class QopUI extends UI {
 		hl.setSizeFull();
 		setContent(hl);
 		
+	}
+
+	private void startCalculationWCatch() {
+		try {
+			startCalculation();
+		} catch (Exception ex)
+		{
+			ex.printStackTrace();
+			StringWriter pw = new StringWriter();
+			ex.printStackTrace(new PrintWriter(pw));
+			
+			new ExceptionDialog("Fehler bei Auswertung:" , pw.toString()).show();;
+		}
 	}
 
 	private void startCalculation() {

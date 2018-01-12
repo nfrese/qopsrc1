@@ -10,6 +10,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.entities.Profile;
+import at.qop.qopwebui.components.JsValidator;
 import at.qop.qoplib.entities.Analysis;
 
 public class ProfileForm extends AbstractForm {
@@ -48,7 +49,7 @@ public class ProfileForm extends AbstractForm {
 			textArea.setWidth(600, Unit.PIXELS);
 			textArea.setHeight(200, Unit.PIXELS);
 			vl.addComponent(textArea);
-			binder.bind(textArea, o -> o.aggrfn, (o,v) -> o.aggrfn = v);
+			binder.forField(textArea).withValidator(new JsValidator()).bind(o -> o.aggrfn, (o,v) -> o.aggrfn = v);
 		}
 		return vl;
 	}
