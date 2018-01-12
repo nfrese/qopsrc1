@@ -21,3 +21,8 @@ netwerk:
 /etc/postgresql/9.5/main/postgreql.conf
 
 listen_addresses = '*'  
+
+
+backup:
+
+psql --set ON_ERROR_STOP=on qop < dump_qop.sql 

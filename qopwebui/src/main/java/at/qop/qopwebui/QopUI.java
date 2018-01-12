@@ -1,6 +1,5 @@
 package at.qop.qopwebui;
 
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
@@ -19,11 +18,9 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.slider.SliderOrientation;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -37,6 +34,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.vividsolutions.jts.geom.Point;
 
+import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.DbLayerSource;
@@ -46,7 +44,6 @@ import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.osrmclient.OSRMClient;
-import at.qop.qopwebui.components.ConfirmationDialog;
 import at.qop.qopwebui.components.ExceptionDialog;
 
 @Theme("mytheme")
@@ -181,7 +178,8 @@ public class QopUI extends UI {
 		if (currentProfile != null && currentAddress != null)
 		{
 			LayerSource source = new DbLayerSource();
-			IRouter router = new OSRMClient("10.0.0.17", 5000);
+			ConfigFile cf = ConfigFile.read();
+			IRouter router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort());
 			Calculation calculation = new Calculation(currentProfile, currentAddress, source, router);
 			calculation.run();
 
