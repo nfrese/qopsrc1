@@ -41,7 +41,7 @@ public class ConfigFile {
 	}
 	
 	private String getStrProp(String key, String defaultValue) {
-		if (props.contains(key)) return props.getProperty(key);
+		if (props.containsKey(key)) return props.getProperty(key);
 		else return defaultValue;
 	}
 	
