@@ -1,7 +1,10 @@
 package at.qop.qopwebui.admin;
 
+import java.util.List;
+
 import com.vaadin.server.Page;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -10,10 +13,14 @@ import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.UpdateAddresses;
+import at.qop.qoplib.batch.BatchCalculation;
 import at.qop.qoplib.dbconnector.DbBatch;
 import at.qop.qoplib.domains.IGenericDomain;
+import at.qop.qoplib.entities.Profile;
 
 public class MiscTab extends AbstractTab {
+
+	private Profile currentProfile;
 
 	@Override
 	public Component initialize(Page page) {
@@ -27,8 +34,32 @@ public class MiscTab extends AbstractTab {
                     Notification.Type.HUMANIZED_MESSAGE).show(page);
             updateAddresses(tfBezirkFilter.getValue());
         });
-    	
-    	final VerticalLayout vl = new VerticalLayout(new HorizontalLayout(button, tfBezirkFilter));
+
+        Button batchButton = new Button("Batch Calculation");
+        batchButton.addClickListener(e -> {
+
+        	if (currentProfile != null)
+        	{
+        		BatchCalculation bc = new BatchCalculation(currentProfile);
+        		bc.run();
+        	}
+        });
+
+        List<Profile> profiles = LookupSessionBeans.profileDomain().listProfiles();
+		ComboBox<Profile> profileCombo = new ComboBox<>("Profilauswahl", profiles);
+		if (profiles.size() > 0)
+		{
+			profileCombo.setSelectedItem(profiles.get(0));
+			currentProfile = profiles.get(0);
+		}
+		profileCombo.setEmptySelectionAllowed(false);
+		profileCombo.setTextInputAllowed(false);
+
+		profileCombo.addSelectionListener(event -> {
+			currentProfile = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
+		});
+        
+    	final VerticalLayout vl = new VerticalLayout(new HorizontalLayout(button, tfBezirkFilter, batchButton));
     	vl.setMargin(true);
 		return vl;
 	}

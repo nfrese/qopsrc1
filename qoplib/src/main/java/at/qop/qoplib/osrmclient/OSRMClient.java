@@ -33,6 +33,11 @@ public class OSRMClient implements IRouter {
 	public double[][] table(ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
 		// http://router.project-osrm.org/table/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?sources=0'
 		
+		if (destinations.length == 0)
+		{
+			return new double[sources.length][0];
+		}
+		
 		StringBuilder urlSb = new StringBuilder();
 		urlSb.append(baseUrl(mode));
 		urlSb.append("/table/v1/" + mode.osrmProfile + "/");
