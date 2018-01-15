@@ -29,6 +29,7 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
 import at.qop.qoplib.LookupSessionBeans;
+import at.qop.qoplib.dbconnector.DBSingleResultTableReader;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.dbconnector.DbTableReader;
@@ -124,9 +125,9 @@ public class LayerDataTab extends AbstractTab {
 					
 					IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 					try {
-						DbTableReader tableReader = new DbTableReader();
+						DBSingleResultTableReader tableReader = new DBSingleResultTableReader();
 						gd_.readTable("select count(*) from " + table.name, tableReader);
-						return (int)(long)tableReader.records.stream().findFirst().get().values[0];
+						return (int)tableReader.longResult();
 					} catch (SQLException e) {
 						throw new RuntimeException(e);
 					}
