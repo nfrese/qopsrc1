@@ -4,21 +4,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.StringJoiner;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Geometry;
 
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.AnalysisFunction;
 import at.qop.qoplib.osrmclient.OSRMClientTest;
-import org.junit.Assert;
 
 public class LayerCalculationTest {
 
@@ -55,45 +52,36 @@ public class LayerCalculationTest {
 			params.ratingfunc = sj.toString();
 		}
 
-		LayerCalculation lc = new LayerCalculation(
-				CRSTransform.gfWGS84.createPoint(new Coordinate(16.37242655454094,48.2061121366474)),
-				params, 1, null);
-
 		LayerSource source = new LayerSource() {
 
 			@Override
-			public Future<LayerCalculationP1Result> load(Point start, ILayerCalculationP1Params layerParams) {
-				Callable<LayerCalculationP1Result> callable = new Callable<LayerCalculationP1Result>() {
+			public LayerCalculationP1Result load(Geometry start, ILayerCalculationP1Params layerParams) {
 
-					@Override
-					public LayerCalculationP1Result call() throws Exception {
-						LayerCalculationP1Result r = new LayerCalculationP1Result();
-						r.table = new DbTable();
-						r.table.colNames = new String[] { "shape", "value" };
-						r.table.typeNames = new String[] { "geometry", "double" };
+				LayerCalculationP1Result r = new LayerCalculationP1Result();
+				r.table = new DbTable();
+				r.table.colNames = new String[] { "shape", "value" };
+				r.table.typeNames = new String[] { "geometry", "double" };
 
-						r.records = new ArrayList<>();
+				r.records = new ArrayList<>();
 
-						Random rand = new Random(666);
+				Random rand = new Random(666);
 
-						Arrays.stream(OSRMClientTest.demoData(-1)).forEach(
-								d -> r.records.add(
-										new DbRecord(
-												CRSTransform.gfWGS84.createPoint(
-														new Coordinate(d.lon, d.lat)), 
-												(double)rand.nextFloat())));
-						return r;
-					}
+				Arrays.stream(OSRMClientTest.demoData(-1)).forEach(
+						d -> r.records.add(
+								new DbRecord(
+										CRSTransform.gfWGS84.createPoint(
+												new Coordinate(d.lon, d.lat)), 
+										(double)rand.nextFloat())));
+				return r;
 
-				};
-				FutureTask<LayerCalculationP1Result> ft = new FutureTask<LayerCalculationP1Result>(callable);
-				ft.run();
-				return ft;
 			}
 		};
-		lc.p0loadTargets(source);
+		LayerCalculation lc = new LayerCalculationSingle(
+				CRSTransform.gfWGS84.createPoint(new Coordinate(16.37242655454094,48.2061121366474)),
+				params, 1, null, source, null);		
+		lc.p0loadTargets();
 		lc.p1calcDistances();
-		lc.p2travelTime(null);
+		lc.p2travelTime();
 		lc.p3OrderTargets();
 		lc.p4Calculate();
 

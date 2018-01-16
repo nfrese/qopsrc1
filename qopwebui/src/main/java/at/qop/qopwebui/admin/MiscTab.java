@@ -59,7 +59,7 @@ public class MiscTab extends AbstractTab {
 			currentProfile = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
 		});
         
-    	final VerticalLayout vl = new VerticalLayout(new HorizontalLayout(button, tfBezirkFilter, batchButton));
+    	final VerticalLayout vl = new VerticalLayout(new HorizontalLayout(button, tfBezirkFilter),new HorizontalLayout(profileCombo, batchButton));
     	vl.setMargin(true);
 		return vl;
 	}

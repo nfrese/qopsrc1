@@ -70,5 +70,9 @@ public class Analysis implements Serializable, ILayerCalculationP1Params {
 	public String getGeomfield() {
 		return geomfield;
 	}
-	
+
+	public boolean travelTimeRequired() {
+		return this.mode != null && this.mode != ModeEnum.air;
+	}	
+
 }

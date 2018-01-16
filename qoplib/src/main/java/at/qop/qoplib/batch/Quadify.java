@@ -2,8 +2,6 @@ package at.qop.qoplib.batch;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -31,7 +29,7 @@ public abstract class Quadify {
 		root.buildTree(this);
 	}
 	
-	public Collection<Quadrant> listInnerQuadrants() {
+	public Collection<Quadrant> listResults() {
 		ArrayList<Quadrant> collect = new ArrayList<>();
 		root.collectInnerQuadrants(collect);
 		return collect;

@@ -17,30 +17,26 @@ import at.qop.qoplib.JSValidation;
 public class ScriptEngineTest {
 	
 	private static final String FUNCTIONS =
-		    "function() {}" +
-		    "  return \"Hello\";" +
-		    "}";
-	
+		    "function() {" +
+		    		"  return \"Hello\";" +
+		    		"}";
+
 	@Test
 	public void test() throws ScriptException
 	{
 		ScriptEngine e = GLO.get().jsEngine;
-		
-		ScriptEngineFactory f = e.getFactory();
-		
-		   ScriptEngine engine = new ScriptEngineManager().getEngineByMimeType("text/javascript");
 
-		    // Compile common functions once
-		    CompiledScript compiled = ((Compilable) engine).compile(FUNCTIONS);
-		    Object sayHello = compiled.eval();
+		ScriptEngine engine = new ScriptEngineManager().getEngineByMimeType("text/javascript");
 
-		    // Load users' script each time
-		    SimpleBindings global = new SimpleBindings();
-		    global.put("sayHello", sayHello);
-		    String script = "sayHello()";
-		    System.out.println(engine.eval(script, global));
+		CompiledScript compiled = ((Compilable) engine).compile(FUNCTIONS);
+		Object sayHello = compiled.eval();
+
+		SimpleBindings global = new SimpleBindings();
+		global.put("sayHello", sayHello);
+		String script = "sayHello()";
+		System.out.println(engine.eval(script, global));
 	}
-	
+
 	@Test
 	public void testValidationOk() {
 		String r = JSValidation.getMessage("5*4");

@@ -124,7 +124,7 @@ public class Quadrant {
 
 	
 	private int count(Quadify ref, Envelope envelope, boolean atRightBorder, boolean atBottomBorder) {
-		return countRecs(ref, envelope, atRightBorder, atBottomBorder);
+		return countSimple(ref, envelope, atRightBorder, atBottomBorder);
 	}	
 	
 	public int countSimple(Quadify ref, Envelope envelope, boolean atRightBorder, boolean atBottomBorder) {

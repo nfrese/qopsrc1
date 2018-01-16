@@ -27,7 +27,7 @@ public class QuadifyTest {
 
 		testQuadify.run();
 		
-		Collection<Quadrant> results = testQuadify.listInnerQuadrants();
+		Collection<Quadrant> results = testQuadify.listResults();
 		
 		Assert.assertEquals(4, results.size());
 	}
@@ -50,7 +50,7 @@ public class QuadifyTest {
                                  
 		testQuadify.run();
 		
-		Collection<Quadrant> results = testQuadify.listInnerQuadrants();
+		Collection<Quadrant> results = testQuadify.listResults();
 		
 		Assert.assertEquals(10, results.size());
 	}
@@ -72,7 +72,7 @@ public class QuadifyTest {
                                  
 		testQuadify.run();
 		
-		Collection<Quadrant> results = testQuadify.listInnerQuadrants();
+		Collection<Quadrant> results = testQuadify.listResults();
 		Assert.assertTrue(results.size()<n/2);
 		
 		Map<Integer, Long> statistics = results.stream().collect(Collectors.groupingBy(q -> q.count, Collectors.counting()));                    // returns a LinkedHashMap, keep order

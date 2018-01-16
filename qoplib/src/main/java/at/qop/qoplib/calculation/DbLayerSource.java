@@ -16,45 +16,37 @@ import at.qop.qoplib.entities.Analysis;
 public class DbLayerSource implements LayerSource {
 
 	@Override
-	public Future<LayerCalculationP1Result> load(Point start, ILayerCalculationP1Params layerParams) {
-		Callable<LayerCalculationP1Result> callable = new Callable<LayerCalculationP1Result>() {
+	public LayerCalculationP1Result load(Geometry start, ILayerCalculationP1Params layerParams) {
 
-			@Override
-			public LayerCalculationP1Result call() throws Exception {
-				
-				IGenericDomain gd_ = LookupSessionBeans.genericDomain();
-				try {
-					DbTableReader tableReader = new DbTableReader();
-					
-					String sql = layerParams.getQuery();
-					if (layerParams.hasRadius())
-					{
-						Geometry buffer = CRSTransform.singleton.bufferWGS84(start, layerParams.getRadius());
-						String stIntersectsSql = "ST_Intersects(" + layerParams.getGeomfield() + ", 'SRID=4326;" + buffer + "'::geometry)";
-						if (sql.toUpperCase().contains("WHERE"))
-						{
-							sql += " AND " + stIntersectsSql;
-						}
-						else
-						{
-							sql += " WHERE "+ stIntersectsSql;
-						}
-					}
-					System.out.println(sql);
-					gd_.readTable(sql, tableReader);
-					LayerCalculationP1Result r = new LayerCalculationP1Result();
-					r.table = tableReader.table;
-					r.records = tableReader.records;
-					return r;
-				} catch (SQLException e) {
-					throw new RuntimeException(e);
+		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
+		try {
+			DbTableReader tableReader = new DbTableReader();
+
+			String sql = layerParams.getQuery();
+			if (layerParams.hasRadius())
+			{
+				Geometry buffer = CRSTransform.singleton.bufferWGS84(start, layerParams.getRadius());
+				String stIntersectsSql = "ST_Intersects(" + layerParams.getGeomfield() + ", 'SRID=4326;" + buffer + "'::geometry)";
+				if (sql.toUpperCase().contains("WHERE"))
+				{
+					sql += " AND " + stIntersectsSql;
+				}
+				else
+				{
+					sql += " WHERE "+ stIntersectsSql;
 				}
 			}
-			
-		};
-		FutureTask<LayerCalculationP1Result> ft = new FutureTask<LayerCalculationP1Result>(callable);
-		ft.run();
-		return ft;
+			System.out.println(sql);
+			gd_.readTable(sql, tableReader);
+			LayerCalculationP1Result r = new LayerCalculationP1Result();
+			r.table = tableReader.table;
+			r.records = tableReader.records;
+			return r;
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+
+
 	}
 
 }

@@ -7,15 +7,18 @@ import com.vividsolutions.jts.geom.Envelope;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.dbconnector.DBSingleResultTableReader;
+import at.qop.qoplib.dbconnector.DBUtils;
 import at.qop.qoplib.domains.IGenericDomain;
 
 public class QuadifyImpl extends Quadify {
 
-	final String tableName;
+	private final String tableName;
+	private final String geomField;
 	
-	public QuadifyImpl(int maxPerRect, String tableName) {
+	public QuadifyImpl(int maxPerRect, String tableName, String geomField) {
 		super(maxPerRect);
 		this.tableName = tableName;
+		this.geomField = geomField;
 	}
 	
 	@Override
@@ -23,7 +26,7 @@ public class QuadifyImpl extends Quadify {
 		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 		try {
 			DBSingleResultTableReader tableReader = new DBSingleResultTableReader();
-			gd_.readTable("SELECT ST_Extent(geom) as table_extent FROM " + tableName, tableReader);
+			gd_.readTable("SELECT ST_Extent(" + geomField + ") as table_extent FROM " + tableName, tableReader);
 			Object res = tableReader.result();
 			return parseEnvelope(res);
 		} catch (SQLException e) {
@@ -32,8 +35,7 @@ public class QuadifyImpl extends Quadify {
 	}
 
 	private Envelope parseEnvelope(Object res) {
-		// TODO Auto-generated method stub
-		return null;
+		return DBUtils.parsePGEnvelope(res);
 	}
 
 	@Override
@@ -41,8 +43,13 @@ public class QuadifyImpl extends Quadify {
 		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 		try {
 			DBSingleResultTableReader tableReader = new DBSingleResultTableReader();
-			gd_.readTable("select count(*) from " + tableName, tableReader);
-			return (int)tableReader.longResult();
+			String sql = "select count(*) from " + tableName 
+					+ " WHERE " + geomField 
+					+ " && " + DBUtils.stMakeEnvelope(envelope);
+			gd_.readTable(sql, tableReader);
+			int count =  (int)tableReader.longResult();
+			System.out.println("count=" + count);
+			return count;
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

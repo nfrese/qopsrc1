@@ -28,7 +28,7 @@ import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.LonLat;
 
-public class LayerCalculation {
+public abstract class LayerCalculation {
 	
 	public final Point start;
 	public final Analysis params;
@@ -37,7 +37,6 @@ public class LayerCalculation {
 	
 	public DbTable table;
 	
-	public Collection<DbRecord> targets;
 	public ArrayList<LayerTarget> orderedTargets;
 	public ArrayList<LayerTarget> keptTargets = new ArrayList<>();
 	
@@ -54,70 +53,23 @@ public class LayerCalculation {
 		this.altRatingFunc = altRatingFunc;
 	}
 	
-	public void p0loadTargets(LayerSource source) {
-		Future<LayerCalculationP1Result> future = source.load(start, params);
-		try {
-			
-			LayerCalculationP1Result r = future.get();
-			table = r.table;
-			targets = r.records;
-			
-		} catch (InterruptedException | ExecutionException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	public abstract void p0loadTargets();
 
 	public void p1calcDistances() {
-		DbGeometryField geomField = table.field(params.geomfield, DbGeometryField.class);
-		orderedTargets = new ArrayList<>();
-		
-		for (DbRecord target : targets)
+		for (LayerTarget lt : orderedTargets)
 		{
-			LayerTarget lt = new LayerTarget();
-			
-			lt.geom = geomField.get(target);
 			lt.distance = CRSTransform.singleton.distanceWGS84(start, lt.geom);
-			lt.rec = target;
-			orderedTargets.add(lt);
 		}
 	}
 	
-	public void p2travelTime(IRouter router) {
-		if (travelTimeRequired())
-		{
-			LonLat[] sources = new LonLat[1];
-			sources[0] = lonLat(start); 
-
-			LonLat[] destinations = new LonLat[orderedTargets.size()];
-			int i = 0;
-			for (i = 0; i < this.orderedTargets.size(); i++)
-			{
-				Coordinate c = orderedTargets.get(i).geom.getCoordinate();
-				destinations[i] = new LonLat(c.x, c.y);
-			}
-
-			try {
-				double[][] r = router.table(params.mode, sources, destinations);
-				for (i = 0; i < this.orderedTargets.size(); i++) {
-					double timeMinutes = r[0][i] / 60;  // minutes
-					orderedTargets.get(i).time = ((double)Math.round(timeMinutes * 100)) / 100;  // round 2 decimal places 
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e); 
-			}
-		}
-	}
+	public abstract void p2travelTime();
 	
 	public void p3OrderTargets() {
-		if (travelTimeRequired()) {
+		if (params.travelTimeRequired()) {
 			Collections.sort(orderedTargets, (t1, t2) -> Double.compare(t1.time, t2.time));
 		} else {
 			Collections.sort(orderedTargets, (t1, t2) -> Double.compare(t1.distance, t2.distance));
 		}
-	}
-	
-	private boolean travelTimeRequired() {
-		return params.mode != null && params.mode != ModeEnum.air;
 	}
 	
 	public void p4Calculate() {
@@ -175,7 +127,7 @@ public class LayerCalculation {
 	}
 	
 	private boolean routingRequired() {
-		return travelTimeRequired();
+		return params.travelTimeRequired();
 	}
 
 	public void proto(String line)
@@ -188,7 +140,7 @@ public class LayerCalculation {
 		keptTargets.add(target);
 	}
 	
-	private static LonLat lonLat(Point p) {
+	protected static LonLat lonLat(Point p) {
 		return new LonLat(p.getCoordinate().x, p.getCoordinate().y);
 	}	
 

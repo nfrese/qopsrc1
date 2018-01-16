@@ -1,37 +1,53 @@
 package at.qop.qoplib.batch;
 
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.LookupSessionBeans;
-import at.qop.qoplib.calculation.Calculation;
+import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.calculation.IRouter;
+import at.qop.qoplib.calculation.LayerCalculationMulti;
+import at.qop.qoplib.calculation.LayerCalculationP1Result;
 import at.qop.qoplib.calculation.LayerSource;
+import at.qop.qoplib.calculation.LayerTarget;
+import at.qop.qoplib.calculation.MultiTarget;
 import at.qop.qoplib.dbconnector.AbstractDbTableReader;
+import at.qop.qoplib.dbconnector.DBUtils;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
 import at.qop.qoplib.dbconnector.fieldtypes.DbTextField;
 import at.qop.qoplib.domains.IGenericDomain;
 import at.qop.qoplib.entities.Address;
+import at.qop.qoplib.entities.Analysis;
+import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.entities.Profile;
+import at.qop.qoplib.entities.ProfileAnalysis;
+import at.qop.qoplib.osrmclient.LonLat;
 import at.qop.qoplib.osrmclient.OSRMClient;
 
 public class BatchCalculation {
-	
+
 	Profile currentProfile;
 	LayerSource source;
 	ConfigFile cf;
 	IRouter router;
 	int count=0;
-	
+
 	public BatchCalculation(Profile currentProfile) {
 		this.currentProfile = currentProfile;
-		
+
 		source = new DbLayerSource();
 		cf = ConfigFile.read();
 		router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort());
@@ -39,48 +55,165 @@ public class BatchCalculation {
 
 	public void run()
 	{
-		String sql = "select * from " + Address.TABLENAME;
-		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
-		
-		AbstractDbTableReader tableReader = new AbstractDbTableReader() {
+		String geomField = "geom";
+		QuadifyImpl quadify = new QuadifyImpl(2000, Address.TABLENAME, geomField);
+		quadify.run();
+		Collection<Quadrant> results = quadify.listResults();
 
-			DbTable table;
-			private DbGeometryField geomField;
-			private DbTextField nameField;
+		Map<Integer, Long> statistics = results.stream().collect(Collectors.groupingBy(q -> q.count, Collectors.counting()));                    // returns a LinkedHashMap, keep order
+		//System.out.println("#results=" + results.size() + " " + statistics);
+
+		long sum = statistics.entrySet().stream().mapToLong(e -> e.getKey()*e.getValue()).sum();
+		System.out.println("sum=" + sum);
+
+		for (Quadrant result : results)
+		{
+
+			String sql = "select * from " + Address.TABLENAME
+					+ " WHERE " + geomField 
+					+ " && " + DBUtils.stMakeEnvelope(result.envelope);
+			IGenericDomain gd_ = LookupSessionBeans.genericDomain();
+
+			List<Address> addresses = new ArrayList<>();
 			
-			@Override
-			public void metadata(DbTable table) {
-				this.table = table;
-				geomField = table.geometryField("geom");
-				nameField = table.textField("name");
+			AbstractDbTableReader tableReader = new AbstractDbTableReader() {
+
+				DbTable table;
+				private DbGeometryField geomField;
+				private DbTextField nameField;
+
+				@Override
+				public void metadata(DbTable table) {
+					this.table = table;
+					geomField = table.geometryField("geom");
+					nameField = table.textField("name");
+				}
+
+				@Override
+				public void record(DbRecord record) {
+
+					Geometry geom = geomField.get(record);
+					String name = nameField.get(record);
+					//System.out.println(geom + " - " + name);
+
+					Address currentAddress = new Address();
+					currentAddress.geom = (Point)geom;
+					currentAddress.name = name;
+					addresses.add(currentAddress);
+
+				}
+
+			};
+			try {
+				gd_.readTable(sql, tableReader);
+				doCalculation(result, currentProfile, addresses, source, router);
+				
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}		
+		}
+
+	}
+	
+	private void doCalculation(Quadrant result, Profile profile, List<Address> addresses, LayerSource source2,
+			IRouter router2) {
+		
+		if (addresses.size() == 0) return;
+		
+		Geometry start = CRSTransform.gfWGS84.toGeometry(result.envelope);
+
+		for (ProfileAnalysis profileAnalysis : profile.profileAnalysis) {	
+			Analysis params = profileAnalysis.analysis;
+			LayerCalculationP1Result loaded = source.load(start, params);
+
+			DbGeometryField geomField = loaded.table.field(params.geomfield, DbGeometryField.class);
+
+			ArrayList<MultiTarget> multiTargets = new ArrayList<>();
+			for (DbRecord target : loaded.records)
+			{
+				MultiTarget lt = new MultiTarget();
+
+				lt.geom = geomField.get(target);
+
+				lt.rec = target;
+				multiTargets.add(lt);
 			}
 
-			@Override
-			public void record(DbRecord record) {
-				
-				Geometry geom = geomField.get(record);
-				String name = nameField.get(record);
-				System.out.println(geom + " - " + name);
-				
-				Address currentAddress = new Address();
-				currentAddress.geom = (Point)geom;
-				currentAddress.name = name;
-				
-				Calculation calculation = new Calculation(currentProfile, currentAddress, source, router);
-				calculation.run();
-				System.out.println("PROGRESS:" + count);
-				count++;
-			}
-			
-		};
-		try {
-			gd_.readTable(sql, tableReader);
+			double[][] times = null;
 
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}		
-		
-		
+			if (profileAnalysis.analysis.travelTimeRequired() )
+			{
+				LonLat[] sources = lonLatFromAddresses(addresses);
+				times = p2travelTime(sources, multiTargets, profileAnalysis.analysis.mode);
+			}
+
+			for (int i = 0; i < addresses.size(); i++)
+			{
+				Address address = addresses.get(i);
+				ArrayList<LayerTarget> targets_ = new ArrayList<>();
+				int t = 0;
+				for (MultiTarget mt : multiTargets)
+				{
+					LayerTarget lt = new LayerTarget();
+					
+					lt.geom = mt.geom;
+					lt.rec = mt.rec;
+					if (profileAnalysis.analysis.travelTimeRequired())
+					{
+						lt.time = times[i][t];
+					}
+					targets_.add(lt);
+					t++;
+				}
+				
+				LayerCalculationMulti lc = new LayerCalculationMulti(address.geom, params, 
+						profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, targets_);
+				lc.p0loadTargets();
+				lc.p1calcDistances();
+				lc.p2travelTime();
+				lc.p3OrderTargets();
+				lc.p4Calculate();
+				//lc.p5route(router);
+			}
+		}
+		count += addresses.size();
+		System.out.println("COUNT***" + count);
+
 	}
 
+	private LonLat[] lonLatFromAddresses(List<Address> addresses) {
+		LonLat[] sources = new LonLat[addresses.size()];
+		for (int i = 0; i < addresses.size(); i++)
+		{
+			Coordinate c = addresses.get(i).geom.getCoordinate();
+			sources[i] = new LonLat(c.x, c.y);
+		}
+		return sources;
+	}
+
+	public double[][] p2travelTime(LonLat[] sources, ArrayList<MultiTarget> orderedTargets, ModeEnum mode) {
+
+		LonLat[] destinations = new LonLat[orderedTargets.size()];
+		for (int i = 0; i < orderedTargets.size(); i++)
+		{
+			Coordinate c = orderedTargets.get(i).geom.getCoordinate();
+			destinations[i] = new LonLat(c.x, c.y);
+		}
+
+		try {
+			double[][] r = router.table(mode, sources, destinations);
+			double time[][] = new double[r.length][r[0].length];
+			for (int j=0; j < sources.length; j++)
+			{
+				for (int i = 0; i < orderedTargets.size(); i++) {
+
+					double timeMinutes = r[j][i] / 60;  // minutes
+					time[j][i] = ((double)Math.round(timeMinutes * 100)) / 100;  // round 2 decimal places
+				}
+			}
+			return time;
+		} catch (IOException e) {
+			throw new RuntimeException(e); 
+		}
+	}
 }

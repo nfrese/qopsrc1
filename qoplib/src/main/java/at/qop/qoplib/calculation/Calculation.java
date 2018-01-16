@@ -27,11 +27,13 @@ public class Calculation {
 	public void run()
 	{
 		for (ProfileAnalysis profileAnalysis : profile.profileAnalysis) {
-			LayerCalculation lc = new LayerCalculation(address.geom, profileAnalysis.analysis, profileAnalysis.weight, profileAnalysis.altratingfunc);
+			LayerCalculation lc = new LayerCalculationSingle(address.geom, profileAnalysis.analysis, 
+					profileAnalysis.weight, profileAnalysis.altratingfunc,
+					source, router);
 			layerCalculations.add(lc);
-			lc.p0loadTargets(source);
+			lc.p0loadTargets();
 			lc.p1calcDistances();
-			lc.p2travelTime(router);
+			lc.p2travelTime();
 			lc.p3OrderTargets();
 			lc.p4Calculate();
 			lc.p5route(router);
