@@ -1,4 +1,4 @@
-package at.qop.qoplib;
+package at.qop.qoplib.dbconnector.write;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +13,7 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public abstract class AbstractUpdater {
 	
-	Map<String,Integer> columnsMap = new HashMap<>(); 
+	protected Map<String,Integer> columnsMap = new HashMap<>(); 
 	
 	DbBatch queue = null;
 

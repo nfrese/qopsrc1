@@ -1,4 +1,4 @@
-package at.qop.qoplib;
+package at.qop.qoplib.imports;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,6 +6,7 @@ import java.net.URL;
 
 import at.qop.qoplib.dbconnector.DbBatch;
 import at.qop.qoplib.dbconnector.DbRecord;
+import at.qop.qoplib.dbconnector.write.AbstractUpdater;
 import at.qop.qoplib.entities.Address;
 
 public class UpdateAddresses extends AbstractUpdater {

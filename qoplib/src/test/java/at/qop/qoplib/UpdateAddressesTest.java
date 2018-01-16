@@ -6,6 +6,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import at.qop.qoplib.dbconnector.DbBatch;
+import at.qop.qoplib.imports.UpdateAddresses;
 
 @Ignore
 public class UpdateAddressesTest {
