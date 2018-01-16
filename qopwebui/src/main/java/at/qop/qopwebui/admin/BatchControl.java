@@ -52,7 +52,7 @@ public class BatchControl {
 				bc = new BatchCalculation(currentProfile) {
 					@Override
 					protected void progress(int overall_, int count_) {
-
+						super.progress(overall_, count_);
 						currentUI.access( new Runnable() {
 							public void run() {
 								progressBar.setValue((float)count_/(float)overall_);

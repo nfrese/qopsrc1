@@ -12,17 +12,20 @@ import java.util.stream.Collectors;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.calculation.IRouter;
-import at.qop.qoplib.calculation.LayerCalculationMulti;
+import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerCalculationP1Result;
 import at.qop.qoplib.calculation.LayerSource;
-import at.qop.qoplib.calculation.LayerTarget;
 import at.qop.qoplib.calculation.MultiTarget;
+import at.qop.qoplib.calculation.multi.LayerCalculationMultiEuclidean;
+import at.qop.qoplib.calculation.multi.LayerCalculationMultiSimple;
+import at.qop.qoplib.calculation.multi.LayerCalculationMultiTT;
 import at.qop.qoplib.dbconnector.AbstractDbTableReader;
 import at.qop.qoplib.dbconnector.DBUtils;
 import at.qop.qoplib.dbconnector.DbRecord;
@@ -84,7 +87,7 @@ public class BatchCalculation implements Runnable {
 	private void runInternal()
 	{
 		String geomField = "geom";
-		QuadifyImpl quadify = new QuadifyImpl(2000, Address.TABLENAME, geomField);
+		QuadifyImpl quadify = new QuadifyImpl(3000, Address.TABLENAME, geomField);
 		quadify.run();
 		overall = quadify.getOverall();
 		
@@ -170,48 +173,68 @@ public class BatchCalculation implements Runnable {
 				multiTargets.add(lt);
 			}
 
-			double[][] times = null;
 
 			if (profileAnalysis.analysis.travelTimeRequired() )
 			{
+				double[][] times = null;
 				LonLat[] sources = lonLatFromAddresses(addresses);
 				times = p2travelTime(sources, multiTargets, profileAnalysis.analysis.mode);
+				System.out.println("LayerCalculation (with matrix)");
+				
+				for (int i = 0; i < addresses.size(); i++)
+				{
+					Address address = addresses.get(i);
+					
+					LayerCalculationMultiTT lc = new LayerCalculationMultiTT(address.geom, params, 
+							profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, multiTargets, times, i);
+					performCalculation(lc);
+				}
 			}
-
-			System.out.println("LayerCalculation");
-			
-			for (int i = 0; i < addresses.size(); i++)
+			else if (profileAnalysis.analysis.hasRadius())
 			{
-				Address address = addresses.get(i);
-				ArrayList<LayerTarget> targets_ = new ArrayList<>();
-				int t = 0;
+				System.out.println("LayerCalculation (with radius)");
+				
+				STRtree spatIx = new STRtree();
 				for (MultiTarget mt : multiTargets)
 				{
-					LayerTarget lt = new LayerTarget();
-					
-					lt.geom = mt.geom;
-					lt.rec = mt.rec;
-					if (profileAnalysis.analysis.travelTimeRequired())
-					{
-						lt.time = times[i][t];
-					}
-					targets_.add(lt);
-					t++;
+					spatIx.insert(mt.geom.getEnvelopeInternal(), mt);
 				}
 				
-				
-				
-				LayerCalculationMulti lc = new LayerCalculationMulti(address.geom, params, 
-						profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, targets_);
-				lc.p0loadTargets();
-				lc.p1calcDistances();
-				lc.p2travelTime();
-				lc.p3OrderTargets();
-				lc.p4Calculate();
+				for (int i = 0; i < addresses.size(); i++)
+				{
+					Address address = addresses.get(i);
+					
+					LayerCalculationMultiEuclidean lc = new LayerCalculationMultiEuclidean(address.geom, params, 
+							profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, spatIx);
+					performCalculation(lc);
+				}
 			}
+			else 
+			{
+				System.out.println("LayerCalculation (simple)");
+				
+				for (int i = 0; i < addresses.size(); i++)
+				{
+					Address address = addresses.get(i);
+					
+					LayerCalculationMultiSimple lc = new LayerCalculationMultiSimple(address.geom, params, 
+							profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, multiTargets);
+					performCalculation(lc);
+				}
+				
+			}
+
 		}
 		count += addresses.size();
 		progress(overall, count);
+	}
+
+	public void performCalculation(LayerCalculation lc) {
+		lc.p0loadTargets();
+		lc.p1calcDistances();
+		lc.p2travelTime();
+		lc.p3OrderTargets();
+		lc.p4Calculate();
 	}
 
 	private LonLat[] lonLatFromAddresses(List<Address> addresses) {
