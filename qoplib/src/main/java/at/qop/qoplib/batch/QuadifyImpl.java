@@ -50,6 +50,7 @@ public class QuadifyImpl extends Quadify {
 			int count =  (int)tableReader.longResult();
 			System.out.println("count=" + count);
 			return count;
+
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

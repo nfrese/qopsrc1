@@ -83,7 +83,6 @@ public class QuadifyTest {
 		
 		long haveChildren = results.stream().filter(q -> q.children != null).count();
 		Assert.assertTrue(haveChildren==0);
-		
 	}
 
 	private void addItem(GeometryFactory gf, QuadifyInMemory<String> testQuadify, Coordinate coordinate, String name) {

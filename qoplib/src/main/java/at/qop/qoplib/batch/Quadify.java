@@ -2,7 +2,6 @@ package at.qop.qoplib.batch;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import com.vividsolutions.jts.geom.Envelope;
 
 public abstract class Quadify {
@@ -45,5 +44,6 @@ public abstract class Quadify {
 			return -1;
 		}
 	}
+
 
 }
