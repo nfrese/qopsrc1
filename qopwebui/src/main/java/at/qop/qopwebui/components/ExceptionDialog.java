@@ -1,5 +1,8 @@
 package at.qop.qopwebui.components;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
@@ -47,6 +50,17 @@ public class ExceptionDialog extends Window {
 
 	}
 	
+	public ExceptionDialog(String title, Throwable t) {
+		this(title, exception2string(t));
+	}
+
+	public static String exception2string(Throwable t) {
+		t.printStackTrace();
+		StringWriter pw = new StringWriter();
+		t.printStackTrace(new PrintWriter(pw));
+		return pw.toString();
+	}
+
 	public ExceptionDialog ok(ClickListener cl)
 	{
 		this.cl = cl;

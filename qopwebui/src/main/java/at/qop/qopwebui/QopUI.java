@@ -166,11 +166,7 @@ public class QopUI extends UI {
 			startCalculation();
 		} catch (Exception ex)
 		{
-			ex.printStackTrace();
-			StringWriter pw = new StringWriter();
-			ex.printStackTrace(new PrintWriter(pw));
-			
-			new ExceptionDialog("Fehler bei Auswertung:" , pw.toString()).show();;
+			new ExceptionDialog("Fehler bei Auswertung:" ,ex).show();;
 		}
 	}
 

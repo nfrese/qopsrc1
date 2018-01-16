@@ -14,7 +14,7 @@ public class ConfirmationDialog extends Window {
 	
 	private String text;
 
-	private ClickListener cl;
+	protected ClickListener cl;
 	
 	public ConfirmationDialog(String title, String message)
 	{
@@ -27,6 +27,12 @@ public class ConfirmationDialog extends Window {
 		Label msgLabel = new Label(text);
 		
 		subContent.addComponent(msgLabel);
+		HorizontalLayout buttons = buttons();
+		subContent.addComponent(buttons);
+
+	}
+
+	public HorizontalLayout buttons() {
 		Button okButton = new Button("OK");
 		okButton.addClickListener(e2 -> {
 			if (cl != null) cl.buttonClick(null);
@@ -36,8 +42,8 @@ public class ConfirmationDialog extends Window {
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});
-		subContent.addComponent(new HorizontalLayout(okButton, cancelButton));
-
+		HorizontalLayout buttons = new HorizontalLayout(okButton, cancelButton);
+		return buttons;
 	}
 	
 	public ConfirmationDialog ok(ClickListener cl)

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -37,13 +38,15 @@ import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.LonLat;
 import at.qop.qoplib.osrmclient.OSRMClient;
 
-public class BatchCalculation {
+public class BatchCalculation implements Runnable {
 
-	Profile currentProfile;
-	LayerSource source;
-	ConfigFile cf;
-	IRouter router;
-	int count=0;
+	private final Profile currentProfile;
+	private LayerSource source;
+	private ConfigFile cf;
+	private IRouter router;
+	public int overall = -1;
+	public int count = 0;
+	public boolean cancelled = false;
 
 	public BatchCalculation(Profile currentProfile) {
 		this.currentProfile = currentProfile;
@@ -53,11 +56,38 @@ public class BatchCalculation {
 		router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort());
 	}
 
+	protected void progress(int overall_, int count_) {
+		int percent = (100* count)/overall_;
+		System.out.println("Progress: " + count_ + "/" + overall_ + " = " + percent + "%");
+	}
+
+	protected void failed(Throwable t) {
+		t.printStackTrace();
+	}
+
+	protected void success() {
+	}
+
+	
 	public void run()
+	{
+		try {
+			runInternal();
+			success();
+		}
+		catch (Throwable t)
+		{
+			failed(t);
+		}
+	}
+	
+	private void runInternal()
 	{
 		String geomField = "geom";
 		QuadifyImpl quadify = new QuadifyImpl(2000, Address.TABLENAME, geomField);
 		quadify.run();
+		overall = quadify.getOverall();
+		
 		Collection<Quadrant> results = quadify.listResults();
 
 		Map<Integer, Long> statistics = results.stream().collect(Collectors.groupingBy(q -> q.count, Collectors.counting()));                    // returns a LinkedHashMap, keep order
@@ -68,7 +98,6 @@ public class BatchCalculation {
 
 		for (Quadrant result : results)
 		{
-
 			String sql = "select * from " + Address.TABLENAME
 					+ " WHERE " + geomField 
 					+ " && " + DBUtils.stMakeEnvelope(result.envelope);
@@ -100,7 +129,6 @@ public class BatchCalculation {
 					currentAddress.geom = (Point)geom;
 					currentAddress.name = name;
 					addresses.add(currentAddress);
-
 				}
 
 			};
@@ -123,6 +151,9 @@ public class BatchCalculation {
 		Geometry start = CRSTransform.gfWGS84.toGeometry(result.envelope);
 
 		for (ProfileAnalysis profileAnalysis : profile.profileAnalysis) {	
+			
+			if (cancelled) throw new CancellationException();
+			
 			Analysis params = profileAnalysis.analysis;
 			LayerCalculationP1Result loaded = source.load(start, params);
 
@@ -147,6 +178,8 @@ public class BatchCalculation {
 				times = p2travelTime(sources, multiTargets, profileAnalysis.analysis.mode);
 			}
 
+			System.out.println("LayerCalculation");
+			
 			for (int i = 0; i < addresses.size(); i++)
 			{
 				Address address = addresses.get(i);
@@ -166,6 +199,8 @@ public class BatchCalculation {
 					t++;
 				}
 				
+				
+				
 				LayerCalculationMulti lc = new LayerCalculationMulti(address.geom, params, 
 						profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, targets_);
 				lc.p0loadTargets();
@@ -173,12 +208,10 @@ public class BatchCalculation {
 				lc.p2travelTime();
 				lc.p3OrderTargets();
 				lc.p4Calculate();
-				//lc.p5route(router);
 			}
 		}
 		count += addresses.size();
-		System.out.println("COUNT***" + count);
-
+		progress(overall, count);
 	}
 
 	private LonLat[] lonLatFromAddresses(List<Address> addresses) {

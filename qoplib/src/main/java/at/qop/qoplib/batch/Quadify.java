@@ -34,5 +34,16 @@ public abstract class Quadify {
 		root.collectInnerQuadrants(collect);
 		return collect;
 	}
+	
+	public int getOverall()
+	{
+		if (root != null) {
+			return root.count;
+		}
+		else
+		{
+			return -1;
+		}
+	}
 
 }
