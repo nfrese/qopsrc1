@@ -36,4 +36,8 @@ public class ProfileAnalysis implements Serializable {
 	
 	public String category;
 	
+	public String categorytitle;
+	
+	public boolean ratingvisible = true;
+	
 }

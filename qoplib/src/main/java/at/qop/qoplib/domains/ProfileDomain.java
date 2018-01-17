@@ -8,13 +8,10 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import com.vividsolutions.jts.geom.Geometry;
-
-import at.qop.qoplib.entities.Address;
-import at.qop.qoplib.entities.Profile;
-import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.AnalysisFunction;
+import at.qop.qoplib.entities.Profile;
+import at.qop.qoplib.entities.ProfileAnalysis;
 
 @Stateless
 @Local (IProfileDomain.class)

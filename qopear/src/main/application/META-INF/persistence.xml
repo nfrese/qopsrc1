@@ -8,7 +8,8 @@
         <jta-data-source>java:/qopDS</jta-data-source>
         <properties>
             <!-- <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />  -->
-            <property name="javax.persistence.schema-generation.database.action" value="create"/>
+            <!-- <property name="javax.persistence.schema-generation.database.action" value="create"/> -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="hibernate.dialect" value="org.hibernate.spatial.dialect.postgis.PostgisDialect" />
 			<property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
             <property name="hibernate.show_sql" value="true" />

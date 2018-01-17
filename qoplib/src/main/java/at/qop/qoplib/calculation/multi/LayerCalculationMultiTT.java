@@ -9,6 +9,7 @@ import at.qop.qoplib.calculation.LayerTarget;
 import at.qop.qoplib.calculation.MultiTarget;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.entities.Analysis;
+import at.qop.qoplib.entities.ProfileAnalysis;
 
 public class LayerCalculationMultiTT extends LayerCalculation {
 	
@@ -16,7 +17,7 @@ public class LayerCalculationMultiTT extends LayerCalculation {
 	private int timesRow;
 	private ArrayList<MultiTarget> multiTargets;
 	
-	public LayerCalculationMultiTT(Point start, Analysis params, double presetWeight, String altRatingFunc,
+	public LayerCalculationMultiTT(Point start, ProfileAnalysis params, double presetWeight, String altRatingFunc,
 			DbTable table,
 			ArrayList<MultiTarget> multiTargets,
 			double[][] times,
@@ -45,7 +46,7 @@ public class LayerCalculationMultiTT extends LayerCalculation {
 	}
 	
 	public void p2travelTime() {
-		if (!params.travelTimeRequired()) throw new RuntimeException("dont!");
+		if (!analysis().travelTimeRequired()) throw new RuntimeException("dont!");
 		for (int t=0;t<orderedTargets.size();t++)
 		{
 			LayerTarget lt = orderedTargets.get(t);

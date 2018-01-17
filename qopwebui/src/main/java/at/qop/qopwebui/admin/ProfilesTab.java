@@ -1,19 +1,19 @@
 package at.qop.qopwebui.admin;
 
+import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import com.vaadin.data.Binder.Binding;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
@@ -23,8 +23,7 @@ import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.LookupSessionBeans;
-import at.qop.qoplib.domains.ProfileDomain;
-import at.qop.qoplib.entities.Analysis;
+import at.qop.qoplib.Utils;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qopwebui.admin.forms.ProfileForm;
@@ -71,6 +70,35 @@ public class ProfilesTab extends AbstractTab {
 
         });
         
+        Button cloneProfileButton = new Button("Profil klonen...");
+        cloneProfileButton.setEnabled(false);
+        cloneProfileButton.addClickListener(e -> {
+
+        	Set<Profile> sel = listSelect.getSelectedItems();
+        	if (sel.size() == 1)
+        	{
+        		Profile profile = sel.iterator().next();
+        		Profile clone;
+				try {
+					clone = Utils.deepClone(profile);
+				} catch (ClassNotFoundException | IOException e1) {
+					throw new RuntimeException(e1);
+				}
+        		clone.name = clone.name + "_" + ((int)(Math.random()*100));
+        		
+        		clone.profileAnalysis.forEach(pa -> {
+        			pa.id = 0;
+        			pa.profile = clone;
+        		});
+
+        		new ProfileForm("Profil klonen", clone, true).ok(e3 -> {
+        			LookupSessionBeans.profileDomain().createProfile(clone);
+        			LookupSessionBeans.profileDomain().createProfileAnalysis(new HashSet<>(clone.profileAnalysis));
+        			refreshProfileList(listSelect);
+        		}).show();
+        	}
+        });
+        
         Button removeProfileButton = new Button("Profil löschen...");
         removeProfileButton.setEnabled(false);
         removeProfileButton.addClickListener(e -> {
@@ -91,7 +119,7 @@ public class ProfilesTab extends AbstractTab {
 
       	twinSelect.setRows(15);
         
-    	Grid<ProfileAnalysis> grid = new Grid<ProfileAnalysis>("Gewichte festlegen");
+    	Grid<ProfileAnalysis> grid = new Grid<ProfileAnalysis>("Kategorien festlegen");
     	grid.getEditor().setEnabled(true);
         grid.setWidth(100.0f, Unit.PERCENTAGE);
         grid.setHeight(100.0f, Unit.PERCENTAGE);
@@ -102,8 +130,28 @@ public class ProfilesTab extends AbstractTab {
 					item.weight = Double.valueOf(v); 
 					LookupSessionBeans.profileDomain().updateProfileAnalysis(item);
 				});
-        
-        
+		grid.addColumn(item -> item.category).setCaption("Kategorie/Sortierung (zb 1.01)")
+			.setEditorComponent(new TextField(), 
+				(item,v)  -> { 
+					item.category = v; 
+					LookupSessionBeans.profileDomain().updateProfileAnalysis(item);
+				});
+		
+		grid.addColumn(item -> item.categorytitle).setCaption("Kategorie-Titel (zb Ambience)")
+		.setMinimumWidth(190)
+		.setEditorComponent(new TextField(), 
+			(item,v)  -> { 
+				item.categorytitle = v; 
+				LookupSessionBeans.profileDomain().updateProfileAnalysis(item);
+			});
+
+		grid.addColumn(item -> item.ratingvisible).setCaption("Einzel-Bewertung sichtbar")
+		.setEditorComponent(new CheckBox(), 
+			(item,v)  -> { 
+				item.ratingvisible = v; 
+				LookupSessionBeans.profileDomain().updateProfileAnalysis(item);
+			});
+		
     	twinSelect.addSelectionListener(event -> {
     		if (!twinSelectSilent)
     		{
@@ -120,6 +168,7 @@ public class ProfilesTab extends AbstractTab {
 				event -> { 
 					removeProfileButton.setEnabled(event.getValue().size() == 1);
 					editProfileButton.setEnabled(event.getValue().size() == 1);
+					cloneProfileButton.setEnabled(event.getValue().size() == 1);
 					
 					if (event.getValue().size() == 1)
 					{
@@ -139,7 +188,7 @@ public class ProfilesTab extends AbstractTab {
 		
 		twinSelect.setWidth(420, Unit.PIXELS);
 		
-		VerticalLayout vl = new VerticalLayout(listSelect, addProfileButton, editProfileButton, removeProfileButton);
+		VerticalLayout vl = new VerticalLayout(listSelect, addProfileButton, editProfileButton, cloneProfileButton, removeProfileButton);
 		vl.setExpandRatio(listSelect, 5.0f);
 		vl.setMargin(false);
 		vl.setHeight(100, Unit.PERCENTAGE);
@@ -189,9 +238,28 @@ public class ProfilesTab extends AbstractTab {
 	}
 
 	private void refreshGrid(Grid<ProfileAnalysis> grid) {
-		DataProvider<ProfileAnalysis, ?> dataProvider = new ListDataProvider<ProfileAnalysis>(
-				currentProfile != null ? currentProfile.profileAnalysis : Collections.emptyList());
-		grid.setDataProvider(dataProvider);
+		if (currentProfile != null)
+		{
+			Comparator<ProfileAnalysis> comparator = profileAnalysisComperator();
+			
+			DataProvider<ProfileAnalysis, ?> dataProvider = new ListDataProvider<ProfileAnalysis>(
+					currentProfile.profileAnalysis.stream().sorted(comparator).collect(Collectors.toList()));
+			
+			grid.setDataProvider(dataProvider);
+		}
+		else
+		{
+			DataProvider<ProfileAnalysis, ?> dataProvider = new ListDataProvider<ProfileAnalysis>(
+					Collections.emptyList());
+			
+			grid.setDataProvider(dataProvider);
+		}
+	}
+
+	private static Comparator<ProfileAnalysis> profileAnalysisComperator() {
+		Comparator<ProfileAnalysis> comparator = Comparator.comparing(pa -> pa.category + "");
+		comparator = comparator.thenComparing(Comparator.comparing(pa -> pa.analysis.name + ""));
+		return comparator;
 	}
 
 }

@@ -10,6 +10,7 @@ import com.vividsolutions.jts.geom.Point;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
 import at.qop.qoplib.entities.Analysis;
+import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.LonLat;
 
 public class LayerCalculationSingle extends LayerCalculation {
@@ -18,7 +19,7 @@ public class LayerCalculationSingle extends LayerCalculation {
 	private final IRouter router;
 	public Collection<DbRecord> targets;
 	
-	public LayerCalculationSingle(Point start, Analysis params, double presetWeight, String altRatingFunc,
+	public LayerCalculationSingle(Point start, ProfileAnalysis params, double presetWeight, String altRatingFunc,
 			LayerSource source, IRouter router) {
 		super(start, params, presetWeight, altRatingFunc);
 		this.source = source;
@@ -27,11 +28,11 @@ public class LayerCalculationSingle extends LayerCalculation {
 	
 	@Override
 	public void p0loadTargets() {
-		LayerCalculationP1Result r = source.load(start, params);
+		LayerCalculationP1Result r = source.load(start, analysis());
 		table = r.table;
 		targets = r.records;
 		
-		DbGeometryField geomField = table.field(params.geomfield, DbGeometryField.class);
+		DbGeometryField geomField = table.field(analysis().geomfield, DbGeometryField.class);
 
 		ArrayList<LayerTarget> targets_ = new ArrayList<>();
 		for (DbRecord target : targets)
@@ -48,7 +49,7 @@ public class LayerCalculationSingle extends LayerCalculation {
 	}
 	
 	public void p2travelTime() {
-		if (params.travelTimeRequired())
+		if (analysis().travelTimeRequired())
 		{
 			LonLat[] sources = new LonLat[1];
 			sources[0] = lonLat(start); 
@@ -62,7 +63,7 @@ public class LayerCalculationSingle extends LayerCalculation {
 			}
 
 			try {
-				double[][] r = router.table(params.mode, sources, destinations);
+				double[][] r = router.table(analysis().mode, sources, destinations);
 				for (i = 0; i < this.orderedTargets.size(); i++) {
 					double timeMinutes = r[0][i] / 60;  // minutes
 					orderedTargets.get(i).time = ((double)Math.round(timeMinutes * 100)) / 100;  // round 2 decimal places 

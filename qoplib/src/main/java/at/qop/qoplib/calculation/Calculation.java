@@ -27,7 +27,7 @@ public class Calculation {
 	public void run()
 	{
 		for (ProfileAnalysis profileAnalysis : profile.profileAnalysis) {
-			LayerCalculation lc = new LayerCalculationSingle(address.geom, profileAnalysis.analysis, 
+			LayerCalculation lc = new LayerCalculationSingle(address.geom, profileAnalysis, 
 					profileAnalysis.weight, profileAnalysis.altratingfunc,
 					source, router);
 			layerCalculations.add(lc);

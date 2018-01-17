@@ -15,6 +15,7 @@ import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.AnalysisFunction;
+import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.OSRMClientTest;
 
 public class LayerCalculationTest {
@@ -22,8 +23,10 @@ public class LayerCalculationTest {
 	@Test
 	public void test() {
 
-		Analysis params = new Analysis();
-		params.geomfield = "shape";
+		ProfileAnalysis pa = new ProfileAnalysis();
+		Analysis analysis = new Analysis();
+		pa.analysis = analysis;
+		analysis.geomfield = "shape";
 
 		{
 			StringJoiner sj = new StringJoiner("\n");
@@ -44,12 +47,12 @@ public class LayerCalculationTest {
 
 			AnalysisFunction analysisFunction = new AnalysisFunction(); 
 			analysisFunction.func = sj.toString(); 
-			params.analysisfunction = analysisFunction;
+			analysis.analysisfunction = analysisFunction;
 		}
 		{
 			StringJoiner sj = new StringJoiner("\n");
 			sj.add("lc.rating = lc.result * 10");
-			params.ratingfunc = sj.toString();
+			analysis.ratingfunc = sj.toString();
 		}
 
 		LayerSource source = new LayerSource() {
@@ -78,7 +81,7 @@ public class LayerCalculationTest {
 		};
 		LayerCalculation lc = new LayerCalculationSingle(
 				CRSTransform.gfWGS84.createPoint(new Coordinate(16.37242655454094,48.2061121366474)),
-				params, 1, null, source, null);		
+				pa, 1, null, source, null);		
 		lc.p0loadTargets();
 		lc.p1calcDistances();
 		lc.p2travelTime();

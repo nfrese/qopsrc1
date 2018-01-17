@@ -202,7 +202,7 @@ public class BatchCalculation implements Runnable {
 				{
 					Address address = addresses.get(i);
 					
-					LayerCalculationMultiTT lc = new LayerCalculationMultiTT(address.geom, params, 
+					LayerCalculationMultiTT lc = new LayerCalculationMultiTT(address.geom, profileAnalysis, 
 							profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, multiTargets, times, i);
 					performCalculation(batRecs[i], profileCnt, lc);
 				}
@@ -221,7 +221,7 @@ public class BatchCalculation implements Runnable {
 				{
 					Address address = addresses.get(i);
 					
-					LayerCalculationMultiEuclidean lc = new LayerCalculationMultiEuclidean(address.geom, params, 
+					LayerCalculationMultiEuclidean lc = new LayerCalculationMultiEuclidean(address.geom, profileAnalysis, 
 							profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, spatIx);
 					performCalculation(batRecs[i], profileCnt, lc);
 				}
@@ -234,7 +234,7 @@ public class BatchCalculation implements Runnable {
 				{
 					Address address = addresses.get(i);
 					
-					LayerCalculationMultiSimple lc = new LayerCalculationMultiSimple(address.geom, params, 
+					LayerCalculationMultiSimple lc = new LayerCalculationMultiSimple(address.geom, profileAnalysis, 
 							profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, multiTargets);
 					performCalculation(batRecs[i], profileCnt, lc);
 				}
@@ -257,7 +257,7 @@ public class BatchCalculation implements Runnable {
 		lc.p3OrderTargets();
 		lc.p4Calculate();
 		ColGrp g = new ColGrp();
-		g.name = lc.params.name;
+		g.name = lc.analysis().name;
 		g.result = lc.result;
 		g.rating = lc.rating;
 		batRec.colGrps[profileCnt] = g; 

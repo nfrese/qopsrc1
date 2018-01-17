@@ -5,10 +5,7 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import at.qop.qoplib.dbconnector.DbBatch;
-import at.qop.qoplib.imports.UpdateAddresses;
-
-//@Ignore
+@Ignore
 public class UpdateAddressesTest {
 	
 	int cnt = 0;

@@ -1,9 +1,9 @@
 package at.qop.qopwebui;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.DecimalFormat;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.annotation.WebServlet;
 
@@ -39,10 +39,12 @@ import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.calculation.IRouter;
+import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerSource;
 import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
+import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.OSRMClient;
 import at.qop.qopwebui.components.ExceptionDialog;
 
@@ -158,7 +160,7 @@ public class QopUI extends UI {
 		HorizontalLayout hl = new HorizontalLayout(new VerticalLayout(title, filtercombo, profileCombo, new Label(""), grid), leafletMap);
 		hl.setSizeFull();
 		setContent(hl);
-		
+
 	}
 
 	private void startCalculationWCatch() {
@@ -180,15 +182,32 @@ public class QopUI extends UI {
 			calculation.run();
 
 			grid.removeAllComponents();
-			grid.addComponent(new Label("<u>Berechnung</u>",  ContentMode.HTML));
-			grid.addComponent(new Label("<u>Resultat</u>",  ContentMode.HTML));
-			grid.addComponent(new Label("<u>Bewertung</u>",  ContentMode.HTML));
-			grid.addComponent(new Label("<u>Gewicht</u>",  ContentMode.HTML));
-			grid.addComponent(new Label("",  ContentMode.HTML));
+			//gridAddHeaders();
 
-			calculation.layerCalculations.forEach(lc -> {
+			Comparator<LayerCalculation> comparator = Comparator.comparing(lc -> lc.params.category + "");
+			comparator = comparator.thenComparing(Comparator.comparing(lc -> lc.params.analysis.name + ""));
+			
+			LayerCalculation lastLc = null;
+			
+			for (LayerCalculation lc :calculation.layerCalculations.stream()
+				.sorted(comparator)
+				.collect(Collectors.toList()))
+				{
 
-				grid.addComponent(new Label(lc.params.description,  ContentMode.HTML));
+				if (nextCategory(lastLc, lc))
+				{
+					String title = lc.params.categorytitle;
+					grid.addComponent(new Label("<b><u>" + title + "</u></b>",  ContentMode.HTML));
+					grid.addComponent(new Label("",  ContentMode.HTML));
+					grid.addComponent(new Label("",  ContentMode.HTML));
+					grid.addComponent(new Label("",  ContentMode.HTML));
+					grid.addComponent(new Label("",  ContentMode.HTML));
+					gridAddHeaders();
+				}
+				
+				lastLc = lc;
+					
+				grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
 				grid.addComponent(new Label(formatDouble2Decimal(lc.result) +"",  ContentMode.HTML));
 				grid.addComponent(new Label(formatDouble2Decimal(lc.rating) +"",  ContentMode.HTML));
 				Slider slider = new Slider(0, 2);
@@ -222,7 +241,7 @@ public class QopUI extends UI {
 								lfgResults.addComponent(lp);
 							}
 						});
-						
+
 						lc.keptTargets.stream().forEach(lt -> {
 
 							if (lt.geom instanceof Point)
@@ -241,8 +260,8 @@ public class QopUI extends UI {
 						});
 
 
-						if (lc.params.hasRadius()) {
-							LCircle circle = new LCircle(lc.start, lc.params.radius);
+						if (lc.analysis().hasRadius()) {
+							LCircle circle = new LCircle(lc.start, lc.analysis().radius);
 							lfgResults.addComponent(circle);
 						}
 						leafletMap.zoomToContent();
@@ -250,19 +269,55 @@ public class QopUI extends UI {
 				});
 				grid.addComponent(button);
 
-			});
-			
+			};
+
 			grid.addComponent(new Label("<b>Summe</b>",  ContentMode.HTML));
 			grid.addComponent(new Label("",  ContentMode.HTML));
-			
+
 			overallRatingLabel = new Label("",  ContentMode.HTML);
-			
+
 			grid.addComponent(overallRatingLabel);
 			grid.addComponent(new Label("",  ContentMode.HTML));
 			grid.addComponent(new Label("",  ContentMode.HTML));
-			
+
 			refreshOverallRating(calculation);
 		}
+	}
+
+	private boolean nextCategory(LayerCalculation lastLc, LayerCalculation lc) {
+		if (lastLc == null)	return true;
+		
+		String lastCat = lastLc.params.category;
+		String cat = lc.params.category;
+		
+		String[] lastCatSplit = lastCat.split("\\.");
+		String[] catSplit = cat.split("\\.");
+		if (lastCatSplit.length != catSplit.length) return true;
+		
+		int changeIx = lastCatSplit.length;
+		
+		for (int i = 0; i < lastCatSplit.length; i++)
+		{
+			if (!catSplit[i].equals(lastCatSplit[i]))
+			{
+				changeIx = i;
+				break;
+			}
+		}
+		
+		if (changeIx < lastCatSplit.length -1)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public void gridAddHeaders() {
+		grid.addComponent(new Label("<u>Berechnung</u>",  ContentMode.HTML));
+		grid.addComponent(new Label("<u>Resultat</u>",  ContentMode.HTML));
+		grid.addComponent(new Label("<u>Bewertung</u>",  ContentMode.HTML));
+		grid.addComponent(new Label("<u>Gewicht</u>",  ContentMode.HTML));
+		grid.addComponent(new Label("",  ContentMode.HTML));
 	}
 
 	private void refreshOverallRating(Calculation calculation) {

@@ -13,12 +13,13 @@ import at.qop.qoplib.calculation.LayerTarget;
 import at.qop.qoplib.calculation.MultiTarget;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.entities.Analysis;
+import at.qop.qoplib.entities.ProfileAnalysis;
 
 public class LayerCalculationMultiEuclidean extends LayerCalculation {
 	
 	private STRtree spatIx;
 	
-	public LayerCalculationMultiEuclidean(Point start, Analysis params, double presetWeight, String altRatingFunc,
+	public LayerCalculationMultiEuclidean(Point start, ProfileAnalysis params, double presetWeight, String altRatingFunc,
 			DbTable table, STRtree spatIx) {
 		super(start, params, presetWeight, altRatingFunc);
 		this.table = table;
@@ -28,8 +29,8 @@ public class LayerCalculationMultiEuclidean extends LayerCalculation {
 	@Override
 	public void p0loadTargets() {
 		orderedTargets = new ArrayList<>();
-		if (!params.hasRadius()) throw new RuntimeException("dont!");
-		Geometry buffer = CRSTransform.singleton.bufferWGS84(start, params.getRadius());
+		if (!analysis().hasRadius()) throw new RuntimeException("dont!");
+		Geometry buffer = CRSTransform.singleton.bufferWGS84(start, analysis().getRadius());
 		
 		@SuppressWarnings("unchecked")
 		List<MultiTarget> results = spatIx.query(buffer.getEnvelopeInternal());

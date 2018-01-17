@@ -15,9 +15,7 @@ import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.Utils;
-import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.AnalysisFunction;
-import at.qop.qopwebui.admin.forms.AnalysisForm;
 import at.qop.qopwebui.admin.forms.AnalysisFunctionForm;
 import at.qop.qopwebui.components.ConfirmationDialog;
 
@@ -100,7 +98,7 @@ public class AnalysisFunctionTab extends AbstractTab {
 			deleteanalysisButton.setEnabled(selectedItems.size() == 1);
 		});
 		
-    	final VerticalLayout vl = new VerticalLayout(grid, new HorizontalLayout(addanalysisButton, cloneButton, editanalysisButton, deleteanalysisButton));
+    	final VerticalLayout vl = new VerticalLayout(grid, new HorizontalLayout(addanalysisButton,  editanalysisButton, cloneButton, deleteanalysisButton));
     	vl.setExpandRatio(grid, 3.0f);
     	vl.setMargin(true);
     	vl.setSizeFull();
