@@ -6,10 +6,10 @@ import java.net.URL;
 
 import at.qop.qoplib.dbconnector.DbBatch;
 import at.qop.qoplib.dbconnector.DbRecord;
-import at.qop.qoplib.dbconnector.write.AbstractUpdater;
+import at.qop.qoplib.dbconnector.write.AbstractCSVUpdater;
 import at.qop.qoplib.entities.Address;
 
-public class UpdateAddresses extends AbstractUpdater {
+public class UpdateAddresses extends AbstractCSVUpdater {
 	
 	private final String bezirkfilter;
 	

@@ -1,10 +1,8 @@
 package at.qop.qoplib.imports;
 
-import at.qop.qoplib.LookupSessionBeans;
-import at.qop.qoplib.dbconnector.DbBatch;
-import at.qop.qoplib.domains.IGenericDomain;
+import at.qop.qoplib.dbconnector.write.PerformUpdateAbstract;
 
-public class PerformAddressUpdate {
+public class PerformAddressUpdate extends PerformUpdateAbstract {
 
 	public void updateAddresses(String bezFilter)
 	{
@@ -14,30 +12,10 @@ public class PerformAddressUpdate {
 			UpdateAddresses updateAddresses = new UpdateAddresses(bezFilter);
 			updateAddresses.onPacket(p -> forward(p));
 			updateAddresses.runUpdate();
+			updateAddresses.done();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-	}
-	
-	private Void forward(DbBatch p) {
-		System.out.println(p);
-		
-		try {
-			IGenericDomain gd = LookupSessionBeans.genericDomain();
-			gd.batchUpdate(p);
-		} catch (Exception ex)
-		{
-			if (p.mayFail)
-			{
-				System.err.println("MAYFAIL: " + ex.getMessage());
-			}
-			else
-			{
-				throw new RuntimeException(ex);
-			}
-		}
-		
-		return null;
 	}
 	
 }

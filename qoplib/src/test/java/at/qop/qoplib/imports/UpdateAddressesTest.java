@@ -1,4 +1,4 @@
-package at.qop.qoplib;
+package at.qop.qoplib.imports;
 
 import java.io.IOException;
 

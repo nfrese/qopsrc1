@@ -16,6 +16,8 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.LookupSessionBeans;
+import at.qop.qoplib.batch.WriteBatTable.BatRecord;
+import at.qop.qoplib.batch.WriteBatTable.ColGrp;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.calculation.IRouter;
@@ -50,6 +52,7 @@ public class BatchCalculation implements Runnable {
 	public int overall = -1;
 	public int count = 0;
 	public boolean cancelled = false;
+	private PerformBatUpdate pbt;
 
 	public BatchCalculation(Profile currentProfile) {
 		this.currentProfile = currentProfile;
@@ -57,6 +60,8 @@ public class BatchCalculation implements Runnable {
 		source = new DbLayerSource();
 		cf = ConfigFile.read();
 		router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort());
+		
+		pbt = new PerformBatUpdate(currentProfile);
 	}
 
 	protected void progress(int overall_, int count_) {
@@ -143,7 +148,7 @@ public class BatchCalculation implements Runnable {
 				throw new RuntimeException(e);
 			}		
 		}
-
+		pbt.wbt.done();
 	}
 	
 	private void doCalculation(Quadrant result, Profile profile, List<Address> addresses, LayerSource source2,
@@ -151,8 +156,11 @@ public class BatchCalculation implements Runnable {
 		
 		if (addresses.size() == 0) return;
 		
+		BatRecord[] batRecs = initBatRecs(profile, addresses);
+		
 		Geometry start = CRSTransform.gfWGS84.toGeometry(result.envelope);
-
+		
+		int profileCnt = 0;
 		for (ProfileAnalysis profileAnalysis : profile.profileAnalysis) {	
 			
 			if (cancelled) throw new CancellationException();
@@ -187,7 +195,7 @@ public class BatchCalculation implements Runnable {
 					
 					LayerCalculationMultiTT lc = new LayerCalculationMultiTT(address.geom, params, 
 							profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, multiTargets, times, i);
-					performCalculation(lc);
+					performCalculation(batRecs[i], profileCnt, lc);
 				}
 			}
 			else if (profileAnalysis.analysis.hasRadius())
@@ -206,7 +214,7 @@ public class BatchCalculation implements Runnable {
 					
 					LayerCalculationMultiEuclidean lc = new LayerCalculationMultiEuclidean(address.geom, params, 
 							profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, spatIx);
-					performCalculation(lc);
+					performCalculation(batRecs[i], profileCnt, lc);
 				}
 			}
 			else 
@@ -219,24 +227,45 @@ public class BatchCalculation implements Runnable {
 					
 					LayerCalculationMultiSimple lc = new LayerCalculationMultiSimple(address.geom, params, 
 							profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, multiTargets);
-					performCalculation(lc);
+					performCalculation(batRecs[i], profileCnt, lc);
 				}
 				
 			}
+			profileCnt++;
 
 		}
+		
+		pbt.wbt.insert(batRecs);
+		
 		count += addresses.size();
 		progress(overall, count);
 	}
 
-	public void performCalculation(LayerCalculation lc) {
+	public void performCalculation(BatRecord batRec, int profileCnt, LayerCalculation lc) {
 		lc.p0loadTargets();
 		lc.p1calcDistances();
 		lc.p2travelTime();
 		lc.p3OrderTargets();
 		lc.p4Calculate();
+		ColGrp g = new ColGrp();
+		g.name = lc.params.name;
+		g.result = lc.result;
+		g.rating = lc.rating;
+		batRec.colGrps[profileCnt] = g; 
 	}
 
+	public BatRecord[] initBatRecs(Profile profile, List<Address> addresses) {
+		BatRecord[] batRecs = new BatRecord[addresses.size()];
+		for (int i = 0; i < addresses.size(); i++) {
+			Address addr = addresses.get(i);
+			BatRecord batRec = new BatRecord(profile.profileAnalysis.size());
+			batRec.name = addr.name;
+			batRec.geom = addr.geom;
+			batRecs[i] = batRec;
+		}
+		return batRecs;
+	}
+	
 	private LonLat[] lonLatFromAddresses(List<Address> addresses) {
 		LonLat[] sources = new LonLat[addresses.size()];
 		for (int i = 0; i < addresses.size(); i++)
