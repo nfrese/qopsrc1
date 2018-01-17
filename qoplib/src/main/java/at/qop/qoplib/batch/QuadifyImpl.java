@@ -48,7 +48,7 @@ public class QuadifyImpl extends Quadify {
 					+ " && " + DBUtils.stMakeEnvelope(envelope);
 			gd_.readTable(sql, tableReader);
 			int count =  (int)tableReader.longResult();
-			System.out.println("count=" + count);
+			//System.out.println("count=" + count);
 			return count;
 
 		} catch (SQLException e) {

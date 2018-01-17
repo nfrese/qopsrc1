@@ -14,7 +14,7 @@ cd ~
 mkdir build-osrm
 cd build-osrm
 
-https://github.com/Project-OSRM/osrm-backend/archive/v5.14.1.tar.gz
+wget https://github.com/Project-OSRM/osrm-backend/archive/v5.14.1.tar.gz
 
 tar -xzvf v5.14.1.tar.gz 
 cd osrm-backend-5.14.1/
@@ -22,7 +22,7 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build .
-
+sudo cmake --build . --target install
 
 osrm as a service 
 -----------------

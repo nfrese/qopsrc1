@@ -13,14 +13,49 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import at.qop.qoplib.ConfigFile;
+import at.qop.qopwebui.components.EnterTextDialog;
+
 @Theme("mytheme")
 public class AdminUI extends UI {
-
+	
 	private static final long serialVersionUID = 1L;
 
-	
 	@Override
     protected void init(VaadinRequest vaadinRequest) {
+		
+		boolean authenticated = "true".equals(UI.getCurrent().getSession().getAttribute("authenticated"));
+		
+		if (!authenticated)
+		{
+			String adminPassword = ConfigFile.read().getAdminPassword();
+			if (adminPassword == null)
+			{
+				init_(vaadinRequest);
+			}
+			else
+			{
+				new EnterTextDialog("Admin", "Passwort?").ok(v -> {
+					if (v.getValue().equals(adminPassword))
+					{
+						UI.getCurrent().getSession().setAttribute("authenticated", "true");
+						init_(vaadinRequest);
+					}
+					else
+					{
+						setContent(new Label("Falsches Passwort! Reload für neuen Versuch!"));
+					}
+				}).show();;
+			}
+		}
+		else
+		{
+			init_(vaadinRequest);
+		}
+	}
+	
+    protected void init_(VaadinRequest vaadinRequest) {
+		
         final VerticalLayout layout = new VerticalLayout();
        
         TabSheet tabs = new TabSheet();

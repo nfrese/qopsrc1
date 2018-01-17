@@ -45,7 +45,12 @@ public class ConfigFile {
 		else return defaultValue;
 	}
 	
-	
+	public String getAdminPassword()
+	{
+		String key = "adminpasswd";
+		String defaultValue = null;
+		return getStrProp(key, defaultValue);
+	}
 	
 
 }

@@ -2,13 +2,14 @@ package at.qop.qopwebui.components;
 
 import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-public class AddWithNameDialog extends Window {
+public class EnterTextDialog extends Window {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -16,7 +17,7 @@ public class AddWithNameDialog extends Window {
 
 	private ValueChangeListener<String> cl;
 	
-	public AddWithNameDialog(String title, String message)
+	public EnterTextDialog(String title, String message)
 	{
 		super(title);
 		this.setModal(true);
@@ -25,12 +26,15 @@ public class AddWithNameDialog extends Window {
        	Window subWindow = this;
     	subWindow.setModal(true);
         VerticalLayout subContent = new VerticalLayout();
+        subContent.setSpacing(true);
         subWindow.setContent(subContent);
 
         TextField profileName = new TextField(text);
+        profileName.focus();
         
 		subContent.addComponent(profileName);
         Button okButton = new Button("OK");
+        okButton.setClickShortcut(KeyCode.ENTER);
 		okButton.addClickListener(e2 -> {
 			if (cl != null) cl.valueChange(new ValueChangeEvent<String>(profileName, null, true));
 			this.close(); 
@@ -39,7 +43,7 @@ public class AddWithNameDialog extends Window {
         subContent.addComponent(okButton);
 	}
 	
-	public AddWithNameDialog ok(ValueChangeListener<String> cl)
+	public EnterTextDialog ok(ValueChangeListener<String> cl)
 	{
 		this.cl = cl;
 		return this;

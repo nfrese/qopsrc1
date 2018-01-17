@@ -12,6 +12,7 @@ import at.qop.qoplib.entities.Address;
 public class UpdateAddresses extends AbstractCSVUpdater {
 	
 	private final String bezirkfilter;
+	public int recordCount = 0;
 	
 	public UpdateAddresses(String bezirkfilter) {
 		super();
@@ -76,6 +77,7 @@ public class UpdateAddresses extends AbstractCSVUpdater {
 
 	@Override
 	public DbBatch gotRecord(String[] arr) {
+		recordCount++;
 		
 		int nameIx = this.columnsMap.get("NAME");
 		int shapeIx = this.columnsMap.get("SHAPE");

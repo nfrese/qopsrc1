@@ -61,7 +61,6 @@ public class BatchCalculation implements Runnable {
 		cf = ConfigFile.read();
 		router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort());
 		
-		pbt = new PerformBatUpdate(currentProfile);
 	}
 
 	protected void progress(int overall_, int count_) {
@@ -91,6 +90,8 @@ public class BatchCalculation implements Runnable {
 	
 	private void runInternal()
 	{
+		pbt = new PerformBatUpdate(currentProfile);
+		
 		String geomField = "geom";
 		QuadifyImpl quadify = new QuadifyImpl(3000, Address.TABLENAME, geomField);
 		quadify.run();
@@ -112,6 +113,7 @@ public class BatchCalculation implements Runnable {
 			IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 
 			List<Address> addresses = new ArrayList<>();
+
 			
 			AbstractDbTableReader tableReader = new AbstractDbTableReader() {
 
@@ -146,7 +148,14 @@ public class BatchCalculation implements Runnable {
 				
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
-			}		
+			}
+			
+			
+			if (addresses.size() != result.count)
+			{
+				System.out.println("found:" + addresses.size() + " != expected: " + result.count);
+				if (addresses.size() < result.count) throw new RuntimeException("found:" + addresses.size() + " < expected: " + result.count);
+			}
 		}
 		pbt.wbt.done();
 	}

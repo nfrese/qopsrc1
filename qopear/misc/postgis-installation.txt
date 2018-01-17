@@ -2,7 +2,7 @@ postgres:
 
 sudo apt-get update
 sudo apt-get upgrade
-uname -a
+sudo apt-get install postgres
 sudo apt-get install postgis
 
 # - Connection Settings -
@@ -17,12 +17,20 @@ grant all on all tables in schema public to qopuser;
 
 --> TODO datenbank postgis fähig machen
 
+--------------------------------
+
 netwerk:
 /etc/postgresql/9.5/main/postgreql.conf
 
 listen_addresses = '*'  
 
 
-backup:
+backup/restore:
 
+pg_dump qop > /tmp/qop_backup.sql
 psql --set ON_ERROR_STOP=on qop < dump_qop.sql 
+
+for dump/restore from 9.5 to 9.4 --> comment SET row_security = off;
+
+move data directory:
+https://www.digitalocean.com/community/tutorials/how-to-move-a-postgresql-data-directory-to-a-new-location-on-ubuntu-16-04
