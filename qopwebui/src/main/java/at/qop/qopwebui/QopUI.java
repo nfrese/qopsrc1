@@ -27,6 +27,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.Slider;
 import com.vaadin.ui.Slider.ValueOutOfBoundsException;
 import com.vaadin.ui.UI;
@@ -157,7 +158,12 @@ public class QopUI extends UI {
 		grid = new GridLayout(5, 1);
 		grid.setSpacing(true);
 
-		HorizontalLayout hl = new HorizontalLayout(new VerticalLayout(title, filtercombo, profileCombo, new Label(""), grid), leafletMap);
+		VerticalLayout vl = new VerticalLayout(title, filtercombo, profileCombo, new Label(""), grid);
+		Panel panel = new Panel();
+		panel.addStyleName("mypanelexample");
+		panel.setContent(vl);
+		panel.setSizeFull();
+		HorizontalLayout hl = new HorizontalLayout(panel, leafletMap);
 		hl.setSizeFull();
 		setContent(hl);
 
@@ -197,19 +203,30 @@ public class QopUI extends UI {
 				if (nextCategory(lastLc, lc))
 				{
 					String title = lc.params.categorytitle;
-					grid.addComponent(new Label("<b><u>" + title + "</u></b>",  ContentMode.HTML));
-					grid.addComponent(new Label("",  ContentMode.HTML));
-					grid.addComponent(new Label("",  ContentMode.HTML));
-					grid.addComponent(new Label("",  ContentMode.HTML));
-					grid.addComponent(new Label("",  ContentMode.HTML));
+					if (title != null && !title.isEmpty())
+					{
+						grid.addComponent(new Label("<b><u>" + title + "</u></b>",  ContentMode.HTML));
+						grid.addComponent(new Label("",  ContentMode.HTML));
+						grid.addComponent(new Label("",  ContentMode.HTML));
+						grid.addComponent(new Label("",  ContentMode.HTML));
+						grid.addComponent(new Label("",  ContentMode.HTML));
+					}
 					gridAddHeaders();
 				}
 				
 				lastLc = lc;
 					
 				grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
-				grid.addComponent(new Label(formatDouble2Decimal(lc.result) +"",  ContentMode.HTML));
-				grid.addComponent(new Label(formatDouble2Decimal(lc.rating) +"",  ContentMode.HTML));
+				if (lc.params.ratingvisible)
+				{
+					grid.addComponent(new Label(formatDouble2Decimal(lc.result) +"",  ContentMode.HTML));
+					grid.addComponent(new Label(formatDouble2Decimal(lc.rating) +"",  ContentMode.HTML));
+				}
+				else
+				{
+					grid.addComponent(new Label("",  ContentMode.HTML));
+					grid.addComponent(new Label("",  ContentMode.HTML));
+				}
 				Slider slider = new Slider(0, 2);
 				slider.setResolution(1);
 				slider.setWidth(150, Unit.PIXELS);
