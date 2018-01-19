@@ -6,7 +6,7 @@
 
     <groupId>at.qop</groupId>
     <artifactId>qopear</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
 
     <packaging>ear</packaging>
 
@@ -26,19 +26,19 @@
         <dependency>
             <groupId>at.qop</groupId>
             <artifactId>qoplib</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.3-SNAPSHOT</version>
             <type>ejb</type>
         </dependency>
         <dependency>
             <groupId>at.qop</groupId>
             <artifactId>qopwebui</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.3-SNAPSHOT</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>at.qop</groupId>
             <artifactId>qopwebui</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.3-SNAPSHOT</version>
             <type>pom</type>
         </dependency>
     </dependencies>
@@ -51,7 +51,7 @@
                 <artifactId>maven-ear-plugin</artifactId>
                 <version>2.10.1</version>
                 <configuration>
-                    <earName>qop</earName>
+                    <earName>qopear</earName>
                     <generateApplicationXml>false</generateApplicationXml>
                     <fileNameMapping>no-version</fileNameMapping>
                     <defaultLibBundleDir>lib/</defaultLibBundleDir>
