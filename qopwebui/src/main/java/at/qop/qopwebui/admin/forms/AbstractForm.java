@@ -1,5 +1,6 @@
 package at.qop.qopwebui.admin.forms;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
@@ -23,14 +24,14 @@ public abstract class AbstractForm extends Window {
 		subContent.addComponent(c);
 		this.setContent(subContent);
 		
-		Button okButton = new Button("Speichern");
+		Button okButton = new Button("Speichern", VaadinIcons.CHECK);
 		okButton.addClickListener(e2 -> {
 			saveData();
 			if (cl != null) cl.buttonClick(null);
 			this.close();
 		});
 		
-		Button cancelButton = new Button("Abbruch");
+		Button cancelButton = new Button("Abbruch", VaadinIcons.CLOSE);
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});

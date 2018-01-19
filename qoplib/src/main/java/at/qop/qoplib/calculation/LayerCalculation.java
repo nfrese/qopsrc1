@@ -32,8 +32,8 @@ public abstract class LayerCalculation {
 	public ArrayList<LayerTarget> orderedTargets;
 	public ArrayList<LayerTarget> keptTargets = new ArrayList<>();
 	
-	public double result;
-	public double rating=1;
+	public double result = Double.NaN;
+	public double rating = 1;
 	public double weight;
 	
 	public LayerCalculation(Point start, ProfileAnalysis params, double presetWeight, String altRatingFunc) {

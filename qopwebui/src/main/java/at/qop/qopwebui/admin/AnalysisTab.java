@@ -1,9 +1,11 @@
 package at.qop.qopwebui.admin;
 
+import java.io.IOException;
 import java.util.Set;
 
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Button;
@@ -13,6 +15,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.LookupSessionBeans;
+import at.qop.qoplib.Utils;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qopwebui.admin.forms.AnalysisForm;
 import at.qop.qopwebui.components.ConfirmationDialog;
@@ -26,7 +29,7 @@ public class AnalysisTab extends AbstractTab {
         grid.setWidth(100.0f, Unit.PERCENTAGE);
         grid.setHeight(100.0f, Unit.PERCENTAGE);
 
-        Button addanalysisButton = new Button("Auswertung hinzufügen...");
+        Button addanalysisButton = new Button("Auswertung hinzufügen...", VaadinIcons.PLUS);
         addanalysisButton.addClickListener(e -> {
         	
         	Analysis analysis = new Analysis();
@@ -38,7 +41,7 @@ public class AnalysisTab extends AbstractTab {
 
         });
         
-        Button editanalysisButton = new Button("Auswertung bearbeiten...");
+        Button editanalysisButton = new Button("Auswertung bearbeiten...", VaadinIcons.EDIT);
         editanalysisButton.setEnabled(false);
         editanalysisButton.addClickListener(e -> {
         	if (grid.getSelectedItems().size() == 1) {
@@ -52,7 +55,29 @@ public class AnalysisTab extends AbstractTab {
         	}
 		} );
         
-        Button deleteanalysisButton = new Button("Auswertung loeschen...");
+        Button cloneanalysisButton = new Button("Auswertung klonen...", VaadinIcons.QUOTE_RIGHT);
+        cloneanalysisButton.setEnabled(false);
+        cloneanalysisButton.addClickListener(e -> {
+        	if (grid.getSelectedItems().size() == 1) {
+        		Analysis analysis = grid.getSelectedItems().iterator().next();
+        		try {
+					Analysis clone = Utils.deepClone(analysis);
+					clone.name = clone.name + "_" + ((int)(Math.random()*100));
+					
+					new AnalysisForm("Auswertung klonen", clone, true).ok(dummy -> {
+						LookupSessionBeans.profileDomain().createAnalysis(clone);
+						refreshGrid(grid);
+					}) .show();
+					
+				} catch (ClassNotFoundException | IOException e1) {
+					throw new RuntimeException(e1);
+				}
+        		
+        		
+        	}
+		} );
+        
+        Button deleteanalysisButton = new Button("Auswertung loeschen...", VaadinIcons.TRASH);
         deleteanalysisButton.setEnabled(false);
         deleteanalysisButton.addClickListener(e -> {
         	if (grid.getSelectedItems().size() == 1) {
@@ -71,10 +96,11 @@ public class AnalysisTab extends AbstractTab {
 			
 			Set<Analysis> selectedItems = event.getAllSelectedItems();
 			editanalysisButton.setEnabled(selectedItems.size() == 1);
+			cloneanalysisButton.setEnabled(selectedItems.size() == 1);
 			deleteanalysisButton.setEnabled(selectedItems.size() == 1);
 		});
 		
-    	final VerticalLayout vl = new VerticalLayout(grid, new HorizontalLayout(addanalysisButton, editanalysisButton, deleteanalysisButton));
+    	final VerticalLayout vl = new VerticalLayout(grid, new HorizontalLayout(addanalysisButton, editanalysisButton, cloneanalysisButton, deleteanalysisButton));
     	vl.setExpandRatio(grid, 3.0f);
     	vl.setMargin(true);
     	vl.setSizeFull();

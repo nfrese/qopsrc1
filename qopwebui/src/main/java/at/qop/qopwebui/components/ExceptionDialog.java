@@ -3,6 +3,7 @@ package at.qop.qopwebui.components;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
@@ -34,15 +35,16 @@ public class ExceptionDialog extends Window {
 		TextArea textArea = new TextArea();
 		textArea.setSizeFull();
 		textArea.setValue(text);
+		textArea.setIcon(VaadinIcons.EXCLAMATION_CIRCLE);
 		
 		subContent.addComponent(textArea);
 		subContent.setExpandRatio(textArea, 10.0f);
-		Button okButton = new Button("OK");
+		Button okButton = new Button("OK", VaadinIcons.CHECK);
 		okButton.addClickListener(e2 -> {
 			if (cl != null) cl.buttonClick(null);
 			this.close(); 
 		});
-		Button cancelButton = new Button("Abbruch");
+		Button cancelButton = new Button("Abbruch", VaadinIcons.CLOSE);
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});

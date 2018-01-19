@@ -18,6 +18,7 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Sizeable;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ContentMode;
@@ -26,6 +27,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Slider;
@@ -49,7 +51,7 @@ import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.OSRMClient;
 import at.qop.qopwebui.components.ExceptionDialog;
 
-@Theme("mytheme")
+@Theme("valo")
 public class QopUI extends UI {
 
 	private static final long serialVersionUID = 1L;
@@ -159,11 +161,12 @@ public class QopUI extends UI {
 		grid.setSpacing(true);
 
 		VerticalLayout vl = new VerticalLayout(title, filtercombo, profileCombo, new Label(""), grid);
+		vl.setSizeUndefined();
 		Panel panel = new Panel();
-		panel.addStyleName("mypanelexample");
 		panel.setContent(vl);
 		panel.setSizeFull();
-		HorizontalLayout hl = new HorizontalLayout(panel, leafletMap);
+		HorizontalSplitPanel hl = new HorizontalSplitPanel(panel, leafletMap);
+		hl.setSplitPosition(60, Unit.PERCENTAGE);
 		hl.setSizeFull();
 		setContent(hl);
 
@@ -219,8 +222,8 @@ public class QopUI extends UI {
 				grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
 				if (lc.params.ratingvisible)
 				{
-					grid.addComponent(new Label(formatDouble2Decimal(lc.result) +"",  ContentMode.HTML));
-					grid.addComponent(new Label(formatDouble2Decimal(lc.rating) +"",  ContentMode.HTML));
+					grid.addComponent(new Label(formatDouble2Decimal(lc.result),  ContentMode.HTML));
+					grid.addComponent(new Label(formatDouble2Decimal(lc.rating),  ContentMode.HTML));
 				}
 				else
 				{
@@ -307,6 +310,9 @@ public class QopUI extends UI {
 		String lastCat = lastLc.params.category;
 		String cat = lc.params.category;
 		
+		if (lastCat == null && cat == null) return false;
+		if (lastCat == null) return true;
+		
 		String[] lastCatSplit = lastCat.split("\\.");
 		String[] catSplit = cat.split("\\.");
 		if (lastCatSplit.length != catSplit.length) return true;
@@ -342,6 +348,8 @@ public class QopUI extends UI {
 	}
 
 	private String formatDouble2Decimal(double d) {
+		if (Double.isNaN(d)) return "-";
+		
 		return new DecimalFormat("#.##").format(d);
 	}
 

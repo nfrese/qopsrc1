@@ -3,6 +3,7 @@ package at.qop.qopwebui.components;
 import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.data.HasValue.ValueChangeListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -33,14 +34,19 @@ public class EnterTextDialog extends Window {
         profileName.focus();
         
 		subContent.addComponent(profileName);
-        Button okButton = new Button("OK");
+        Button okButton = new Button("OK", VaadinIcons.CHECK);
         okButton.setClickShortcut(KeyCode.ENTER);
 		okButton.addClickListener(e2 -> {
 			if (cl != null) cl.valueChange(new ValueChangeEvent<String>(profileName, null, true));
 			this.close(); 
 		});
+		Button cancelButton = new Button("Abbruch", VaadinIcons.CLOSE);
+		cancelButton.addClickListener(e2 -> {
+			this.close(); 
+		});
         
         subContent.addComponent(okButton);
+        subContent.addComponent(cancelButton);
 	}
 	
 	public EnterTextDialog ok(ValueChangeListener<String> cl)

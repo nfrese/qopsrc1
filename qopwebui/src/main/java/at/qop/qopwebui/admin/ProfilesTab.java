@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Button;
@@ -17,6 +18,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TwinColSelect;
@@ -41,7 +43,7 @@ public class ProfilesTab extends AbstractTab {
         listSelect.setRows(15);
         refreshProfileList(listSelect);
         
-        Button addProfileButton = new Button("Profil hinzufügen...");
+        Button addProfileButton = new Button("Profil hinzufügen...", VaadinIcons.PLUS);
         addProfileButton.addClickListener(e -> {
 
         	Profile profile = new Profile();
@@ -53,7 +55,7 @@ public class ProfilesTab extends AbstractTab {
 
         });
         
-        Button editProfileButton = new Button("Profil bearbeiten...");
+        Button editProfileButton = new Button("Profil bearbeiten..." , VaadinIcons.EDIT);
         editProfileButton.setEnabled(false);
         editProfileButton.addClickListener(e -> {
 
@@ -70,7 +72,7 @@ public class ProfilesTab extends AbstractTab {
 
         });
         
-        Button cloneProfileButton = new Button("Profil klonen...");
+        Button cloneProfileButton = new Button("Profil klonen...", VaadinIcons.QUOTE_RIGHT);
         cloneProfileButton.setEnabled(false);
         cloneProfileButton.addClickListener(e -> {
 
@@ -99,7 +101,7 @@ public class ProfilesTab extends AbstractTab {
         	}
         });
         
-        Button removeProfileButton = new Button("Profil löschen...");
+        Button removeProfileButton = new Button("Profil löschen...", VaadinIcons.TRASH);
         removeProfileButton.setEnabled(false);
         removeProfileButton.addClickListener(e -> {
         	Set<Profile> sel = listSelect.getSelectedItems();
@@ -186,7 +188,7 @@ public class ProfilesTab extends AbstractTab {
 		listSelect.setSizeFull();
 		listSelect.setWidth(220, Unit.PIXELS);
 		
-		twinSelect.setWidth(420, Unit.PIXELS);
+		twinSelect.setWidth(100, Unit.PERCENTAGE);
 		
 		VerticalLayout vl = new VerticalLayout(listSelect, addProfileButton, editProfileButton, cloneProfileButton, removeProfileButton);
 		vl.setExpandRatio(listSelect, 5.0f);
@@ -195,12 +197,15 @@ public class ProfilesTab extends AbstractTab {
 		vl.setWidth(240, Unit.PIXELS);
 		final HorizontalLayout hl = new HorizontalLayout( 
 				vl, twinSelect, grid);
-		hl.setExpandRatio(grid, 3.0f);
+//		hl.setExpandRatio(grid, 1.7f);
 		hl.setExpandRatio(twinSelect, 1f);
 		hl.setMargin(true);
 		hl.setSizeFull();
 		
-		return hl;
+		HorizontalSplitPanel hsp = new HorizontalSplitPanel(hl, grid);
+		hsp.setSplitPosition(50, Unit.PERCENTAGE);
+		hsp.setSizeFull();
+		return hsp;
 	}
 
 	private void updateTwinSelect(TwinColSelect<ProfileAnalysis> twinSelect) {

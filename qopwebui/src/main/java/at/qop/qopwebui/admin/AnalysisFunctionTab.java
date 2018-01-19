@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Button;
@@ -28,7 +29,7 @@ public class AnalysisFunctionTab extends AbstractTab {
         grid.setWidth(100.0f, Unit.PERCENTAGE);
         grid.setHeight(100.0f, Unit.PERCENTAGE);
 
-        Button addanalysisButton = new Button("Auswertungs-Funktion hinzufügen...");
+        Button addanalysisButton = new Button("Auswertungs-Funktion hinzufügen...", VaadinIcons.PLUS);
         addanalysisButton.addClickListener(e -> {
         	
         	AnalysisFunction analysis = new AnalysisFunction();
@@ -40,7 +41,22 @@ public class AnalysisFunctionTab extends AbstractTab {
 
         });
         
-        Button cloneButton = new Button("Auswertungs-Funktion klonen...");
+        Button editanalysisButton = new Button("Auswertungs-Funktion bearbeiten...", VaadinIcons.EDIT);
+        editanalysisButton.setEnabled(false);
+        editanalysisButton.addClickListener(e -> {
+        	if (grid.getSelectedItems().size() == 1) {
+        		AnalysisFunction analysis = grid.getSelectedItems().iterator().next();
+        		
+        		new AnalysisFunctionForm("Auswertungs-Funktion bearbeiten", analysis, false).ok(dummy -> {
+        			LookupSessionBeans.profileDomain().updateAnalysisFunction(analysis);
+        			refreshGrid(grid);
+        		}) .show();
+        		
+        	}
+		} );
+
+        
+        Button cloneButton = new Button("Auswertungs-Funktion klonen...", VaadinIcons.QUOTE_RIGHT);
         cloneButton.setEnabled(false);
         cloneButton.addClickListener(e -> {
         	if (grid.getSelectedItems().size() == 1) {
@@ -61,21 +77,7 @@ public class AnalysisFunctionTab extends AbstractTab {
         	}
         } );
         
-        Button editanalysisButton = new Button("Auswertungs-Funktion bearbeiten...");
-        editanalysisButton.setEnabled(false);
-        editanalysisButton.addClickListener(e -> {
-        	if (grid.getSelectedItems().size() == 1) {
-        		AnalysisFunction analysis = grid.getSelectedItems().iterator().next();
-        		
-        		new AnalysisFunctionForm("Auswertungs-Funktion bearbeiten", analysis, false).ok(dummy -> {
-        			LookupSessionBeans.profileDomain().updateAnalysisFunction(analysis);
-        			refreshGrid(grid);
-        		}) .show();
-        		
-        	}
-		} );
-        
-        Button deleteanalysisButton = new Button("Auswertungs-Funktion loeschen...");
+        Button deleteanalysisButton = new Button("Auswertungs-Funktion loeschen...", VaadinIcons.TRASH);
         deleteanalysisButton.setEnabled(false);
         deleteanalysisButton.addClickListener(e -> {
         	if (grid.getSelectedItems().size() == 1) {

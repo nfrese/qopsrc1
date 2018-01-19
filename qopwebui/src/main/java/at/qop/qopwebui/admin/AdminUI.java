@@ -16,7 +16,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import at.qop.qoplib.ConfigFile;
 import at.qop.qopwebui.components.EnterTextDialog;
 
-@Theme("mytheme")
+@Theme("valo")
 public class AdminUI extends UI {
 	
 	private static final long serialVersionUID = 1L;

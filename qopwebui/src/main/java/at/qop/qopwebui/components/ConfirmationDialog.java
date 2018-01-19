@@ -1,5 +1,6 @@
 package at.qop.qopwebui.components;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
@@ -25,6 +26,7 @@ public class ConfirmationDialog extends Window {
 		this.setContent(subContent);
 		
 		Label msgLabel = new Label(text);
+		msgLabel.setIcon(icon());
 		
 		subContent.addComponent(msgLabel);
 		HorizontalLayout buttons = buttons();
@@ -32,13 +34,17 @@ public class ConfirmationDialog extends Window {
 
 	}
 
+	public VaadinIcons icon() {
+		return VaadinIcons.QUESTION;
+	}
+
 	public HorizontalLayout buttons() {
-		Button okButton = new Button("OK");
+		Button okButton = new Button("OK", VaadinIcons.CHECK);
 		okButton.addClickListener(e2 -> {
 			if (cl != null) cl.buttonClick(null);
 			this.close(); 
 		});
-		Button cancelButton = new Button("Abbruch");
+		Button cancelButton = new Button("Abbruch", VaadinIcons.CLOSE);
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});
