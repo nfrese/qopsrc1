@@ -16,6 +16,8 @@ public class Calculation {
 	
 	public List<LayerCalculation> layerCalculations = new ArrayList<>();
 	
+	public List<CalculationSection> sections = new ArrayList<>();
+	
 	public Calculation(Profile profile, Address address, LayerSource source, IRouter router) {
 		super();
 		this.profile = profile;
@@ -38,11 +40,21 @@ public class Calculation {
 			lc.p4Calculate();
 			lc.p5route(router);
 		};
+		
+		new CalculationOrderer(this).run();
 	}
 	
 	public double overallRating()
 	{
-		return layerCalculations.stream().mapToDouble(lc -> (lc.rating * lc.weight)).sum();
+		double sectionSum = sections.stream().mapToDouble(se -> se.rating()).sum();
+		
+		double overall = layerCalculations.stream().mapToDouble(lc -> (lc.rating * lc.weight)).sum();
+		if ((int)(sectionSum*100) != (int)(overall*100)) throw new RuntimeException("never: " + sectionSum + " != " + overall);
+		return overall;
+	}
+
+	public void addSection(CalculationSection current) {
+		sections.add(current);
 	}
 
 }

@@ -1,9 +1,10 @@
 package at.qop.qopwebui;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Comparator;
+import java.util.EventObject;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.servlet.annotation.WebServlet;
 
@@ -17,12 +18,11 @@ import org.vaadin.addon.leaflet.LTileLayer;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.event.EventRouter;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.Sizeable;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.shared.Registration;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.ui.slider.SliderOrientation;
 import com.vaadin.ui.Button;
@@ -42,6 +42,7 @@ import com.vividsolutions.jts.geom.Point;
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.Calculation;
+import at.qop.qoplib.calculation.CalculationSection;
 import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.calculation.LayerCalculation;
@@ -51,7 +52,6 @@ import at.qop.qoplib.calculation.charts.QopPieChart;
 import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
-import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.OSRMClient;
 import at.qop.qopwebui.components.ChartDialog;
 import at.qop.qopwebui.components.ExceptionDialog;
@@ -165,7 +165,9 @@ public class QopUI extends UI {
 		grid = new GridLayout(6, 1);
 		grid.setSpacing(true);
 
-		VerticalLayout vl = new VerticalLayout(title, filtercombo, profileCombo, new Label(""), grid);
+		overallRatingLabel = new Label("",  ContentMode.HTML);
+		
+		VerticalLayout vl = new VerticalLayout(title, filtercombo, profileCombo, new Label(""), grid, overallRatingLabel);
 		vl.setSizeUndefined();
 		Panel panel = new Panel();
 		panel.setContent(vl);
@@ -186,6 +188,31 @@ public class QopUI extends UI {
 		}
 	}
 
+
+	EventRouter evr = new EventRouter();
+	public static class SliderChangedEvent extends EventObject {
+
+		private static final long serialVersionUID = 1L;
+
+		public SliderChangedEvent(Object source) {
+			super(source);
+		}
+	}
+	
+	@FunctionalInterface
+	public static interface SliderChangedListener extends Serializable {
+	  void sliderChanged(SliderChangedEvent event);
+	}
+
+	public void addSliderChangedListener(SliderChangedListener l)
+	{
+		try {
+			evr.addListener(SliderChangedEvent.class, l, SliderChangedListener.class.getMethod("sliderChanged", SliderChangedEvent.class));
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	private void startCalculation() {
 		if (currentProfile != null && currentAddress != null)
 		{
@@ -198,180 +225,146 @@ public class QopUI extends UI {
 			grid.removeAllComponents();
 			//gridAddHeaders();
 
-			Comparator<LayerCalculation> comparator = Comparator.comparing(lc -> lc.params.category + "");
-			comparator = comparator.thenComparing(Comparator.comparing(lc -> lc.params.analysis.name + ""));
-			
-			LayerCalculation lastLc = null;
-			
-			for (LayerCalculation lc :calculation.layerCalculations.stream()
-				.sorted(comparator)
-				.collect(Collectors.toList()))
+			for (CalculationSection section : calculation.sections)
+			{
+				String title = section.getTitle();
+				if (title != null && !title.isEmpty())
 				{
-
-				if (nextCategory(lastLc, lc))
-				{
-					String title = lc.params.categorytitle;
-					if (title != null && !title.isEmpty())
-					{
-						grid.addComponent(new Label("<b><u>" + title + "</u></b>",  ContentMode.HTML));
-						grid.addComponent(new Label("",  ContentMode.HTML));
-						grid.addComponent(new Label("",  ContentMode.HTML));
-						grid.addComponent(new Label("",  ContentMode.HTML));
-						grid.addComponent(new Label("",  ContentMode.HTML));
-						grid.addComponent(new Label("",  ContentMode.HTML));
-					}
-					gridAddHeaders();
-				}
-				lastLc = lc;
-				
-				grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
-				
-				if (lc.charts != null && lc.charts.size() > 0)
-				{
-					HorizontalLayout hl = new HorizontalLayout();
-
-					for (QopChart chart : lc.charts) {
-						VaadinIcons icon = VaadinIcons.CHART;
-
-						if (chart instanceof QopPieChart)
-						{
-							icon = VaadinIcons.PIE_CHART;
-						}
-						else if (chart instanceof QopPieChart)
-						{
-							icon = VaadinIcons.BAR_CHART;
-						}
-
-						Button chartButton = new Button("", icon);
-						chartButton.addClickListener(e -> {
-							new ChartDialog(lc.analysis().description, "", chart.createChart()).show();
-						});
-						hl.addComponent(chartButton);
-					}
-
-					grid.addComponent(hl);
-				}
-				else
-				{
-					grid.addComponent(new Label(""));
-				}
-				
-				if (lc.params.ratingvisible)
-				{
-					grid.addComponent(new Label(formatDouble2Decimal(lc.result),  ContentMode.HTML));
-					grid.addComponent(new Label(formatDouble2Decimal(lc.rating),  ContentMode.HTML));
-				}
-				else
-				{
+					grid.addComponent(new Label("<b><u>" + title + "</u></b>",  ContentMode.HTML));
+					grid.addComponent(new Label("",  ContentMode.HTML));
+					grid.addComponent(new Label("",  ContentMode.HTML));
+					grid.addComponent(new Label("",  ContentMode.HTML));
 					grid.addComponent(new Label("",  ContentMode.HTML));
 					grid.addComponent(new Label("",  ContentMode.HTML));
 				}
-				Slider slider = new Slider(0, 2);
-				slider.setResolution(1);
-				slider.setWidth(150, Unit.PIXELS);
-				slider.setOrientation(SliderOrientation.HORIZONTAL);
-				try {
-					slider.setValue(lc.weight);
-					slider.addValueChangeListener(l -> {
-						lc.weight = slider.getValue();
-						refreshOverallRating(calculation);
-					});
-					grid.addComponent(slider);
-				} catch (ValueOutOfBoundsException e) {
-					grid.addComponent(new Label("Bad Value " + lc.weight,  ContentMode.HTML));
-				}				
+				gridAddHeaders();
 
-				Button button = new Button("Karte >");
-				button.setStyleName(ValoTheme.BUTTON_LINK);
-				button.addClickListener(e -> {
+				for (LayerCalculation lc :section.lcs)
+				{
 
-					if (lfgResults != null)
+					grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
+
+					if (lc.charts != null && lc.charts.size() > 0)
 					{
-						lfgResults.removeAllComponents();
+						HorizontalLayout hl = new HorizontalLayout();
 
-						lc.keptTargets.stream().forEach(lt -> {
-							if (lt.route != null)
+						for (QopChart chart : lc.charts) {
+							VaadinIcons icon = VaadinIcons.CHART;
+
+							if (chart instanceof QopPieChart)
 							{
-								LPolyline lp = new LPolyline(lt.route);
-								lp.setColor("#ff6020");
-								lfgResults.addComponent(lp);
+								icon = VaadinIcons.PIE_CHART;
 							}
-						});
-
-						lc.keptTargets.stream().forEach(lt -> {
-
-							if (lt.geom instanceof Point)
+							else if (chart instanceof QopPieChart)
 							{
-								LMarker lm = new LMarker((Point)lt.geom);
-								lm.addStyleName("specialstyle");
-								lm.setIcon(new ExternalResource("https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png"));
-								lm.setIconAnchor(new org.vaadin.addon.leaflet.shared.Point(12, 41));
-								if (lt.caption != null)
+								icon = VaadinIcons.BAR_CHART;
+							}
+
+							Button chartButton = new Button("", icon);
+							chartButton.addClickListener(e -> {
+								new ChartDialog(lc.analysis().description, "", chart.createChart()).show();
+							});
+							hl.addComponent(chartButton);
+						}
+
+						grid.addComponent(hl);
+					}
+					else
+					{
+						grid.addComponent(new Label(""));
+					}
+
+					if (lc.params.ratingvisible)
+					{
+						grid.addComponent(new Label(formatDouble2Decimal(lc.result),  ContentMode.HTML));
+						grid.addComponent(new Label(formatDouble2Decimal(lc.rating),  ContentMode.HTML));
+					}
+					else
+					{
+						grid.addComponent(new Label("",  ContentMode.HTML));
+						grid.addComponent(new Label("",  ContentMode.HTML));
+					}
+					Slider slider = new Slider(0, 2);
+					slider.setResolution(1);
+					slider.setWidth(150, Unit.PIXELS);
+					slider.setOrientation(SliderOrientation.HORIZONTAL);
+					try {
+						slider.setValue(lc.weight);
+						slider.addValueChangeListener(l -> {
+							lc.weight = slider.getValue();
+							refreshOverallRating(calculation);
+						});
+						grid.addComponent(slider);
+					} catch (ValueOutOfBoundsException e) {
+						grid.addComponent(new Label("Bad Value " + lc.weight,  ContentMode.HTML));
+					}				
+
+					Button button = new Button("Karte >");
+					button.setStyleName(ValoTheme.BUTTON_LINK);
+					button.addClickListener(e -> {
+
+						if (lfgResults != null)
+						{
+							lfgResults.removeAllComponents();
+
+							lc.keptTargets.stream().forEach(lt -> {
+								if (lt.route != null)
 								{
-									lm.setPopup(lt.caption);
+									LPolyline lp = new LPolyline(lt.route);
+									lp.setColor("#ff6020");
+									lfgResults.addComponent(lp);
 								}
+							});
 
-								lfgResults.addComponent(lm);
+							lc.keptTargets.stream().forEach(lt -> {
+
+								if (lt.geom instanceof Point)
+								{
+									LMarker lm = new LMarker((Point)lt.geom);
+									lm.addStyleName("specialstyle");
+									lm.setIcon(new ExternalResource("https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png"));
+									lm.setIconAnchor(new org.vaadin.addon.leaflet.shared.Point(12, 41));
+									if (lt.caption != null)
+									{
+										lm.setPopup(lt.caption);
+									}
+
+									lfgResults.addComponent(lm);
+								}
+							});
+
+
+							if (lc.analysis().hasRadius()) {
+								LCircle circle = new LCircle(lc.start, lc.analysis().radius);
+								lfgResults.addComponent(circle);
 							}
-						});
-
-
-						if (lc.analysis().hasRadius()) {
-							LCircle circle = new LCircle(lc.start, lc.analysis().radius);
-							lfgResults.addComponent(circle);
+							leafletMap.zoomToContent();
 						}
-						leafletMap.zoomToContent();
-					}
+					});
+					grid.addComponent(button);
+
+				};
+
+				grid.addComponent(new Label("<b>Summe</b>",  ContentMode.HTML));
+				grid.addComponent(new Label("",  ContentMode.HTML));
+				grid.addComponent(new Label("",  ContentMode.HTML));
+				
+				Label sectionRatingLabel = new Label("",  ContentMode.HTML);
+				
+				grid.addComponent(sectionRatingLabel);
+				grid.addComponent(new Label("",  ContentMode.HTML));
+				grid.addComponent(new Label("",  ContentMode.HTML));
+				
+				addSliderChangedListener(e -> {
+					sectionRatingLabel.setValue("<big><b>" + formatDouble2Decimal(section.rating()) + "</b></big>");
 				});
-				grid.addComponent(button);
-
-			};
-
-			grid.addComponent(new Label("<b>Summe</b>",  ContentMode.HTML));
-			grid.addComponent(new Label("",  ContentMode.HTML));
-			grid.addComponent(new Label("",  ContentMode.HTML));
-
-			overallRatingLabel = new Label("",  ContentMode.HTML);
-
-			grid.addComponent(overallRatingLabel);
-			grid.addComponent(new Label("",  ContentMode.HTML));
-			grid.addComponent(new Label("",  ContentMode.HTML));
-
+			}
+			
+			addSliderChangedListener(e -> {
+				overallRatingLabel.setValue("<big><big><b>Gesamtindex: " + formatDouble2Decimal(calculation.overallRating()) + "</b></big></big>");
+			});
 			refreshOverallRating(calculation);
 		}
-	}
-
-	private boolean nextCategory(LayerCalculation lastLc, LayerCalculation lc) {
-		if (lastLc == null)	return true;
-		
-		String lastCat = lastLc.params.category;
-		String cat = lc.params.category;
-		
-		if (lastCat == null && cat == null) return false;
-		if (lastCat == null) return true;
-		
-		String[] lastCatSplit = lastCat.split("\\.");
-		String[] catSplit = {};
-		if (cat != null) catSplit = cat.split("\\.");
-		
-		if (lastCatSplit.length != catSplit.length) return true;
-		
-		int changeIx = lastCatSplit.length;
-		
-		for (int i = 0; i < lastCatSplit.length; i++)
-		{
-			if (!catSplit[i].equals(lastCatSplit[i]))
-			{
-				changeIx = i;
-				break;
-			}
-		}
-		
-		if (changeIx < lastCatSplit.length -1)
-		{
-			return true;
-		}
-		return false;
 	}
 
 	public void gridAddHeaders() {
@@ -384,12 +377,12 @@ public class QopUI extends UI {
 	}
 
 	private void refreshOverallRating(Calculation calculation) {
-		overallRatingLabel.setValue("<big><b>" + formatDouble2Decimal(calculation.overallRating()) + "</b></big>");
+		evr.fireEvent(new SliderChangedEvent(this));
 	}
 
 	private String formatDouble2Decimal(double d) {
 		if (Double.isNaN(d)) return "-";
-		
+
 		return new DecimalFormat("#.##").format(d);
 	}
 
