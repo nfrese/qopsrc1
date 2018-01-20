@@ -15,6 +15,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.GLO;
+import at.qop.qoplib.calculation.charts.QopBarChart;
 import at.qop.qoplib.calculation.charts.QopChart;
 import at.qop.qoplib.calculation.charts.QopPieChart;
 import at.qop.qoplib.dbconnector.DbTable;
@@ -38,7 +39,7 @@ public abstract class LayerCalculation {
 	public double rating = 1;
 	public double weight;
 	
-	public QopChart chart = null;
+	public List<QopChart> charts = null;
 	
 	public LayerCalculation(Point start, ProfileAnalysis params, double presetWeight, String altRatingFunc) {
 		super();
@@ -140,9 +141,24 @@ public abstract class LayerCalculation {
 		keptTargets.add(target);
 	}
 	
-	public void createPieChart()
+	public QopPieChart addPieChart()
 	{
-		this.chart = new QopPieChart();
+		initChartsList();
+		QopPieChart chart_ = new QopPieChart();
+		this.charts.add(chart_);
+		return chart_;
+	}
+
+	public QopBarChart addBarChart()
+	{
+		initChartsList();
+		QopBarChart chart_ = new QopBarChart();
+		this.charts.add(chart_);
+		return chart_;
+	}
+	
+	private void initChartsList() {
+		if (charts == null) charts = new ArrayList<>();
 	}
 	
 	protected static LonLat lonLat(Point p) {

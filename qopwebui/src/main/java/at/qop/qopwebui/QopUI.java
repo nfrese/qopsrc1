@@ -46,6 +46,7 @@ import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerSource;
+import at.qop.qoplib.calculation.charts.QopChart;
 import at.qop.qoplib.calculation.charts.QopPieChart;
 import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.entities.Address;
@@ -161,7 +162,7 @@ public class QopUI extends UI {
 		lfgResults = new LFeatureGroup();
 		leafletMap.addLayer(lfgResults);
 
-		grid = new GridLayout(5, 1);
+		grid = new GridLayout(6, 1);
 		grid.setSpacing(true);
 
 		VerticalLayout vl = new VerticalLayout(title, filtercombo, profileCombo, new Label(""), grid);
@@ -217,35 +218,44 @@ public class QopUI extends UI {
 						grid.addComponent(new Label("",  ContentMode.HTML));
 						grid.addComponent(new Label("",  ContentMode.HTML));
 						grid.addComponent(new Label("",  ContentMode.HTML));
+						grid.addComponent(new Label("",  ContentMode.HTML));
 					}
 					gridAddHeaders();
 				}
-				
 				lastLc = lc;
-				if (lc.chart != null)
+				
+				grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
+				
+				if (lc.charts != null && lc.charts.size() > 0)
 				{
-					VaadinIcons icon = VaadinIcons.CHART;
-					
-					if (lc.chart instanceof QopPieChart)
-					{
-						icon = VaadinIcons.PIE_CHART;
+					HorizontalLayout hl = new HorizontalLayout();
+
+					for (QopChart chart : lc.charts) {
+						VaadinIcons icon = VaadinIcons.CHART;
+
+						if (chart instanceof QopPieChart)
+						{
+							icon = VaadinIcons.PIE_CHART;
+						}
+						else if (chart instanceof QopPieChart)
+						{
+							icon = VaadinIcons.BAR_CHART;
+						}
+
+						Button chartButton = new Button("", icon);
+						chartButton.addClickListener(e -> {
+							new ChartDialog(lc.analysis().description, "", chart.createChart()).show();
+						});
+						hl.addComponent(chartButton);
 					}
-					
-					Button chartButton = new Button("", icon);
-					chartButton.addClickListener(e -> {
-						new ChartDialog(lc.analysis().description, "", lc.chart.createChart()).show();
-					});
-					
-					HorizontalLayout hl = new HorizontalLayout(
-							new Label(lc.analysis().description,  ContentMode.HTML),
-							chartButton
-							);
+
 					grid.addComponent(hl);
 				}
 				else
 				{
-					grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
+					grid.addComponent(new Label(""));
 				}
+				
 				if (lc.params.ratingvisible)
 				{
 					grid.addComponent(new Label(formatDouble2Decimal(lc.result),  ContentMode.HTML));
@@ -319,6 +329,7 @@ public class QopUI extends UI {
 
 			grid.addComponent(new Label("<b>Summe</b>",  ContentMode.HTML));
 			grid.addComponent(new Label("",  ContentMode.HTML));
+			grid.addComponent(new Label("",  ContentMode.HTML));
 
 			overallRatingLabel = new Label("",  ContentMode.HTML);
 
@@ -365,6 +376,7 @@ public class QopUI extends UI {
 
 	public void gridAddHeaders() {
 		grid.addComponent(new Label("<u>Berechnung</u>",  ContentMode.HTML));
+		grid.addComponent(new Label("",  ContentMode.HTML));
 		grid.addComponent(new Label("<u>Resultat</u>",  ContentMode.HTML));
 		grid.addComponent(new Label("<u>Bewertung</u>",  ContentMode.HTML));
 		grid.addComponent(new Label("<u>Gewicht</u>",  ContentMode.HTML));
