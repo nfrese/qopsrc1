@@ -17,10 +17,12 @@ import org.vaadin.addon.leaflet.LTileLayer;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.Registration;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.ui.slider.SliderOrientation;
 import com.vaadin.ui.Button;
@@ -44,11 +46,13 @@ import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerSource;
+import at.qop.qoplib.calculation.charts.QopPieChart;
 import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.OSRMClient;
+import at.qop.qopwebui.components.ChartDialog;
 import at.qop.qopwebui.components.ExceptionDialog;
 
 @Theme("valo")
@@ -218,8 +222,30 @@ public class QopUI extends UI {
 				}
 				
 				lastLc = lc;
+				if (lc.chart != null)
+				{
+					VaadinIcons icon = VaadinIcons.CHART;
 					
-				grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
+					if (lc.chart instanceof QopPieChart)
+					{
+						icon = VaadinIcons.PIE_CHART;
+					}
+					
+					Button chartButton = new Button("", icon);
+					chartButton.addClickListener(e -> {
+						new ChartDialog(lc.analysis().description, "", lc.chart.createChart()).show();
+					});
+					
+					HorizontalLayout hl = new HorizontalLayout(
+							new Label(lc.analysis().description,  ContentMode.HTML),
+							chartButton
+							);
+					grid.addComponent(hl);
+				}
+				else
+				{
+					grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
+				}
 				if (lc.params.ratingvisible)
 				{
 					grid.addComponent(new Label(formatDouble2Decimal(lc.result),  ContentMode.HTML));
@@ -314,7 +340,9 @@ public class QopUI extends UI {
 		if (lastCat == null) return true;
 		
 		String[] lastCatSplit = lastCat.split("\\.");
-		String[] catSplit = cat.split("\\.");
+		String[] catSplit = {};
+		if (cat != null) catSplit = cat.split("\\.");
+		
 		if (lastCatSplit.length != catSplit.length) return true;
 		
 		int changeIx = lastCatSplit.length;

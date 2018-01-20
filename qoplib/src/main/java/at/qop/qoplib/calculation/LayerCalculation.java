@@ -15,6 +15,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.GLO;
+import at.qop.qoplib.calculation.charts.QopChart;
+import at.qop.qoplib.calculation.charts.QopPieChart;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.ProfileAnalysis;
@@ -35,6 +37,8 @@ public abstract class LayerCalculation {
 	public double result = Double.NaN;
 	public double rating = 1;
 	public double weight;
+	
+	public QopChart chart = null;
 	
 	public LayerCalculation(Point start, ProfileAnalysis params, double presetWeight, String altRatingFunc) {
 		super();
@@ -134,6 +138,11 @@ public abstract class LayerCalculation {
 	public void keep(LayerTarget target)
 	{
 		keptTargets.add(target);
+	}
+	
+	public void createPieChart()
+	{
+		this.chart = new QopPieChart();
 	}
 	
 	protected static LonLat lonLat(Point p) {

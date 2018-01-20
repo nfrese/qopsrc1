@@ -5,9 +5,7 @@ import java.io.StringWriter;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -19,8 +17,6 @@ public class ExceptionDialog extends Window {
 	
 	private String text;
 
-	private ClickListener cl;
-	
 	public ExceptionDialog(String title, String message)
 	{
 		super(title);
@@ -39,16 +35,11 @@ public class ExceptionDialog extends Window {
 		
 		subContent.addComponent(textArea);
 		subContent.setExpandRatio(textArea, 10.0f);
-		Button okButton = new Button("OK", VaadinIcons.CHECK);
-		okButton.addClickListener(e2 -> {
-			if (cl != null) cl.buttonClick(null);
-			this.close(); 
-		});
-		Button cancelButton = new Button("Abbruch", VaadinIcons.CLOSE);
+		Button cancelButton = new Button("OK", VaadinIcons.CHECK);
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});
-		subContent.addComponent(new HorizontalLayout(okButton, cancelButton));
+		subContent.addComponent(new HorizontalLayout(cancelButton));
 
 	}
 	
@@ -61,12 +52,6 @@ public class ExceptionDialog extends Window {
 		StringWriter pw = new StringWriter();
 		t.printStackTrace(new PrintWriter(pw));
 		return pw.toString();
-	}
-
-	public ExceptionDialog ok(ClickListener cl)
-	{
-		this.cl = cl;
-		return this;
 	}
 	
 	public void show()
