@@ -19,6 +19,7 @@ import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.WriteBatTable.BatRecord;
 import at.qop.qoplib.batch.WriteBatTable.ColGrp;
 import at.qop.qoplib.calculation.CRSTransform;
+import at.qop.qoplib.calculation.CreateTargetsMulti;
 import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.calculation.LayerCalculation;
@@ -45,6 +46,7 @@ import at.qop.qoplib.osrmclient.OSRMClient;
 
 public class BatchCalculation implements Runnable {
 
+	private static final CreateTargetsMulti CREATE_TARGETS_MULTI = new CreateTargetsMulti();
 	private final Profile currentProfile;
 	private LayerSource source;
 	private ConfigFile cf;
@@ -180,16 +182,12 @@ public class BatchCalculation implements Runnable {
 			DbGeometryField geomField = loaded.table.field(params.geomfield, DbGeometryField.class);
 
 			ArrayList<MultiTarget> multiTargets = new ArrayList<>();
+			
 			for (DbRecord target : loaded.records)
 			{
-				MultiTarget lt = new MultiTarget();
-
-				lt.geom = geomField.get(target);
-
-				lt.rec = target;
-				multiTargets.add(lt);
+				Geometry geom = geomField.get(target);
+				CREATE_TARGETS_MULTI.createTargetsFromRecord(multiTargets, target, geom);
 			}
-
 
 			if (profileAnalysis.analysis.travelTimeRequired() )
 			{

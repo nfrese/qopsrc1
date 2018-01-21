@@ -3,21 +3,23 @@ package at.qop.qoplib.calculation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
-import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.LonLat;
 
 public class LayerCalculationSingle extends LayerCalculation {
 
+	private static final CreateTargetsSingle CREATE_TARGETS = new CreateTargetsSingle();
+	
 	private final LayerSource source;
 	private final IRouter router;
-	public Collection<DbRecord> targets;
 	
 	public LayerCalculationSingle(Point start, ProfileAnalysis params, double presetWeight, String altRatingFunc,
 			LayerSource source, IRouter router) {
@@ -28,26 +30,23 @@ public class LayerCalculationSingle extends LayerCalculation {
 	
 	@Override
 	public void p0loadTargets() {
+		Collection<DbRecord> records;
 		LayerCalculationP1Result r = source.load(start, analysis());
 		table = r.table;
-		targets = r.records;
+		records = r.records;
 		
 		DbGeometryField geomField = table.field(analysis().geomfield, DbGeometryField.class);
 
 		ArrayList<LayerTarget> targets_ = new ArrayList<>();
-		for (DbRecord target : targets)
+		for (DbRecord rec : records)
 		{
-			LayerTarget lt = new LayerTarget();
-			
-			lt.geom = geomField.get(target);
-			
-			lt.rec = target;
-			targets_.add(lt);
+			Geometry shape = geomField.get(rec);
+			CREATE_TARGETS.createTargetsFromRecord(targets_, rec, shape);
 		}
 		
 		orderedTargets = targets_;
 	}
-	
+
 	public void p2travelTime() {
 		if (analysis().travelTimeRequired())
 		{

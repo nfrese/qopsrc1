@@ -10,6 +10,8 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineSegment;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 public class CRSTransform {
@@ -74,6 +76,11 @@ public class CRSTransform {
 		Geometry pGeom = fromWGS84(g1);
 		Geometry buffered = pGeom.buffer(meter);
 		return toWGS84(buffered);
+	}
+
+	public double lenWGS84(LineSegment lseg) {
+		LineString geometry = lseg.toGeometry(gfWGS84);
+		return distanceWGS84(geometry.getStartPoint(), geometry.getEndPoint()); 
 	}
 	
 }

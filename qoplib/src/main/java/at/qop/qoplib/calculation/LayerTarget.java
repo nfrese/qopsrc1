@@ -1,18 +1,13 @@
 package at.qop.qoplib.calculation;
 
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 
-import at.qop.qoplib.dbconnector.DbRecord;
-
-public class LayerTarget {
+public class LayerTarget extends AbstractLayerTarget {
 	
-	public Geometry geom;
-	public DbRecord rec;
 	public double distance;
 	public double time;
 	
-	// calculated in Javascript
+	// calculated in JavaScript
 	public String caption;
 	public double value;
 	public String unit;
@@ -22,4 +17,5 @@ public class LayerTarget {
 	public String toString() {
 		return "LayerTarget [geom=" + geom + ", target=" + rec + ", distance=" + distance + "]";
 	}
+	
 }

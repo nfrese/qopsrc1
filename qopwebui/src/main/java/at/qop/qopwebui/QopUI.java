@@ -2,6 +2,7 @@ package at.qop.qopwebui;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.EventObject;
 import java.util.List;
@@ -12,8 +13,11 @@ import org.vaadin.addon.leaflet.LCircle;
 import org.vaadin.addon.leaflet.LFeatureGroup;
 import org.vaadin.addon.leaflet.LMap;
 import org.vaadin.addon.leaflet.LMarker;
+import org.vaadin.addon.leaflet.LPolygon;
 import org.vaadin.addon.leaflet.LPolyline;
 import org.vaadin.addon.leaflet.LTileLayer;
+import org.vaadin.addon.leaflet.LeafletLayer;
+import org.vaadin.addon.leaflet.util.JTSUtil;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
@@ -41,12 +45,15 @@ import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.LookupSessionBeans;
+import at.qop.qoplib.calculation.AbstractLayerTarget;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.CalculationSection;
 import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerSource;
+import at.qop.qoplib.calculation.LayerTarget;
+import at.qop.qoplib.calculation.LayerTargetDissolved;
 import at.qop.qoplib.calculation.charts.QopChart;
 import at.qop.qoplib.calculation.charts.QopPieChart;
 import at.qop.qoplib.domains.IAddressDomain;
@@ -307,6 +314,19 @@ public class QopUI extends UI {
 						{
 							lfgResults.removeAllComponents();
 
+							lc.keptTargets.stream().filter(lt -> lt instanceof LayerTargetDissolved).map(lt -> {
+
+								LayerTargetDissolved ltd = (LayerTargetDissolved)lt;
+								return (LayerTarget) ltd.parent;
+							}).distinct().forEach( parent -> {
+								if (parent != null)
+								{
+									Collection<LeafletLayer> lPoly = JTSUtil.toLayers(parent.geom);
+									lfgResults.addComponent(lPoly);
+								}
+							});
+
+							
 							lc.keptTargets.stream().forEach(lt -> {
 								if (lt.route != null)
 								{
@@ -331,6 +351,7 @@ public class QopUI extends UI {
 
 									lfgResults.addComponent(lm);
 								}
+								
 							});
 
 
