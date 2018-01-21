@@ -123,6 +123,22 @@ public abstract class LayerCalculation {
 					_targetsRemoved.add(lt);
 				}
 			}
+			
+			for (AbstractLayerTarget parent : new ArrayList<>(parentMap.keySet()))
+			{
+				if (parent.geom.intersects(start))
+				{
+					LayerTargetDissolved lt = new LayerTargetDissolved();
+					lt.geom = this.start;
+					lt.distance = 0.0;
+					lt.time = 0.0;
+					lt.rec = parent.rec;
+					_targetsRemoved.add(lt);
+					lt.parent = parent;
+					parentMap.put(parent, lt);
+				}
+			}
+			
 			_targetsRemoved.addAll(parentMap.values());
 			orderedTargets = _targetsRemoved;
 		}

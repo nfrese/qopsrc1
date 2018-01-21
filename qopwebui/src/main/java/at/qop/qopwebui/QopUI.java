@@ -41,11 +41,13 @@ import com.vaadin.ui.Slider.ValueOutOfBoundsException;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.AbstractLayerTarget;
+import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.CalculationSection;
 import at.qop.qoplib.calculation.DbLayerSource;
@@ -169,6 +171,23 @@ public class QopUI extends UI {
 		lfgResults = new LFeatureGroup();
 		leafletMap.addLayer(lfgResults);
 
+		leafletMap.addClickListener(l -> {
+			org.vaadin.addon.leaflet.shared.Point start = l.getPoint();
+			Point startJts = CRSTransform.gfWGS84.createPoint(new Coordinate(start.getLon(), start.getLat()));
+			startCalculation(startJts);
+			
+			lfg.removeAllComponents();
+			lfgResults.removeAllComponents();
+			filtercombo.clear();
+
+			LMarker lm = new LMarker(startJts);
+			lm.setCaption("<b>Aktuelle Position:</b><br>" +startJts);
+			lfg.addComponent(lm);
+			startCalculation(startJts);
+			leafletMap.zoomToContent();
+			
+		});
+		
 		grid = new GridLayout(6, 1);
 		grid.setSpacing(true);
 
@@ -221,12 +240,22 @@ public class QopUI extends UI {
 	}
 	
 	private void startCalculation() {
-		if (currentProfile != null && currentAddress != null)
+		if (currentAddress != null)
 		{
+			Point start = currentAddress.geom; 
+			startCalculation(start);
+		}
+	}
+
+	private void startCalculation(Point start) {
+		if (currentProfile != null)
+		{
+			
+			
 			LayerSource source = new DbLayerSource();
 			ConfigFile cf = ConfigFile.read();
 			IRouter router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort());
-			Calculation calculation = new Calculation(currentProfile, currentAddress, source, router);
+			Calculation calculation = new Calculation(currentProfile, start, source, router);
 			calculation.run();
 
 			grid.removeAllComponents();

@@ -3,6 +3,8 @@ package at.qop.qoplib.calculation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vividsolutions.jts.geom.Point;
+
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
@@ -10,7 +12,7 @@ import at.qop.qoplib.entities.ProfileAnalysis;
 public class Calculation {
 	
 	private final Profile profile;
-	private final Address address;
+	private final Point start;
 	private final LayerSource source;
 	private final IRouter router;
 	
@@ -18,10 +20,10 @@ public class Calculation {
 	
 	public List<CalculationSection> sections = new ArrayList<>();
 	
-	public Calculation(Profile profile, Address address, LayerSource source, IRouter router) {
+	public Calculation(Profile profile, Point address, LayerSource source, IRouter router) {
 		super();
 		this.profile = profile;
-		this.address = address;
+		this.start = address;
 		this.source = source;
 		this.router = router;
 	}
@@ -29,7 +31,7 @@ public class Calculation {
 	public void run()
 	{
 		for (ProfileAnalysis profileAnalysis : profile.profileAnalysis) {
-			LayerCalculation lc = new LayerCalculationSingle(address.geom, profileAnalysis, 
+			LayerCalculation lc = new LayerCalculationSingle(start, profileAnalysis, 
 					profileAnalysis.weight, profileAnalysis.altratingfunc,
 					source, router);
 			layerCalculations.add(lc);
