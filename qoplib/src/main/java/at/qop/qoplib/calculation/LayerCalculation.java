@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,9 @@ public abstract class LayerCalculation {
 	public abstract void p2travelTime();
 	
 	public void p3OrderTargets() {
+		
+		removeDissolved();
+		
 		if (analysis().travelTimeRequired()) {
 			Collections.sort(orderedTargets, (t1, t2) -> Double.compare(t1.time, t2.time));
 		} else {
@@ -69,6 +73,61 @@ public abstract class LayerCalculation {
 		}
 	}
 	
+	private void removeDissolved() {
+		boolean hasParents = false;
+		
+		for (LayerTarget lt : orderedTargets)
+		{
+			if (lt instanceof TargetHasParent)
+			{
+				hasParents=true;
+			}
+		}
+		if (hasParents)
+		{
+			ArrayList<LayerTarget> _targetsRemoved = new ArrayList<>();
+			HashMap<AbstractLayerTarget, LayerTarget> parentMap = new HashMap<>();
+			
+			for (LayerTarget lt : orderedTargets)
+			{
+				
+				if (lt instanceof TargetHasParent)
+				{
+					hasParents=true;
+					TargetHasParent ltd = (TargetHasParent)lt;
+					LayerTarget prevLt = parentMap.get(ltd.getParent());
+					if (prevLt != null)
+					{
+						if (analysis().travelTimeRequired()) {
+							if (lt.time < prevLt.time)
+							{
+								parentMap.put(ltd.getParent(), lt);
+							}
+						}
+						else
+						{
+							// not very nice
+							if (lt.distance < prevLt.distance)
+							{
+								parentMap.put(ltd.getParent(), lt);
+							}
+						}
+					}
+					else
+					{
+						parentMap.put(ltd.getParent(), lt);
+					}
+				}
+				else
+				{
+					_targetsRemoved.add(lt);
+				}
+			}
+			_targetsRemoved.addAll(parentMap.values());
+			orderedTargets = _targetsRemoved;
+		}
+	}
+
 	public void p4Calculate() {
 		
 		ScriptContext context = new SimpleScriptContext();

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -93,8 +94,11 @@ public abstract class CreateTargets <T extends AbstractLayerTarget>
 		
 		for (int i=0; i< geom.getNumPoints(); i++)
 		{
-			Point point = CRSTransform.gfWGS84.createPoint(geom.getCoordinateN(i));
-			addTargetDissolved(results, parentLt, rec, point);
+			if (i < geom.getNumPoints() - 1 || addLast)
+			{
+				Point point = gf().createPoint(geom.getCoordinateN(i));
+				addTargetDissolved(results, parentLt, rec, point);
+			}
 			
 			if (i < geom.getNumPoints() - 1)
 			{
@@ -106,7 +110,7 @@ public abstract class CreateTargets <T extends AbstractLayerTarget>
 
 	public void fromLineSegment(List<T> results, T parentLt, DbRecord rec, LineSegment lseg) {
 		
-		double len = CRSTransform.singleton.lenWGS84(lseg);
+		double len = len(lseg);
 		
 		int n = (int) Math.floor(len/TARGET_EVERY_X_METERS);
 		
@@ -114,11 +118,13 @@ public abstract class CreateTargets <T extends AbstractLayerTarget>
 		{
 			Coordinate coord = lseg.pointAlong(1/(n+1));
 			
-			Point point = CRSTransform.gfWGS84.createPoint(coord);
+			Point point = gf().createPoint(coord);
 			addTargetDissolved(results, parentLt, rec, point);
 		}
 	}
 
+	///////////
+	
 	protected abstract T createParent(DbRecord rec, Geometry shape);
 	
 	protected abstract void addTarget(List<T> results, DbRecord rec, Geometry shape);
@@ -126,4 +132,12 @@ public abstract class CreateTargets <T extends AbstractLayerTarget>
 	protected abstract void addTargetDissolved(List<T> results, T parentLt, DbRecord rec,
 			Point point);
 
+	protected GeometryFactory gf() {
+		return CRSTransform.gfWGS84;
+	}
+	
+	protected double len(LineSegment lseg) {
+		return CRSTransform.singleton.lenWGS84(lseg);
+	}
+	
 }
