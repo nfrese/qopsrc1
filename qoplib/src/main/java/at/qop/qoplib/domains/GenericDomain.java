@@ -6,8 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,8 +13,6 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
-import org.hibernate.EntityMode;
 
 import at.qop.qoplib.dbconnector.AbstractDbTableReader;
 import at.qop.qoplib.dbconnector.DbBatch;
@@ -134,7 +130,8 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	@Override
 	public void readTable(String sql, AbstractDbTableReader tableReader) throws SQLException
 	{
-		System.out.println("readTable:" + sql);
+		long t_start = System.currentTimeMillis();
+		
 		Connection connection = hibSessImplementor().connection();
 		try (PreparedStatement ps = connection.prepareStatement(sql)) {
 			try (ResultSet rs = ps.executeQuery()) {
@@ -169,6 +166,7 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 			}
 		}
 		tableReader.done();
+		System.out.println((System.currentTimeMillis() - t_start) + " ms readTable: " + sql);
 	}
 
 

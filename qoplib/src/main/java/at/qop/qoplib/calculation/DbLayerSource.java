@@ -1,17 +1,12 @@
 package at.qop.qoplib.calculation;
 
 import java.sql.SQLException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.dbconnector.DbTableReader;
 import at.qop.qoplib.domains.IGenericDomain;
-import at.qop.qoplib.entities.Analysis;
 
 public class DbLayerSource implements LayerSource {
 
@@ -36,7 +31,6 @@ public class DbLayerSource implements LayerSource {
 					sql += " WHERE "+ stIntersectsSql;
 				}
 			}
-			System.out.println(sql);
 			gd_.readTable(sql, tableReader);
 			LayerCalculationP1Result r = new LayerCalculationP1Result();
 			r.table = tableReader.table;

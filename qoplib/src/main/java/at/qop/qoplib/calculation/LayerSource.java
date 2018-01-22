@@ -1,7 +1,5 @@
 package at.qop.qoplib.calculation;
 
-import java.util.concurrent.Future;
-
 import com.vividsolutions.jts.geom.Geometry;
 
 public interface LayerSource {

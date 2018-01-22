@@ -31,6 +31,8 @@ public class Calculation {
 	public void run()
 	{
 		for (ProfileAnalysis profileAnalysis : profile.profileAnalysis) {
+			long t_start = System.currentTimeMillis();
+			
 			LayerCalculation lc = new LayerCalculationSingle(start, profileAnalysis, 
 					profileAnalysis.weight, profileAnalysis.altratingfunc,
 					source, router);
@@ -41,6 +43,9 @@ public class Calculation {
 			lc.p3OrderTargets();
 			lc.p4Calculate();
 			lc.p5route(router);
+			
+			long t_finished = System.currentTimeMillis();
+			System.out.println(">>>>" + profileAnalysis.analysis.name + " done in " + (t_finished - t_start) + "ms");
 		};
 		
 		new CalculationOrderer(this).run();

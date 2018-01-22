@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
@@ -60,9 +59,10 @@ public class OSRMClient implements IRouter {
 			if (i>0) urlSb.append(';');
 			urlSb.append(cnt++);
 		}
+		
+		long t_start = System.currentTimeMillis();
 		//hostPort + "/table/v1/driving/16.369561009437817,48.20423271310815;16.37741831002266,48.20776186641345?sources=0&destinations=1"
 		URL url = new URL(urlSb.toString());
-		System.out.println(url);
 		
 		URLConnection con = url.openConnection();
 			
@@ -70,7 +70,16 @@ public class OSRMClient implements IRouter {
 			String result = new BufferedReader(new InputStreamReader(is))
 					  .lines().collect(Collectors.joining("\n"));
 			
-			return OSRMClient.parseTableResult(result);
+			long t_callFinished = System.currentTimeMillis();
+			
+			double[][] parseTableResult = OSRMClient.parseTableResult(result);
+			long t_finished = System.currentTimeMillis();
+			
+			System.out.println(sources.length + "x" + destinations.length 
+					+ " t_call=" + (t_callFinished - t_start) 
+					+ "ms t_parse="+ (t_finished - t_callFinished) + "ms " + url);
+			
+			return parseTableResult;
 		}
 	}
 
