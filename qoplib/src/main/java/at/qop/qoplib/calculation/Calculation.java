@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.vividsolutions.jts.geom.Point;
 
-import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
 
@@ -19,6 +18,7 @@ public class Calculation {
 	public List<LayerCalculation> layerCalculations = new ArrayList<>();
 	
 	public List<CalculationSection> sections = new ArrayList<>();
+	public double overallRating;
 	
 	public Calculation(Profile profile, Point address, LayerSource source, IRouter router) {
 		super();
@@ -51,13 +51,20 @@ public class Calculation {
 		new CalculationOrderer(this).run();
 	}
 	
-	public double overallRating()
+	public void runRating()
 	{
-		double sectionSum = sections.stream().mapToDouble(se -> se.rating()).sum();
-		
-		double overall = layerCalculations.stream().mapToDouble(lc -> (lc.rating * lc.weight)).sum();
-		if ((int)(sectionSum*100) != (int)(overall*100)) throw new RuntimeException("never: " + sectionSum + " != " + overall);
-		return overall;
+		OverallResult orc;
+		if (profile.aggrfn != null && !profile.aggrfn.trim().isEmpty())
+		{
+			orc = new ScriptedOverallResult(profile.aggrfn, sections);
+		}
+		else
+		{
+			orc = new OverallResult(sections);
+		}
+
+		orc.run();
+		overallRating = orc.overallRating;
 	}
 
 	public void addSection(CalculationSection current) {

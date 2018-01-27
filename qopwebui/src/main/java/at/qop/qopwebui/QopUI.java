@@ -406,12 +406,12 @@ public class QopUI extends UI {
 				grid.addComponent(new Label("",  ContentMode.HTML));
 				
 				addSliderChangedListener(e -> {
-					sectionRatingLabel.setValue("<big><b>" + formatDouble2Decimal(section.rating()) + "</b></big>");
+					sectionRatingLabel.setValue("<big><b>" + formatDouble2Decimal(section.rating) + "</b></big>");
 				});
 			}
 			
 			addSliderChangedListener(e -> {
-				overallRatingLabel.setValue("<big><big><b>Gesamtindex: " + formatDouble2Decimal(calculation.overallRating()) + "</b></big></big>");
+				overallRatingLabel.setValue("<big><big><b>Gesamtindex: " + formatDouble2Decimal(calculation.overallRating) + "</b></big></big>");
 			});
 			refreshOverallRating(calculation);
 		}
@@ -427,6 +427,7 @@ public class QopUI extends UI {
 	}
 
 	private void refreshOverallRating(Calculation calculation) {
+		calculation.runRating();
 		evr.fireEvent(new SliderChangedEvent(this));
 	}
 

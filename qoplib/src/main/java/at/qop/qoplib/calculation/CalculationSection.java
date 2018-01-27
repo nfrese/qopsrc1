@@ -6,15 +6,8 @@ import java.util.List;
 public class CalculationSection {
 
 	public List<LayerCalculation> lcs = new ArrayList<>();
-	
-	public double rating() {
-		double _result = 0;
-		for (LayerCalculation lc : lcs)
-		{
-			_result += (lc.rating * lc.weight);
-		}
-		return _result;
-	}
+	public double rating;
+	public double weight;
 	
 	public String getTitle() {
 

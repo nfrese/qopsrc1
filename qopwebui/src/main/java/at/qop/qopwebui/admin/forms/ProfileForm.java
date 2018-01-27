@@ -7,6 +7,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.entities.Profile;
@@ -60,7 +61,7 @@ public class ProfileForm extends AbstractForm {
 			binder.writeBean(profile);
 		} catch (ValidationException e) {
 			new Notification("Validation error count: "
-					+ e.getValidationErrors().size()).show((Page)this.getParent());
+					+ e.getValidationErrors().size()).show(UI.getCurrent().getPage());
 		}
 	}
 	

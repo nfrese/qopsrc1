@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -25,6 +26,7 @@ public class Profile implements Serializable {
 
 	public String description;
 
+	@Column(columnDefinition="TEXT")
 	public String aggrfn;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "profile")
