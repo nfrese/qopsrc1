@@ -9,7 +9,6 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
-import at.qop.qoplib.JSValidation;
 import at.qop.qoplib.entities.AnalysisFunction;
 import at.qop.qopwebui.components.JsValidator;
 

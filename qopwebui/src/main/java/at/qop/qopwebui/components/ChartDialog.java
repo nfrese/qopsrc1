@@ -18,11 +18,9 @@ import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 
-public class ChartDialog extends Window {
+public class ChartDialog extends AbstractDialog {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -81,10 +79,5 @@ public class ChartDialog extends Window {
 		t.printStackTrace(new PrintWriter(pw));
 		return pw.toString();
 	}
-	
-	public void show()
-	{
-		this.center();
-		UI.getCurrent().addWindow(this);
-	}
+
 }

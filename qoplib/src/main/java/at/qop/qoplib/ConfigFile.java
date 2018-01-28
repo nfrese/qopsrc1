@@ -51,6 +51,42 @@ public class ConfigFile {
 		String defaultValue = null;
 		return getStrProp(key, defaultValue);
 	}
-	
+
+	public String getWorkingDir()
+	{
+		String key = "workingdir";
+		String defaultValue = "/tmp";
+		return getStrProp(key, defaultValue);
+	}
+
+	public String getDbHost() {
+		String key = "dbhost";
+		String defaultValue = "localhost";
+		return getStrProp(key, defaultValue);
+	}
+
+	public String getDbUserName() {
+		String key = "dbuser";
+		String defaultValue = "qopuser";
+		return getStrProp(key, defaultValue);
+	}
+
+	public String getDb() {
+		String key = "db";
+		String defaultValue = "qop";
+		return getStrProp(key, defaultValue);
+	}
+
+	public int getPort() {
+		String key = "dbport";
+		String defaultValue = "5432";
+		return Integer.valueOf(getStrProp(key, defaultValue));
+	}
+
+	public String getDbPasswd() {
+		String key = "dbpasswd";
+		String defaultValue = "unknown";
+		return getStrProp(key, defaultValue);
+	}
 
 }

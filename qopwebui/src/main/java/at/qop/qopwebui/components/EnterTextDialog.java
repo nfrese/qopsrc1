@@ -6,11 +6,10 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-public class EnterTextDialog extends Window {
+public class EnterTextDialog extends AbstractDialog {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -54,10 +53,5 @@ public class EnterTextDialog extends Window {
 		this.cl = cl;
 		return this;
 	}
-	
-	public void show()
-	{
-		this.center();
-		UI.getCurrent().addWindow(this);
-	}
+
 }

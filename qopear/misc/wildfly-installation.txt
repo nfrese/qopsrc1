@@ -27,7 +27,13 @@ edit /opt/wildfly-11.0.0.Final/standalone/configuration/standalone.xml:
                         <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter"/>
                     </validation>
                 </datasource>
-             ...
+... max-postsize ist fuer uploads !!! ...
+ <subsystem xmlns="urn:jboss:domain:undertow:4.0">
+            <buffer-cache name="default"/>
+            <server name="default-server">
+                <http-listener name="default" socket-binding="http" redirect-socket="https" enable-http2="true" max-post-size="500000000"/>             
+...             
+             
     <deployments>
         <deployment name="postgresql-42.1.4.jar" runtime-name="postgresql-42.1.4.jar">
             <content sha1="1c7788d16b67d51f2f38ae99e474ece968bf715a"/>

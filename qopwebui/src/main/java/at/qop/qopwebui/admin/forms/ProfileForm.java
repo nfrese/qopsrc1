@@ -2,7 +2,6 @@ package at.qop.qopwebui.admin.forms;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.ValidationException;
-import com.vaadin.server.Page;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextArea;
@@ -12,7 +11,6 @@ import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.entities.Profile;
 import at.qop.qopwebui.components.JsValidator;
-import at.qop.qoplib.entities.Analysis;
 
 public class ProfileForm extends AbstractForm {
 	

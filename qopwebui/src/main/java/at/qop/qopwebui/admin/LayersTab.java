@@ -17,9 +17,9 @@ public class LayersTab extends AbstractTab {
 
 	@Override
 	public Component initialize(Page page) {
-    	StringBuilder html = new StringBuilder();
-    	
-			IGenericDomain gd = LookupSessionBeans.genericDomain();
+		StringBuilder html = new StringBuilder();
+
+		IGenericDomain gd = LookupSessionBeans.genericDomain();
 
 		QopDBMetadata meta = gd.getMetadata();
 		for (QopDBTable table : meta.tables)
@@ -33,7 +33,6 @@ public class LayersTab extends AbstractTab {
 				}
 			}
 		}
-		
     	
 		final Label label = new Label(html.toString(), ContentMode.HTML);
         label.setWidth(100.0f, Unit.PERCENTAGE);

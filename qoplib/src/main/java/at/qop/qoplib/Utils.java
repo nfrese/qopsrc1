@@ -23,4 +23,8 @@ public class Utils {
 		return (T) new ObjectInputStream(baIn).readObject();		
 	}
 
+	public static String uxCmdStringEscape(String name) {
+		return "\"" + name.replace("\"", "\\\"") + "\"";
+	}
+
 }

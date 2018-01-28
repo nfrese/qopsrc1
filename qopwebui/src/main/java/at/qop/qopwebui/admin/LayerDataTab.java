@@ -83,8 +83,6 @@ public class LayerDataTab extends AbstractTab {
 			
 			Set<DbRecord> selectedItems = event.getAllSelectedItems();
 			for (DbRecord selectedItem : selectedItems){
-				
-				
 
 				Collection<Geometry> geoms = selectedItem.getGeometries(currentTable);
 				for (Geometry geom : geoms)

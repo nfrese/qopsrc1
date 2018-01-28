@@ -9,7 +9,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.imports.PerformAddressUpdate;
-import at.qop.qopwebui.components.ChartDialog;
+import at.qop.qopwebui.admin.imports.ImportShapefilesComponent;
 
 public class MiscTab extends AbstractTab {
 
@@ -25,8 +25,11 @@ public class MiscTab extends AbstractTab {
 			new PerformAddressUpdate().updateAddresses(tfBezirkFilter.getValue());
 		});
 
+		ImportShapefilesComponent importShapesButton = new ImportShapefilesComponent();
+		importShapesButton.init();
+		
 		final VerticalLayout vl = new VerticalLayout(new HorizontalLayout(button, tfBezirkFilter),
-				new BatchControl().init());
+				new BatchControl().init(), importShapesButton);
 		vl.setMargin(true);
 		return vl;
 	}
