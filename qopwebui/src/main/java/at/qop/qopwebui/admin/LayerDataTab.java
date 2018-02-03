@@ -3,6 +3,7 @@ package at.qop.qopwebui.admin;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import org.vaadin.addon.leaflet.LTileLayer;
 import org.vaadin.addon.leaflet.LeafletLayer;
 import org.vaadin.addon.leaflet.util.JTSUtil;
 
+import com.google.gwt.view.client.ListDataProvider;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.SortOrder;
 import com.vaadin.server.Page;
@@ -58,7 +60,7 @@ public class LayerDataTab extends AbstractTab {
         
 		listSelect.addValueChangeListener(
 				event -> { 
-					new Notification("Value changed:", String.valueOf(event.getValue())).show(page); 
+					//new Notification("Value changed:", String.valueOf(event.getValue())).show(page); 
 					if (event.getValue().size() == 1)
 					{
 						QopDBTable table = event.getValue().iterator().next();
@@ -192,8 +194,8 @@ public class LayerDataTab extends AbstractTab {
 		
 		String baseSql = "select * from " + table.name;
 		
-		grid.setDataProvider(dataProvider(table, baseSql));
 		grid.removeAllColumns();
+		grid.setDataProvider(dataProvider(table, baseSql));
 		
 		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 		

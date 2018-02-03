@@ -5,6 +5,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
@@ -15,21 +16,35 @@ public class MiscTab extends AbstractTab {
 
 	@Override
 	public Component initialize(Page page) {
-		TextField tfBezirkFilter = new TextField("Bezirkfilter (zb: 01)");
-		Button button = new Button("Update Addresses");
-		button.addClickListener(e -> {
-			//layout.addComponent(new ProgressBar());
-			new Notification("Lade die Adressen herunter",
-					"Moment",
-					Notification.Type.HUMANIZED_MESSAGE).show(page);
-			new PerformAddressUpdate().updateAddresses(tfBezirkFilter.getValue());
-		});
-
-		ImportShapefilesComponent importShapesButton = new ImportShapefilesComponent();
-		importShapesButton.init();
 		
-		final VerticalLayout vl = new VerticalLayout(new HorizontalLayout(button, tfBezirkFilter),
-				new BatchControl().init(), importShapesButton);
+		final VerticalLayout vl = new VerticalLayout();
+		
+		{
+			Panel p = new Panel();
+			TextField tfBezirkFilter = new TextField("Bezirkfilter (zb: 01)");
+			Button button = new Button("Adressen aktualisieren");
+			button.addClickListener(e -> {
+				new Notification("Lade die Adressen herunter",
+						"Moment",
+						Notification.Type.HUMANIZED_MESSAGE).show(page);
+				new PerformAddressUpdate().updateAddresses(tfBezirkFilter.getValue());
+			});
+			HorizontalLayout hl = new HorizontalLayout(button, tfBezirkFilter);
+			hl.setMargin(true);
+			p.setContent(hl);
+			vl.addComponent(p);
+		}
+		{
+			Panel p = new Panel();
+			p.setContent(new BatchControl().init());
+			vl.addComponent(p);
+		}
+		{
+			ImportShapefilesComponent component = new ImportShapefilesComponent();
+			component.init();
+
+			vl.addComponent(component);
+		}
 		vl.setMargin(true);
 		return vl;
 	}

@@ -44,6 +44,7 @@ public class ExecDialog extends AbstractDialog {
 	
 	public IntConsumer onDone = (exit) -> {};
 	public IntConsumer onOK = (exit) -> {};
+	public Runnable onExit = () -> {};
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -51,9 +52,10 @@ public class ExecDialog extends AbstractDialog {
 	private Process p;
 	
 	HorizontalLayout hlButtons;
-	Button closeButton;
+	Button okButton;
 	Button cancelButton;
 	private int exit;
+	private Button closeButton;
 	
 	public ExecDialog(String title)
 	{
@@ -73,20 +75,27 @@ public class ExecDialog extends AbstractDialog {
 		
 		subContent.addComponent(panel);
 		subContent.setExpandRatio(panel, 10.0f);
+		closeButton = new Button("Schließen", VaadinIcons.CLOSE);
+		closeButton.setEnabled(false);
+		closeButton.addClickListener(e2 -> {
+			onExit.run();
+			close();
+		});
+		
 		cancelButton = new Button("Abbruch", VaadinIcons.STOP);
 		cancelButton.addClickListener(e2 -> {
 			cancel();
 		});
-		closeButton = new Button("OK", VaadinIcons.CHECK);
-		closeButton.setEnabled(false);
-		closeButton.addClickListener(e2 -> {
+		okButton = new Button("OK", VaadinIcons.CHECK);
+		okButton.setEnabled(false);
+		okButton.addClickListener(e2 -> {
 			onOK.accept(exit);
 			close(); 
 		});
 
 		this.setClosable(false);
 		UI.getCurrent().setPollInterval(1000);
-		hlButtons = new HorizontalLayout(cancelButton, closeButton);
+		hlButtons = new HorizontalLayout(cancelButton, closeButton, okButton);
 		subContent.addComponent(hlButtons);
 
 	}
@@ -145,9 +154,9 @@ public class ExecDialog extends AbstractDialog {
 
 	protected void done(int exit) {
 		getUI().access(() -> {
-			closeButton.setEnabled(true);
+			okButton.setEnabled(exit == 0);
 			cancelButton.setEnabled(false);
-			this.setClosable(true);
+			closeButton.setEnabled(true);
 			getUI().setPollInterval(-1);
 			this.exit = exit;
 			onDone.accept(exit);

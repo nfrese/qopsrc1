@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.Upload;
@@ -27,11 +26,11 @@ import com.vaadin.ui.VerticalLayout;
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.TmpWorkingDir;
-import at.qop.qoplib.Utils;
 import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
 import at.qop.qopwebui.components.ExecDialog;
+import at.qop.qopwebui.components.InfoDialog;
 
 public class ImportShapefilesComponent extends Panel implements Receiver, SucceededListener, ProgressListener{
 	
@@ -46,28 +45,19 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 	{
 		vl = new VerticalLayout();
 		
-		Upload upload = new Upload("Upload zipped Shape-Files", this);
+		Upload upload = new Upload("Gezippte Shape-Dateien importieren", this);
 		upload.addProgressListener(this);
 		upload.addSucceededListener(this);
 		vl.addComponent(upload);
 		
-		Button buttonX = new Button("Import Shapes");
-		buttonX.addClickListener(e -> { 
-			ExecDialog wcd = new ExecDialog("title");
-			wcd.show();
-			wcd.executeCommand("unzip " + Utils.uxCmdStringEscape(zipFile.getName()) , null, tmpDir.dir);
-		});
-		
-		pgbar = new ProgressBar(); 
+		pgbar = new ProgressBar();
 		vl.addComponent(pgbar);
-		
-		vl.addComponent(buttonX);
 		this.setContent(vl);
 	}
 
 	@Override
 	public void uploadSucceeded(SucceededEvent event) {
-		ExecDialog execUnzip = new ExecDialog("unzip");
+		ExecDialog execUnzip = new ExecDialog("Entpacken");
 		execUnzip.show();
 		execUnzip.executeCommand("unzip " + zipFile.getName() , null, tmpDir.dir);
 		execUnzip.onOK = (exit) -> {
@@ -104,7 +94,7 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 				}
 			}
 
-			ImportShapefilesDialog isfd = new ImportShapefilesDialog("select shapefiles ", shapeFiles);
+			ImportShapefilesDialog isfd = new ImportShapefilesDialog("Auswahl der Shape-Dateien ", shapeFiles);
 			isfd.onDone = () -> {
 				ConfigFile cfgFile = ConfigFile.read();
 
@@ -119,15 +109,32 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 					}
 				}
 
-				ExecDialog execImp = new ExecDialog("shapes -> db");
+				ExecDialog execImp = new ExecDialog("Shape-Dateien in die Datenbank einspielen");
 				execImp.show();
 				execImp.executeCommand(cmdSb.toString(), new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
 				execImp.onOK = (exit1) -> {
-
+					cleanup();
 				};
+				execImp.onExit = () -> { cleanup(); };
 			};
+			isfd.onExit = () -> { cleanup(); };
 			isfd.show();
 		};
+		
+		execUnzip.onExit = () -> {
+			cleanup();
+		};
+	}
+
+	private void cleanup() {
+		try {
+			tmpDir.cleanUp();
+			tmpDir = null;
+			zipFile = null;
+			new InfoDialog("Info", "Importverzeichnis wurde gelöscht!").show();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

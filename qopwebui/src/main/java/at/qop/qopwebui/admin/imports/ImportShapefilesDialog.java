@@ -18,12 +18,13 @@ import at.qop.qopwebui.components.AbstractDialog;
 public class ImportShapefilesDialog extends AbstractDialog {
 	
 	public Runnable onDone = () -> {};
+	public Runnable onExit = () -> {};
 	
 	private static final long serialVersionUID = 1L;
 	
-	Button closeButton;
+	Button okButton;
 	Button cancelButton;
-
+	
 	private HorizontalLayout hlButtons;
 	
 	final List<ImportShapefile> shapeFiles;
@@ -72,20 +73,21 @@ public class ImportShapefilesDialog extends AbstractDialog {
 		
 		subContent.addComponent(grid);
 		subContent.setExpandRatio(grid, 10.0f);
-		cancelButton = new Button("Abbruch", VaadinIcons.CLOSE);
+		cancelButton = new Button("Schließen", VaadinIcons.CLOSE);
 		cancelButton.addClickListener(e2 -> {
+			onExit.run();
 			this.close();
 		});
-		closeButton = new Button("OK", VaadinIcons.CHECK);
-		closeButton.setEnabled(true);
-		closeButton.addClickListener(e2 -> {
+		okButton = new Button("OK", VaadinIcons.CHECK);
+		okButton.setEnabled(true);
+		okButton.addClickListener(e2 -> {
 			onDone.run();
 			this.close(); 
 		});
 
-		this.setClosable(true);
+		this.setClosable(false);
 		UI.getCurrent().setPollInterval(1000);
-		hlButtons = new HorizontalLayout(cancelButton, closeButton);
+		hlButtons = new HorizontalLayout(cancelButton, okButton);
 		subContent.addComponent(hlButtons);
 
 	}

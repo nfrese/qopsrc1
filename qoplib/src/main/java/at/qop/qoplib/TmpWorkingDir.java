@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class TmpWorkingDir {
@@ -24,7 +25,8 @@ public class TmpWorkingDir {
 			throw new RuntimeException("!wd.isDirectory()");
 		}
 		
-		dir = new File(wd , "qoptmp" + new Date() + "");
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd__HH_mm_ss_SSS");
+		dir = new File(wd , "qoptmp_" + df.format(new Date()) + "");
 		dir.deleteOnExit();
 		dir.mkdir();
 	}

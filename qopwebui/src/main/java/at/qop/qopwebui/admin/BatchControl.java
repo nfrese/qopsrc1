@@ -33,6 +33,7 @@ public class BatchControl {
 	public Component init() {
 		UI currentUI = UI.getCurrent();
 		progressBar = new ProgressBar();
+		progressBar.setValue(Float.NaN);
 
 		if (bc != null)
 		{
