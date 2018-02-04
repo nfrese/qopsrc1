@@ -98,20 +98,20 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 			isfd.onDone = () -> {
 				ConfigFile cfgFile = ConfigFile.read();
 
-				StringJoiner cmdSb = new StringJoiner("\\");
+				List<String> cmds = new ArrayList<>();
 
 				for (ImportShapefile s : shapeFiles)
 				{
 					if (s.importFlag)
 					{
 						String cmd = s.importCmd(cfgFile);
-						cmdSb.add(cmd);
+						cmds.add(cmd);
 					}
 				}
 
 				ExecDialog execImp = new ExecDialog("Shape-Dateien in die Datenbank einspielen");
 				execImp.show();
-				execImp.executeCommand(cmdSb.toString(), new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
+				execImp.executeCommands(cmds.iterator(), new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
 				execImp.onOK = (exit1) -> {
 					cleanup();
 				};

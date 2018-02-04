@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.function.IntConsumer;
 
 import com.vaadin.icons.VaadinIcons;
@@ -101,6 +103,35 @@ public class ExecDialog extends AbstractDialog {
 	}
 
 	public void executeCommand(String command, String[] envp, File dir) {
+		executeCommands(Arrays.asList(command).iterator(), envp, dir);
+	}
+	
+	public void executeCommands(Iterator<String> cmdIt, String[] envp, File dir) {
+		
+		if (cmdIt.hasNext())
+		{
+			executeCommand(cmdIt.next(), envp, dir, 
+					(exit) -> {
+						if (exit == 0)
+						{
+							getUI().access(() -> {
+								executeCommands(cmdIt, envp, dir);
+							});
+						}
+						else
+						{
+							done(exit);
+						}
+					}
+					);
+		}
+		else
+		{
+			done(0);
+		}
+	}
+	
+	public void executeCommand(String command, String[] envp, File dir, IntConsumer singleDone) {
 
 		console.addComponent(new Label("<b>" + command + "</b>", ContentMode.HTML));
 		
@@ -137,9 +168,9 @@ public class ExecDialog extends AbstractDialog {
 			Runnable finishCmd = () -> { 
 				try {
 					int exit = p.waitFor();
-					done(exit);
+					singleDone.accept(exit);
 				} catch (InterruptedException e) {
-					done(Integer.MIN_VALUE);
+					singleDone.accept(Integer.MIN_VALUE);
 					e.printStackTrace();
 				} 
 			};

@@ -15,22 +15,26 @@ import org.vaadin.addon.leaflet.LTileLayer;
 import org.vaadin.addon.leaflet.LeafletLayer;
 import org.vaadin.addon.leaflet.util.JTSUtil;
 
-import com.google.gwt.view.client.ListDataProvider;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.SortOrder;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.data.sort.SortDirection;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.Notification;
+import com.vaadin.ui.VerticalLayout;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
 import at.qop.qoplib.LookupSessionBeans;
+import at.qop.qoplib.batch.PerformDelete;
 import at.qop.qoplib.dbconnector.DBSingleResultTableReader;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
@@ -39,18 +43,25 @@ import at.qop.qoplib.dbconnector.DbTableScanner;
 import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
+import at.qop.qopwebui.admin.forms.exports.ExportShapefiles;
+import at.qop.qopwebui.components.ConfirmationDialog;
 
 public class LayerDataTab extends AbstractTab {
 
-	DbTable currentTable;	
+	protected DbTable currentTable;
+	protected int currentLines;	
+	
+	protected Label tableLines = null;
 	
 	@Override
 	public Component initialize(Page page) {
     	IGenericDomain gd = LookupSessionBeans.genericDomain();
 
-		QopDBMetadata meta = gd.getMetadata();
 		
-		ListSelect<QopDBTable> listSelect = new ListSelect<QopDBTable>("Tabelle auswählen...", meta.tables.stream().filter(t->t.isGeometric()).collect(Collectors.toList()));
+		ListSelect<QopDBTable> listSelect = new ListSelect<QopDBTable>("Tabelle auswählen...");
+		
+		refreshList(gd, listSelect);
+		
         listSelect.setRows(6);
         listSelect.setHeight(100.0f, Unit.PERCENTAGE);
  
@@ -60,12 +71,15 @@ public class LayerDataTab extends AbstractTab {
         
 		listSelect.addValueChangeListener(
 				event -> { 
-					//new Notification("Value changed:", String.valueOf(event.getValue())).show(page); 
 					if (event.getValue().size() == 1)
 					{
 						QopDBTable table = event.getValue().iterator().next();
 						prepareGrid(grid, table);
 						
+					}
+					else
+					{
+						clearGrid(grid);
 					}
 				} );
     	
@@ -102,7 +116,59 @@ public class LayerDataTab extends AbstractTab {
     	hl.setExpandRatio(leafletMap, 1.5f);
     	hl.setSizeFull();
     	hl.setMargin(true);
-    	return hl;
+    	
+    	
+    	Button deleteLayerButton = new Button("Tabelle loeschen...", VaadinIcons.TRASH);
+        deleteLayerButton.setEnabled(false);
+        deleteLayerButton.addClickListener(e -> {
+        	if (listSelect.getSelectedItems().size() == 1) {
+        		new ConfirmationDialog("Tabelle löeschen",listSelect.getSelectedItems() + " wirklich loeschen?")
+        		.ok(
+        			(evt) -> { 
+        				new PerformDelete(listSelect.getSelectedItems().iterator().next().name);
+        				refreshList(gd, listSelect);
+        			}  
+        		).show();
+        	}
+        });
+        
+    	Button exportLayerButton = new Button("Tabelle exportieren...", VaadinIcons.DOWNLOAD);
+    	exportLayerButton.setEnabled(false);
+    	exportLayerButton.addClickListener(e -> {
+        	if (listSelect.getSelectedItems().size() > 0) {
+        		new ConfirmationDialog("Tabellen exportieren",listSelect.getSelectedItems() + " wirklich exportieren?")
+        		.ok(
+        			(evt) -> { 
+        				ExportShapefiles expSh = new ExportShapefiles(listSelect.getSelectedItems().stream().map(item -> item.name).collect(Collectors.toList()));
+        				expSh.run();
+        			}  
+        		).show();
+        	}
+        });
+        
+        tableLines = new Label("");
+        
+        final HorizontalLayout hlButtons = new HorizontalLayout();
+        hlButtons.addComponent(deleteLayerButton);
+        hlButtons.addComponent(exportLayerButton);
+        hlButtons.addComponent(tableLines);
+    	
+    	VerticalLayout vl = new VerticalLayout(hl, hlButtons); 
+    	vl.setSizeFull();
+    	vl.setExpandRatio(hl, 5.0f);
+    	
+    	listSelect.addValueChangeListener(
+    			event -> { 
+    				deleteLayerButton.setEnabled(event.getValue().size() == 1);
+    				exportLayerButton.setEnabled(event.getValue().size() > 0);
+    			} );
+
+    	return vl;
+	}
+
+	protected void refreshList(IGenericDomain gd, ListSelect<QopDBTable> listSelect) {
+		QopDBMetadata meta = gd.getMetadata();
+		listSelect.setItems(meta.tables.stream().filter(t->t.isGeometric()).collect(Collectors.toList()));
 	}
 	
 	public static interface DataService {
@@ -127,7 +193,10 @@ public class LayerDataTab extends AbstractTab {
 					try {
 						DBSingleResultTableReader tableReader = new DBSingleResultTableReader();
 						gd_.readTable("select count(*) from " + table.name, tableReader);
-						return (int)tableReader.longResult();
+						int lines = (int)tableReader.longResult();
+						currentLines = lines;
+						tableLines.setValue("Records: " + currentLines);
+						return lines;
 					} catch (SQLException e) {
 						throw new RuntimeException(e);
 					}
@@ -189,6 +258,12 @@ public class LayerDataTab extends AbstractTab {
 			throw new RuntimeException(ex);
 		}
 	}	
+	
+	private void clearGrid(Grid<DbRecord> grid) {
+		grid.removeAllColumns();
+		DataProvider<DbRecord, ?> emptyDataProvider = new ListDataProvider<DbRecord>(Collections.emptyList());
+		grid.setDataProvider(emptyDataProvider);
+	}
 	
 	private void prepareGrid(Grid<DbRecord> grid, QopDBTable table) {
 		
