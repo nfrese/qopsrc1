@@ -1,18 +1,24 @@
 package at.qop.qopwebui.admin.forms.exports;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Panel;
 
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.TmpWorkingDir;
+import at.qop.qopwebui.components.ConfirmationDialog;
+import at.qop.qopwebui.components.DownloadDialog;
 import at.qop.qopwebui.components.ExecDialog;
 import at.qop.qopwebui.components.InfoDialog;
 
@@ -48,7 +54,24 @@ public class ExportShapefiles {
 
 		execImp.executeCommands(cmds.iterator(), new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
 		execImp.onOK = (exit1) -> {
-			cleanup();
+			
+			zipFile = new File(tmpDir.dir, "downloadshapes.zip");
+			
+			ExecDialog execZip = new ExecDialog("Einpacken");
+			execZip.show();
+			execZip.executeCommand("zip -r " + zipFile.getName() + " *", null, tmpDir.dir);
+			execZip.onOK = (exit) -> {
+
+				StreamResource streamResource = createResource();
+				ConfirmationDialog dod = new DownloadDialog("Download", streamResource.getFilename(), streamResource)
+						.cancel(() -> { cleanup(); })
+						.ok((e) -> { cleanup(); });
+				dod.show();
+			};
+			
+			execZip.onExit = () -> {
+				cleanup();
+			};
 		};
 		execImp.onExit = () -> { cleanup(); };
 	}
@@ -77,27 +100,25 @@ public class ExportShapefiles {
 		//setContent(downloadButton);
 	}
 
-	//	    private StreamResource createResource() {
-	//	        return new StreamResource(new StreamSource() {
-	//	            @Override
-	//	            public InputStream getStream() {
-	//	                String text = "My image";
-	//
-	//	                BufferedImage bi = new BufferedImage(100, 30, BufferedImage.TYPE_3BYTE_BGR);
-	//	                bi.getGraphics().drawChars(text.toCharArray(), 0, text.length(), 10, 20);
-	//
-	//	                try {
-	//	                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	//	                    ImageIO.write(bi, "png", bos);
-	//	                    return new ByteArrayInputStream(bos.toByteArray());
-	//	                } catch (IOException e) {
-	//	                    e.printStackTrace();
-	//	                    return null;
-	//	                }
-	//
-	//	            }
-	//	        }, "myImage.png");
-	//	    }
-	//	}
+	private StreamResource createResource() {
+		String downloadFilename = "qop_export_" + tableNames.stream().collect(Collectors.joining("_")) + ".zip";
+		if (downloadFilename.length() > 200)
+		{
+			downloadFilename = "qop_multiexport.zip";
+		}
+		
+		return new StreamResource(new StreamSource() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public InputStream getStream() {
+				try {
+					return new FileInputStream(zipFile);
+				} catch (FileNotFoundException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}, downloadFilename);
+	}
 
 }
