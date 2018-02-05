@@ -12,7 +12,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
@@ -62,7 +61,7 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 		execUnzip.executeCommand("unzip " + zipFile.getName() , null, tmpDir.dir);
 		execUnzip.onOK = (exit) -> {
 			Path directory = tmpDir.getPath();
-			List<ImportShapefile> shapeFiles = new ArrayList<>();				
+			List<ImportShapefileCMD> shapeFiles = new ArrayList<>();				
 			try {
 
 				Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
@@ -70,7 +69,7 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 						if (file.getFileName().toString().toLowerCase().endsWith(".shp"))
 						{
-							shapeFiles.add(new ImportShapefile(file));
+							shapeFiles.add(new ImportShapefileCMD(file));
 						}
 						return FileVisitResult.CONTINUE;
 					}
@@ -84,7 +83,7 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 			QopDBMetadata meta = gd.getMetadata();
 			for (QopDBTable table : meta.tables)
 			{
-				for (ImportShapefile shape : shapeFiles)
+				for (ImportShapefileCMD shape : shapeFiles)
 				{
 					if (shape.tableName.equalsIgnoreCase(table.name))
 					{
@@ -100,11 +99,11 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 
 				List<String> cmds = new ArrayList<>();
 
-				for (ImportShapefile s : shapeFiles)
+				for (ImportShapefileCMD s : shapeFiles)
 				{
 					if (s.importFlag)
 					{
-						String cmd = s.importCmd(cfgFile);
+						String cmd = s.cmd(cfgFile);
 						cmds.add(cmd);
 					}
 				}

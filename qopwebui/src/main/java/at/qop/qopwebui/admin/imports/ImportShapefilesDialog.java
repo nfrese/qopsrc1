@@ -27,9 +27,9 @@ public class ImportShapefilesDialog extends AbstractDialog {
 	
 	private HorizontalLayout hlButtons;
 	
-	final List<ImportShapefile> shapeFiles;
+	final List<ImportShapefileCMD> shapeFiles;
 	
-	public ImportShapefilesDialog(String title, List<ImportShapefile> shapeFiles)
+	public ImportShapefilesDialog(String title, List<ImportShapefileCMD> shapeFiles)
 	{
 		super(title);
 		this.shapeFiles = shapeFiles;
@@ -40,7 +40,7 @@ public class ImportShapefilesDialog extends AbstractDialog {
 		subContent.setSizeFull();
 		this.setContent(subContent);
 		
-		Grid<ImportShapefile> grid = new Grid<ImportShapefile>();
+		Grid<ImportShapefileCMD> grid = new Grid<ImportShapefileCMD>();
 		grid.setSizeFull();
 		
 		grid.addColumn(item -> item.importFlag).setCaption("Wird importiert")
@@ -65,7 +65,7 @@ public class ImportShapefilesDialog extends AbstractDialog {
 		
 		grid.addColumn(item -> item.warning).setCaption("Warning");
 		
-		DataProvider<ImportShapefile, ?> dataProvider = new ListDataProvider<ImportShapefile>(
+		DataProvider<ImportShapefileCMD, ?> dataProvider = new ListDataProvider<ImportShapefileCMD>(
 				shapeFiles);
 		
 		grid.setDataProvider(dataProvider);

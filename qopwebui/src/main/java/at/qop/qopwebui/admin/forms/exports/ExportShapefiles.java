@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,8 +43,8 @@ public class ExportShapefiles {
 
 		for (String tableName : tableNames)
 		{
-			ExportShapefile s = new ExportShapefile(tmpDir.getPath() , tableName);
-			String cmd = s.exportCmd(cfgFile);
+			ExportShapefileCMD s = new ExportShapefileCMD(tmpDir.getPath() , tableName);
+			String cmd = s.cmd(cfgFile);
 			cmds.add(cmd);
 		}
 
@@ -76,7 +75,6 @@ public class ExportShapefiles {
 		execImp.onExit = () -> { cleanup(); };
 	}
 
-
 	private void cleanup() {
 		try {
 			tmpDir.cleanUp();
@@ -86,9 +84,7 @@ public class ExportShapefiles {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
 	}
-
 
 	protected void init(String filename) {
 		Button downloadButton = new Button("Download image");
@@ -96,8 +92,6 @@ public class ExportShapefiles {
 		StreamResource myResource = null; // createResource();
 		FileDownloader fileDownloader = new FileDownloader(myResource);
 		fileDownloader.extend(downloadButton);
-
-		//setContent(downloadButton);
 	}
 
 	private StreamResource createResource() {

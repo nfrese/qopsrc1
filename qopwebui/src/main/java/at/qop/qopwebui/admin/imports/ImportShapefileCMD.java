@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.Utils;
 
-public class ImportShapefile {
+public class ImportShapefileCMD {
 	
 	public final Path path;
 	public boolean importFlag=true;
@@ -14,7 +14,7 @@ public class ImportShapefile {
 	public String encoding = "LATIN1";
 	public String warning = null;
 	
-	public ImportShapefile(Path path) {
+	public ImportShapefileCMD(Path path) {
 		super();
 		this.path = path;
 		tableName = proposeTableName();
@@ -29,7 +29,7 @@ public class ImportShapefile {
 		return getFilename().toLowerCase().replaceAll("\\.shp$", "");
 	}
 
-	public String importCmd(ConfigFile cfgFile) {
+	public String cmd(ConfigFile cfgFile) {
 		String cmd = "shp2pgsql -d -w -I -s %SRID% -W \"%ENCODING%\" %SHAPEFILE% %TABLENAME%";
 		cmd += " | psql -h %HOST% -U %USER_NAME% -d %DB% -p %PORT%";
 		
