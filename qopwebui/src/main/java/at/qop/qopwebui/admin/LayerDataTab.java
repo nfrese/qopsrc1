@@ -44,6 +44,7 @@ import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
 import at.qop.qopwebui.admin.forms.exports.ExportShapefiles;
+import at.qop.qopwebui.admin.imports.ImportShapefilesComponent;
 import at.qop.qopwebui.components.ConfirmationDialog;
 
 public class LayerDataTab extends AbstractTab {
@@ -117,22 +118,26 @@ public class LayerDataTab extends AbstractTab {
     	hl.setSizeFull();
     	hl.setMargin(true);
     	
-    	
-    	Button deleteLayerButton = new Button("Tabelle loeschen...", VaadinIcons.TRASH);
+		ImportShapefilesComponent importComponent = new ImportShapefilesComponent();
+		importComponent.init();
+
+    	Button deleteLayerButton = new Button("Tabellen loeschen...", VaadinIcons.TRASH);
         deleteLayerButton.setEnabled(false);
         deleteLayerButton.addClickListener(e -> {
-        	if (listSelect.getSelectedItems().size() == 1) {
-        		new ConfirmationDialog("Tabelle löeschen",listSelect.getSelectedItems() + " wirklich loeschen?")
+        	if (listSelect.getSelectedItems().size() > 0) {
+        		new ConfirmationDialog("Tabellen löeschen", listSelect.getSelectedItems() + " wirklich loeschen?")
         		.ok(
         			(evt) -> { 
-        				new PerformDelete(listSelect.getSelectedItems().iterator().next().name);
+        				listSelect.getSelectedItems().forEach( item -> {
+        					new PerformDelete(item.name);
+        				});
         				refreshList(gd, listSelect);
         			}  
         		).show();
         	}
         });
         
-    	Button exportLayerButton = new Button("Tabelle exportieren...", VaadinIcons.DOWNLOAD);
+    	Button exportLayerButton = new Button("Tabellen exportieren...", VaadinIcons.DOWNLOAD);
     	exportLayerButton.setEnabled(false);
     	exportLayerButton.addClickListener(e -> {
         	if (listSelect.getSelectedItems().size() > 0) {
@@ -149,8 +154,10 @@ public class LayerDataTab extends AbstractTab {
         tableLines = new Label("");
         
         final HorizontalLayout hlButtons = new HorizontalLayout();
+        hlButtons.addComponent(importComponent);
         hlButtons.addComponent(deleteLayerButton);
         hlButtons.addComponent(exportLayerButton);
+
         hlButtons.addComponent(tableLines);
     	
     	VerticalLayout vl = new VerticalLayout(hl, hlButtons); 
@@ -159,7 +166,7 @@ public class LayerDataTab extends AbstractTab {
     	
     	listSelect.addValueChangeListener(
     			event -> { 
-    				deleteLayerButton.setEnabled(event.getValue().size() == 1);
+    				deleteLayerButton.setEnabled(event.getValue().size() > 0);
     				exportLayerButton.setEnabled(event.getValue().size() > 0);
     			} );
 

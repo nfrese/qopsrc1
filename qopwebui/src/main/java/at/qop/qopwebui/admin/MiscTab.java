@@ -9,7 +9,9 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
+import at.qop.qoplib.Constants;
 import at.qop.qoplib.imports.PerformAddressUpdate;
+import at.qop.qopwebui.admin.forms.exports.DumpDatabase;
 import at.qop.qopwebui.admin.imports.ImportShapefilesComponent;
 
 public class MiscTab extends AbstractTab {
@@ -40,10 +42,23 @@ public class MiscTab extends AbstractTab {
 			vl.addComponent(p);
 		}
 		{
-			ImportShapefilesComponent component = new ImportShapefilesComponent();
-			component.init();
+			Panel p = new Panel();
+			Button dumpConfigButton = new Button("Konfigurationstabellen sichern");
+			dumpConfigButton.addClickListener(e -> {
+				DumpDatabase dd = new DumpDatabase(Constants.CONFIG_TABLES);
+				dd.run();
+			});
 
-			vl.addComponent(component);
+			Button dumpAllButton = new Button("Komplette Datenbank sichern");
+			dumpAllButton.addClickListener(e -> {
+				DumpDatabase dd = new DumpDatabase();
+				dd.run();
+			});
+			
+			HorizontalLayout hl = new HorizontalLayout(dumpConfigButton, dumpAllButton);
+			hl.setMargin(true);
+			p.setContent(hl);
+			vl.addComponent(p);
 		}
 		vl.setMargin(true);
 		return vl;

@@ -3,6 +3,7 @@ package at.qop.qopwebui.admin;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
@@ -40,8 +41,8 @@ public class BatchControl {
 			bc.cancelled = true;
 		}
 
-		progressLabel = new Label();
-		batchInfoLabel = new Label();
+		progressLabel = new Label("", ContentMode.HTML);
+		batchInfoLabel = new Label("", ContentMode.HTML);
 
 		batchButton = new Button("Batch Calculation");
 		batchButton.addClickListener(e -> {
@@ -105,7 +106,7 @@ public class BatchControl {
 				t.start();
 				updateButtons();
 				currentUI.setPollInterval(500);
-				batchInfoLabel.setValue("batch processing " + currentProfile.name + "<br>Tabelle batch_" + currentProfile.name + " wird gescchrieben!");
+				batchInfoLabel.setValue("Batch Verarbeitung Profil " + currentProfile.name + "<br>Tabelle batch_" + currentProfile.name + " wird geschrieben!");
 			}
 		});
 

@@ -5,9 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
@@ -19,17 +18,22 @@ import at.qop.qopwebui.components.DownloadDialog;
 import at.qop.qopwebui.components.ExecDialog;
 import at.qop.qopwebui.components.InfoDialog;
 
-public class ExportShapefiles {
+public class DumpDatabase {
 
 	private final List<String> tableNames;
 	private TmpWorkingDir tmpDir;
 	private File zipFile;
 	
-	public ExportShapefiles(List<String> tableNames) {
+	public DumpDatabase(List<String> tableNames) {
 		super();
 		this.tableNames = tableNames;
 	}
 
+	public DumpDatabase() {
+		super();
+		this.tableNames = Collections.emptyList(); // complete db
+	}
+	
 	public void run()
 	{
 		tmpDir = new TmpWorkingDir();
@@ -37,22 +41,17 @@ public class ExportShapefiles {
 
 		ConfigFile cfgFile = ConfigFile.read();
 
-		List<String> cmds = new ArrayList<>();
 
-		for (String tableName : tableNames)
-		{
-			ExportShapefileCMD s = new ExportShapefileCMD(tmpDir.getPath() , tableName);
-			String cmd = s.cmd(cfgFile);
-			cmds.add(cmd);
-		}
+		DumpDatabaseCMD s = new DumpDatabaseCMD(tmpDir.getPath(), tableNames);
+		String cmd = s.cmd(cfgFile);
 
-		ExecDialog execImp = new ExecDialog("Shape-Dateien aus der Datenbank exportieren");
+		ExecDialog execImp = new ExecDialog("Datenbank Backup erstellen");
 		execImp.show();
 
-		execImp.executeCommands(cmds.iterator(), new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
+		execImp.executeCommand(cmd, new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
 		execImp.onOK = (exit1) -> {
 			
-			zipFile = new File(tmpDir.dir, "downloadshapes.zip");
+			zipFile = new File(tmpDir.dir, "downloaddump.zip");
 			
 			ExecDialog execZip = new ExecDialog("Einpacken");
 			execZip.show();
@@ -85,10 +84,10 @@ public class ExportShapefiles {
 	}
 
 	private StreamResource createResource() {
-		String downloadFilename = "qop_export_" + tableNames.stream().collect(Collectors.joining("_")) + ".zip";
-		if (downloadFilename.length() > 200)
+		String downloadFilename = "qop_dump.zip";
+		if (this.tableNames.size() == 0)
 		{
-			downloadFilename = "qop_multiexport.zip";
+			downloadFilename = "qop_dump_all.zip";
 		}
 		
 		return new StreamResource(new StreamSource() {
