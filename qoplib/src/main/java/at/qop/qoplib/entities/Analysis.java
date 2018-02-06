@@ -74,5 +74,10 @@ public class Analysis implements Serializable, ILayerCalculationP1Params {
 	public boolean travelTimeRequired() {
 		return this.mode != null && this.mode != ModeEnum.air;
 	}	
+	
+	public String batColumnName()
+	{
+		return this.name.replace("/", "_").replace("-", "_").replace(" ", "_");
+	}
 
 }

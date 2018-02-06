@@ -39,7 +39,7 @@ public class WriteBatTable extends AbstractUpdater {
 	
 	private List<String> names()
 	{
-		return this.currentProfile.profileAnalysis.stream().map(a -> a.analysis.name).collect(Collectors.toList());
+		return this.currentProfile.profileAnalysis.stream().map(a -> a.analysis.batColumnName()).collect(Collectors.toList());
 	}
 	
 	private String tname()

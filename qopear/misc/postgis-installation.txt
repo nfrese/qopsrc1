@@ -19,7 +19,7 @@ grant all on all tables in schema public to qopuser;
 
 --------------------------------
 
-netwerk:
+network:
 /etc/postgresql/9.5/main/postgreql.conf
 
 listen_addresses = '*'  

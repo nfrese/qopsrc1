@@ -255,7 +255,7 @@ public class BatchCalculation implements Runnable {
 		lc.p3OrderTargets();
 		lc.p4Calculate();
 		ColGrp g = new ColGrp();
-		g.name = lc.analysis().name;
+		g.name = lc.analysis().batColumnName();
 		g.result = lc.result;
 		g.rating = lc.rating;
 		batRec.colGrps[profileCnt] = g; 
