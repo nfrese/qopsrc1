@@ -8,11 +8,11 @@ import javax.script.SimpleScriptContext;
 
 import at.qop.qoplib.GLO;
 
-public class ScriptedOverallResult extends OverallResult {
+public class ScriptedOverallResult<T extends ILayerCalculation> extends OverallResult<T> {
 	
 	public final String func;
 	
-	public ScriptedOverallResult(String func, List<CalculationSection> sections) {
+	public ScriptedOverallResult(String func, List<CalculationSection<T>> sections) {
 		super(sections);
 		this.func = func;
 	}

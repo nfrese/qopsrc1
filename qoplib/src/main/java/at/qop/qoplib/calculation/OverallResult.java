@@ -2,12 +2,12 @@ package at.qop.qoplib.calculation;
 
 import java.util.List;
 
-public class OverallResult {
+public class OverallResult<T extends ILayerCalculation> {
 	
-	public final List<CalculationSection> sections;
+	public final List<CalculationSection<T>> sections;
 	public double overallRating;
 	
-	public OverallResult(List<CalculationSection> sections) {
+	public OverallResult(List<CalculationSection<T>> sections) {
 		super();
 		this.sections = sections;
 	}
@@ -16,16 +16,21 @@ public class OverallResult {
 		double overallSumRating = 0;
 		double overallSumWeight = 0;
 		
-		for (CalculationSection section : sections)
+		for (CalculationSection<T> section : sections)
 		{
 			if (section.lcs.size() > 0)
 			{
 				double sectionSumWeight = 0;
 				double sectionSumRating = 0;
-				for (LayerCalculation lc : section.lcs)
+				for (ILayerCalculation lc : section.lcs)
 				{
-					sectionSumRating += (lc.rating * lc.weight);
-					sectionSumWeight += lc.weight; 
+					if (Double.isNaN(lc.getRating()))
+							{
+						System.out.println();
+							}
+					
+					sectionSumRating += (lc.getRating() * lc.getWeight());
+					sectionSumWeight += lc.getWeight(); 
 				}
 				
 				if (sectionSumWeight > 0)

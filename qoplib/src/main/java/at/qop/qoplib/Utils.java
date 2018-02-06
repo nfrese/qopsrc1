@@ -27,4 +27,16 @@ public class Utils {
 		return "\"" + name.replace("\"", "\\\"") + "\"";
 	}
 
+	public static String toPGColumnName(String name) {
+		return name.toLowerCase()
+				.replace("/", "_")
+				.replace("-", "_")
+				.replace("&", "_a_")
+				.replace(" ", "_")
+				.replace("ä", "ae")
+				.replace("ö", "oe")
+				.replace("ü", "ue")
+				.replace("ß", "ss");
+	}
+
 }

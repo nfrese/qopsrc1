@@ -16,6 +16,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import at.qop.qoplib.Utils;
 import at.qop.qoplib.calculation.ILayerCalculationP1Params;
 
 @Entity
@@ -77,7 +78,7 @@ public class Analysis implements Serializable, ILayerCalculationP1Params {
 	
 	public String batColumnName()
 	{
-		return this.name.replace("/", "_").replace("-", "_").replace(" ", "_");
+		return Utils.toPGColumnName(this.name);
 	}
 
 }

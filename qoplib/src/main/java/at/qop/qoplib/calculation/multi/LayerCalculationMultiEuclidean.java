@@ -12,7 +12,6 @@ import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerTarget;
 import at.qop.qoplib.calculation.MultiTarget;
 import at.qop.qoplib.dbconnector.DbTable;
-import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.ProfileAnalysis;
 
 public class LayerCalculationMultiEuclidean extends LayerCalculation {

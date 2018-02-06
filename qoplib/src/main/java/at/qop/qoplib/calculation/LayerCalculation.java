@@ -24,10 +24,14 @@ import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.LonLat;
 
-public abstract class LayerCalculation {
+public abstract class LayerCalculation implements ILayerCalculation {
 	
 	public final Point start;
 	public final ProfileAnalysis params;
+	public ProfileAnalysis getParams() {
+		return params;
+	}
+
 	public final double presetWeight;
 	private final String altRatingFunc;
 	
@@ -175,7 +179,6 @@ public abstract class LayerCalculation {
 		} catch (ScriptException e) {
 			throw new RuntimeException(e);
 		}
-		
 	}
 	
 	public void p5route(IRouter router) {
@@ -240,4 +243,13 @@ public abstract class LayerCalculation {
 		return new LonLat(p.getCoordinate().x, p.getCoordinate().y);
 	}	
 
+	public double getRating()
+	{
+		return rating;
+	}
+	
+	public double getWeight()
+	{
+		return weight;
+	}
 }

@@ -3,7 +3,6 @@ package at.qop.qopwebui;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.EventObject;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import org.vaadin.addon.leaflet.LCircle;
 import org.vaadin.addon.leaflet.LFeatureGroup;
 import org.vaadin.addon.leaflet.LMap;
 import org.vaadin.addon.leaflet.LMarker;
-import org.vaadin.addon.leaflet.LPolygon;
 import org.vaadin.addon.leaflet.LPolyline;
 import org.vaadin.addon.leaflet.LTileLayer;
 import org.vaadin.addon.leaflet.LeafletLayer;
@@ -46,11 +44,11 @@ import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.LookupSessionBeans;
-import at.qop.qoplib.calculation.AbstractLayerTarget;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.CalculationSection;
 import at.qop.qoplib.calculation.DbLayerSource;
+import at.qop.qoplib.calculation.ILayerCalculation;
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerSource;
@@ -259,9 +257,8 @@ public class QopUI extends UI {
 			calculation.run();
 
 			grid.removeAllComponents();
-			//gridAddHeaders();
 
-			for (CalculationSection section : calculation.sections)
+			for (CalculationSection<ILayerCalculation> section : calculation.getSections())
 			{
 				String title = section.getTitle();
 				if (title != null && !title.isEmpty())
@@ -275,9 +272,10 @@ public class QopUI extends UI {
 				}
 				gridAddHeaders();
 
-				for (LayerCalculation lc :section.lcs)
+				for (ILayerCalculation ilc :section.lcs)
 				{
-
+					LayerCalculation lc = (LayerCalculation)ilc; 
+					
 					grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
 
 					if (lc.charts != null && lc.charts.size() > 0)
@@ -411,7 +409,7 @@ public class QopUI extends UI {
 			}
 			
 			addSliderChangedListener(e -> {
-				overallRatingLabel.setValue("<big><big><b>Gesamtindex: " + formatDouble2Decimal(calculation.overallRating) + "</b></big></big>");
+				overallRatingLabel.setValue("<big><big><b>Gesamtindex: " + formatDouble2Decimal(calculation.getOverallRating()) + "</b></big></big>");
 			});
 			refreshOverallRating(calculation);
 		}

@@ -1,6 +1,7 @@
 package at.qop.qoplib.calculation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.vividsolutions.jts.geom.Point;
@@ -16,9 +17,7 @@ public class Calculation {
 	private final IRouter router;
 	
 	public List<LayerCalculation> layerCalculations = new ArrayList<>();
-	
-	public List<CalculationSection> sections = new ArrayList<>();
-	public double overallRating;
+	private Rating<ILayerCalculation> rating = null; 
 	
 	public Calculation(Profile profile, Point address, LayerSource source, IRouter router) {
 		super();
@@ -48,27 +47,22 @@ public class Calculation {
 			System.out.println(">>>>" + profileAnalysis.analysis.name + " done in " + (t_finished - t_start) + "ms");
 		};
 		
-		new CalculationOrderer(this).run();
-	}
-	
-	public void runRating()
-	{
-		OverallResult orc;
-		if (profile.aggrfn != null && !profile.aggrfn.trim().isEmpty())
-		{
-			orc = new ScriptedOverallResult(profile.aggrfn, sections);
-		}
-		else
-		{
-			orc = new OverallResult(sections);
-		}
-
-		orc.run();
-		overallRating = orc.overallRating;
+		List<ILayerCalculation> x = new ArrayList<>(layerCalculations);
+		this.rating = new Rating<ILayerCalculation>(profile,  new SectionBuilder<ILayerCalculation>(x).run());
+		this.rating.runRating();
 	}
 
-	public void addSection(CalculationSection current) {
-		sections.add(current);
+	public double getOverallRating() {
+		if (rating != null) return rating.overallRating;
+		return Double.NaN;
 	}
 
+	public void runRating() {
+		if (rating != null) rating.runRating();
+	}
+
+	public List<CalculationSection<ILayerCalculation>> getSections() {
+		if (rating != null) return rating.sections;
+		return Collections.emptyList();
+	}
 }
