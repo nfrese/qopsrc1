@@ -29,7 +29,7 @@ public class LayerCalculationMultiEuclidean extends LayerCalculation {
 	public void p0loadTargets() {
 		orderedTargets = new ArrayList<>();
 		if (!analysis().hasRadius()) throw new RuntimeException("dont!");
-		Geometry buffer = CRSTransform.singleton.bufferWGS84(start, analysis().getRadius());
+		Geometry buffer = CRSTransform.singleton.bufferWGS84Corr(start, analysis().getRadius());
 		
 		@SuppressWarnings("unchecked")
 		List<MultiTarget> results = spatIx.query(buffer.getEnvelopeInternal());

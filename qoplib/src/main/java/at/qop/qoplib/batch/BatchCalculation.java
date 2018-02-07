@@ -201,6 +201,10 @@ public class BatchCalculation implements Runnable {
 				{
 					Address address = addresses.get(i);
 					
+					if ("Spitzweg 160".equals(address.name + "")) {
+						System.out.println();
+					}
+					
 					LayerCalculationMultiTT lc = new LayerCalculationMultiTT(address.geom, profileAnalysis, 
 							profileAnalysis.weight, profileAnalysis.altratingfunc, loaded.table, multiTargets, times, i);
 					performCalculation(batRecs[i], profileCnt, lc);

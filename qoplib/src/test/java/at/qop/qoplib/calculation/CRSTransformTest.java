@@ -52,12 +52,13 @@ public class CRSTransformTest {
 		Point p2 = CRSTransform.gfWGS84.createPoint(new Coordinate(16.37741831002266, 48.20776186641345));
 		
 		double d = crst.distanceWGS84(p1, p2);
+		double something = (d / 50);
 		
-		Geometry buffered = crst.bufferWGS84(p1, d+1);
+		Geometry buffered = crst.bufferWGS84Corr(p1, d+ something);
 		
 		assertTrue(p2.intersects(buffered));
 		
-		Geometry bufferedSmall = crst.bufferWGS84(p1, d-1);
+		Geometry bufferedSmall = crst.bufferWGS84Corr(p1, d-something);
 		
 		assertFalse(p2.intersects(bufferedSmall));
 	}

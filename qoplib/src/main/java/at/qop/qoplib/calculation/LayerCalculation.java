@@ -69,11 +69,30 @@ public abstract class LayerCalculation implements ILayerCalculation {
 	public void p3OrderTargets() {
 		
 		removeDissolved();
+		removeTooDistant();
 		
 		if (analysis().travelTimeRequired()) {
 			Collections.sort(orderedTargets, (t1, t2) -> Double.compare(t1.time, t2.time));
 		} else {
 			Collections.sort(orderedTargets, (t1, t2) -> Double.compare(t1.distance, t2.distance));
+		}
+	}
+	
+	private void removeTooDistant()
+	{
+		
+		if (params.analysis.hasRadius())
+		{
+			ArrayList<LayerTarget> collect = new ArrayList<>();
+			
+			for (LayerTarget lt : orderedTargets)
+			{
+				if (lt.distance <= params.analysis.radius)
+				{
+					collect.add(lt);
+				}
+			}
+			orderedTargets = collect;
 		}
 	}
 	
@@ -85,6 +104,7 @@ public abstract class LayerCalculation implements ILayerCalculation {
 			if (lt instanceof TargetHasParent)
 			{
 				hasParents=true;
+				break;
 			}
 		}
 		if (hasParents)

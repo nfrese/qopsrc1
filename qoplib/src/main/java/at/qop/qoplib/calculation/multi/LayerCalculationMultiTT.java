@@ -40,7 +40,6 @@ public class LayerCalculationMultiTT extends LayerCalculation {
 			lt.geom = mt.geom;
 			lt.rec = mt.rec;
 			orderedTargets.add(lt);
-			t++;
 		}
 	}
 	

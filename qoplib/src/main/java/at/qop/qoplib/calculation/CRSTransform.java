@@ -72,9 +72,13 @@ public class CRSTransform {
 		return fromWGS84(g1).distance(fromWGS84(g2));
 	}
 	
-	public Geometry bufferWGS84(Geometry g1, double meter) {
+	public Geometry bufferWGS84Corr(Geometry g1, double meter) {
+		return bufferWGS84(g1, meter, 1.02); // add 2% for the possible error of 8 segments per quadrant
+	}
+	
+	public Geometry bufferWGS84(Geometry g1, double meter, double corrFact) {
 		Geometry pGeom = fromWGS84(g1);
-		Geometry buffered = pGeom.buffer(meter);
+		Geometry buffered = pGeom.buffer(meter * corrFact);
 		return toWGS84(buffered);
 	}
 

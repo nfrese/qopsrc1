@@ -15,7 +15,7 @@ public class LayerTarget extends AbstractLayerTarget {
 	
 	@Override
 	public String toString() {
-		return "LayerTarget [geom=" + geom + ", target=" + rec + ", distance=" + distance + "]";
+		return "LayerTarget [distance=" + distance + ", time=" + time + ", geom=" + geom + ", rec=" + rec + "]";
 	}
 	
 }
