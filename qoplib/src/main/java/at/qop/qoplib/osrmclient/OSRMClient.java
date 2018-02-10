@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
@@ -67,12 +68,9 @@ public class OSRMClient implements IRouter {
 		URLConnection con = url.openConnection();
 			
 		try (InputStream is= con.getInputStream()) {
-			String result = new BufferedReader(new InputStreamReader(is))
-					  .lines().collect(Collectors.joining("\n"));
-			
 			long t_callFinished = System.currentTimeMillis();
 			
-			double[][] parseTableResult = OSRMClient.parseTableResult(result);
+			double[][] parseTableResult = OSRMClient.parseTableResult(new BufferedReader(new InputStreamReader(is)));
 			long t_finished = System.currentTimeMillis();
 			
 			System.out.println(sources.length + "x" + destinations.length 
@@ -87,10 +85,10 @@ public class OSRMClient implements IRouter {
 		return "http://" + host + ":" + (baseport + mode.osrmPortOffset);
 	}
 	
-	public static double[][] parseTableResult(String json) throws JsonProcessingException, IOException
+	public static double[][] parseTableResult(Reader jsonReader) throws JsonProcessingException, IOException
 	{
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode node = mapper.readTree(json);
+		JsonNode node = mapper.readTree(jsonReader);
 		String code = node.get("code").asText();
 		if (!"Ok".equalsIgnoreCase(code))
 		{

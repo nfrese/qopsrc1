@@ -158,8 +158,21 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 					rec.values = new Object[cols];
 					for (int i = 0; i < cols ; i++)
 					{
-						Object value = rs.getObject(i+1);
-						rec.values[i] = value;
+						try {
+							Object value = rs.getObject(i+1);
+							rec.values[i] = value;
+						}
+						catch (Exception ex)
+						{
+							if (ex.getMessage().contains("Bad value for type BigDecimal : NaN"))
+							{
+								rec.values[i] = null;
+							}
+							else
+							{
+								throw ex;
+							}
+						}
 					}
 					tableReader.record(rec);
 				}
