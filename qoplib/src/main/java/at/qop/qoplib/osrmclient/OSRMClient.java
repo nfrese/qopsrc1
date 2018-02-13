@@ -11,7 +11,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -70,7 +73,7 @@ public class OSRMClient implements IRouter {
 		try (InputStream is= con.getInputStream()) {
 			long t_callFinished = System.currentTimeMillis();
 			
-			double[][] parseTableResult = OSRMClient.parseTableResult(new BufferedReader(new InputStreamReader(is)));
+			double[][] parseTableResult = OSRMClient.parseTableResult(new BufferedReader(new InputStreamReader(is)), sources.length, destinations.length);
 			long t_finished = System.currentTimeMillis();
 			
 			System.out.println(sources.length + "x" + destinations.length 
@@ -85,50 +88,42 @@ public class OSRMClient implements IRouter {
 		return "http://" + host + ":" + (baseport + mode.osrmPortOffset);
 	}
 	
-	public static double[][] parseTableResult(Reader jsonReader) throws JsonProcessingException, IOException
+	public static double[][] parseTableResult(Reader jsonReader, int rows, int cols) throws JsonProcessingException, IOException
 	{
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode node = mapper.readTree(jsonReader);
-		String code = node.get("code").asText();
-		if (!"Ok".equalsIgnoreCase(code))
-		{
-			throw new RuntimeException("osrm return code != ok");
-		}
+		JsonFactory jfactory = new JsonFactory();
 		
-		JsonNode durations = node.get("durations");
-		int rows = 0;
-		int cols = 0;
-
-		{ // count rows and cols
-			Iterator<JsonNode> itRows = durations.iterator();
-			while (itRows.hasNext()) {
-				JsonNode row = itRows.next();
-				Iterator<JsonNode> itCols = row.iterator();
-				cols=0;
-				while (itCols.hasNext()) {
-					JsonNode cell = itCols.next();
-					cols++;
-				}
-				rows++;
-			}
-		}
+		JsonParser jParser = jfactory.createParser(jsonReader);
 		
 		double[][] durationArr = new double[rows][cols];
-		{
-			int r = 0;
-			
-			Iterator<JsonNode> itRows = durations.iterator();
-			while (itRows.hasNext()) {
-				JsonNode row = itRows.next();
-				Iterator<JsonNode> itCols = row.iterator();
-				int c=0;
-				while (itCols.hasNext()) {
-					JsonNode cell = itCols.next();
-					durationArr[r][c] = cell.asDouble();
-					c++;
+		
+		while (jParser.nextToken() != JsonToken.END_OBJECT) {
+		    String fieldname = jParser.getCurrentName();
+		
+		    if ("code".equals(fieldname))
+		    {
+		    	jParser.nextToken();
+		        String code = jParser.getText();
+				if (!"Ok".equalsIgnoreCase(code))
+				{
+					throw new RuntimeException("osrm return code != ok");
 				}
-				r++;
-			}
+		    }
+		    if ("durations".equals(fieldname))
+		    {
+		    	if (jParser.nextToken() != JsonToken.START_ARRAY) throw new RuntimeException("Expected START_ARRAY");
+		    	int r = 0;
+		    	while (jParser.nextToken() == JsonToken.START_ARRAY) {
+		    	
+		    		int c=0;
+		    		while (jParser.nextToken() != JsonToken.END_ARRAY) {
+		    			durationArr[r][c] = jParser.getDoubleValue();
+						c++;
+		    		}
+			    	if (c != cols) throw new RuntimeException("c != cols");
+		    		r++;
+		        }
+		    	if (r != rows) throw new RuntimeException("r != rows");
+		    }
 		}
 		return durationArr;
 	}
