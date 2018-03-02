@@ -88,7 +88,7 @@ public class ExecDialog extends AbstractDialog {
 		cancelButton.addClickListener(e2 -> {
 			cancel();
 		});
-		okButton = new Button("OK", VaadinIcons.CHECK);
+		okButton = new Button(okButtonText(), okButtonSymbol());
 		okButton.setEnabled(false);
 		okButton.addClickListener(e2 -> {
 			onOK.accept(exit);
@@ -102,6 +102,14 @@ public class ExecDialog extends AbstractDialog {
 
 	}
 
+	protected VaadinIcons okButtonSymbol() {
+		return VaadinIcons.CHECK;
+	}
+
+	protected String okButtonText() {
+		return "OK";
+	}
+	
 	public void executeCommand(String command, String[] envp, File dir) {
 		executeCommands(Arrays.asList(command).iterator(), envp, dir);
 	}
@@ -131,6 +139,9 @@ public class ExecDialog extends AbstractDialog {
 		}
 	}
 	
+	String lastLine = null;
+	int duplicateCount = 0;
+	
 	public void executeCommand(String command, String[] envp, File dir, IntConsumer singleDone) {
 
 		console.addComponent(new Label("<b>" + command + "</b>", ContentMode.HTML));
@@ -143,9 +154,25 @@ public class ExecDialog extends AbstractDialog {
 
 				@Override
 				protected void print(String line) {
-					getUI().access(() -> {
-						console.addComponent(new Label(line));
-					});
+					if (!line.equals(lastLine))
+					{
+						if (duplicateCount > 1)
+						{
+							getUI().access(() -> {
+								console.addComponent(new Label(lastLine + " repeated " + duplicateCount + " times"));
+							});
+						}
+						
+						lastLine = line;
+						duplicateCount = 1;
+						getUI().access(() -> {
+							console.addComponent(new Label(line));
+						});
+					}
+					else
+					{
+						duplicateCount++;
+					}
 				}
 				
 			});

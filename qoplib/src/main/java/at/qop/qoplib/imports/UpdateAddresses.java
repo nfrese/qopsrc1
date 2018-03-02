@@ -26,12 +26,6 @@ public class UpdateAddresses extends AbstractCSVUpdater {
 			sql = "DROP TABLE public.q_addresses";
 			ddl(sql, true);
 		}
-
-		{
-			String sql;
-			sql = "DROP INDEX public.q_addresses_geom_gist";
-			ddl(sql, true);
-		}
 		
 		{
 			String sql = "CREATE TABLE public.q_addresses"
@@ -59,6 +53,12 @@ public class UpdateAddresses extends AbstractCSVUpdater {
 					+ " ON public.q_addresses"
 					+ " USING gist"
 					+ "(geom);";
+			ddl(sql, false);
+		}
+
+		{
+			String sql = "CREATE INDEX q_adresses_name_ix"
+					+ " ON public.q_addresses (name varchar_ops DESC NULLS FIRST);";
 			ddl(sql, false);
 		}
 	}

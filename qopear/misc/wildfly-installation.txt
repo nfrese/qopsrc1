@@ -2,6 +2,11 @@ wildfly:
 
 download/install wildfly 11
 
+registration as a service:
+
+cd /opt/wildfly/docs/contrib/scripts/systemd
+cat README
+
 database driver:
 
 deploy postgresql-42.1.4.jar via the wildfly admin console

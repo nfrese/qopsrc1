@@ -199,7 +199,7 @@ public class LayerDataTab extends AbstractTab {
 					IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 					try {
 						DBSingleResultTableReader tableReader = new DBSingleResultTableReader();
-						gd_.readTable("select count(*) from " + table.name, tableReader);
+						gd_.readTable("select count(gid) from " + table.name, tableReader);
 						int lines = (int)tableReader.longResult();
 						currentLines = lines;
 						tableLines.setValue("Records: " + currentLines);

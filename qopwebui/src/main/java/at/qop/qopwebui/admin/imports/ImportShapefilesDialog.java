@@ -61,7 +61,11 @@ public class ImportShapefilesDialog extends AbstractDialog {
 					item.srid = Integer.valueOf(v); 
 				});*/
 		
-		grid.addColumn(item -> item.encoding).setCaption("Encoding");
+		grid.addColumn(item -> item.encoding).setCaption("Encoding (siehe CPG oder CST-Datei)")
+		.setEditorComponent(new TextField(), 
+				(item,v)  -> { 
+					item.encoding = v; 
+				});		
 		
 		grid.addColumn(item -> item.warning).setCaption("Warning");
 		
@@ -78,7 +82,7 @@ public class ImportShapefilesDialog extends AbstractDialog {
 			onExit.run();
 			this.close();
 		});
-		okButton = new Button("OK", VaadinIcons.CHECK);
+		okButton = new Button("Weiter", VaadinIcons.ARROW_RIGHT);
 		okButton.setEnabled(true);
 		okButton.addClickListener(e2 -> {
 			onDone.run();

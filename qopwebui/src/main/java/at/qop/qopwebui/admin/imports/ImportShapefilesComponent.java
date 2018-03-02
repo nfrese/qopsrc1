@@ -29,6 +29,7 @@ import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
 import at.qop.qopwebui.components.ExecDialog;
+import at.qop.qopwebui.components.ExecDialogNext;
 import at.qop.qopwebui.components.InfoDialog;
 
 public class ImportShapefilesComponent extends Panel implements Receiver, SucceededListener, ProgressListener{
@@ -56,7 +57,7 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 
 	@Override
 	public void uploadSucceeded(SucceededEvent event) {
-		ExecDialog execUnzip = new ExecDialog("Entpacken");
+		ExecDialog execUnzip = new ExecDialogNext("Entpacken");
 		execUnzip.show();
 		execUnzip.executeCommand("unzip " + zipFile.getName() , null, tmpDir.dir);
 		execUnzip.onOK = (exit) -> {

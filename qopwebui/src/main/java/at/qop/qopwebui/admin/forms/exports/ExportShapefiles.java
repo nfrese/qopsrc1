@@ -17,6 +17,7 @@ import at.qop.qoplib.TmpWorkingDir;
 import at.qop.qopwebui.components.ConfirmationDialog;
 import at.qop.qopwebui.components.DownloadDialog;
 import at.qop.qopwebui.components.ExecDialog;
+import at.qop.qopwebui.components.ExecDialogNext;
 import at.qop.qopwebui.components.InfoDialog;
 
 public class ExportShapefiles {
@@ -46,7 +47,7 @@ public class ExportShapefiles {
 			cmds.add(cmd);
 		}
 
-		ExecDialog execImp = new ExecDialog("Shape-Dateien aus der Datenbank exportieren");
+		ExecDialog execImp = new ExecDialogNext("Shape-Dateien aus der Datenbank exportieren");
 		execImp.show();
 
 		execImp.executeCommands(cmds.iterator(), new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
@@ -54,7 +55,7 @@ public class ExportShapefiles {
 			
 			zipFile = new File(tmpDir.dir, "downloadshapes.zip");
 			
-			ExecDialog execZip = new ExecDialog("Einpacken");
+			ExecDialog execZip = new ExecDialogNext("Einpacken");
 			execZip.show();
 			execZip.executeCommand("zip -r " + zipFile.getName() + " *", null, tmpDir.dir);
 			execZip.onOK = (exit) -> {

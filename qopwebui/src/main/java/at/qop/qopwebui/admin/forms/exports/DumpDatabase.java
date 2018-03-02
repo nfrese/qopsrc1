@@ -16,6 +16,7 @@ import at.qop.qoplib.TmpWorkingDir;
 import at.qop.qopwebui.components.ConfirmationDialog;
 import at.qop.qopwebui.components.DownloadDialog;
 import at.qop.qopwebui.components.ExecDialog;
+import at.qop.qopwebui.components.ExecDialogNext;
 import at.qop.qopwebui.components.InfoDialog;
 
 public class DumpDatabase {
@@ -45,7 +46,7 @@ public class DumpDatabase {
 		DumpDatabaseCMD s = new DumpDatabaseCMD(tmpDir.getPath(), tableNames);
 		String cmd = s.cmd(cfgFile);
 
-		ExecDialog execImp = new ExecDialog("Datenbank Backup erstellen");
+		ExecDialog execImp = new ExecDialogNext("Datenbank Backup erstellen");
 		execImp.show();
 
 		execImp.executeCommand(cmd, new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
@@ -53,7 +54,7 @@ public class DumpDatabase {
 			
 			zipFile = new File(tmpDir.dir, "downloaddump.zip");
 			
-			ExecDialog execZip = new ExecDialog("Einpacken");
+			ExecDialog execZip = new ExecDialogNext("Einpacken");
 			execZip.show();
 			execZip.executeCommand("zip -r " + zipFile.getName() + " *", null, tmpDir.dir);
 			execZip.onOK = (exit) -> {
