@@ -3,6 +3,7 @@ package at.qop.qoplib.osrmclient;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,49 +31,68 @@ public class OSRMClientTest {
 	@Test
 	public void testSingle() throws IOException {
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000);
+		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000, 100);
 
 		LonLat[] sources = new LonLat[] {new LonLat(16.369561009437817, 48.20423271310815)};
 		LonLat[] targets = new LonLat[] {new LonLat(16.37741831002266, 48.20776186641345)};
 		double[][] result = client.table(ModeEnum.car, sources, targets);
-		System.out.println(result);
+		System.out.println(Arrays.deepToString(result));
 
 	}
 	
 	@Test
 	public void testMini() throws IOException {
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000);
+		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000, 100);
 
 		LonLat[] sources = demoData(5);
 		LonLat[] targets = demoData(5);
 		
 		double[][] result = client.table(ModeEnum.car, sources, targets);
-		System.out.println(result);
+		System.out.println(Arrays.deepToString(result));
 	}
 	
 	@Test
 	public void testMedium() throws IOException {
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000);
+		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000, 100);
 
 		LonLat[] sources = demoData(100);
 		LonLat[] targets = demoData(100);
 		
 		double[][] result = client.table(ModeEnum.car, sources, targets);
-		System.out.println(result);
+		System.out.println(Arrays.deepToString(result));
 
 	}
 	
 	@Test
 	public void testBig() throws IOException {
+		
+		String r1Str;
+		
+		{
+			OSRMClient client = new OSRMClient(OSRM_SERVER, 5000, 3000);
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000);
+			LonLat[] sources = demoData(-1);
+			LonLat[] targets = demoData(-1);
+			double[][] result = client.table(ModeEnum.car, sources, targets);
+			
+			r1Str = Arrays.deepToString(result);
+			System.out.println(result.length + "x" + result[0].length);
+		}
 
-		LonLat[] sources = demoData(-1);
-		LonLat[] targets = demoData(-1);
-		double[][] result = client.table(ModeEnum.car, sources, targets);
-		System.out.println(result.length + "x" + result[0].length);
+		
+		{
+			OSRMClient client = new OSRMClient(OSRM_SERVER, 5000, 100);
+
+			LonLat[] sources = demoData(-1);
+			LonLat[] targets = demoData(-1);
+			double[][] result = client.table(ModeEnum.car, sources, targets);
+			System.out.println(result.length + "x" + result[0].length);
+			
+			String r2Str = Arrays.deepToString(result);
+			Assert.assertEquals(r1Str, r2Str);
+		}
 
 	}
 

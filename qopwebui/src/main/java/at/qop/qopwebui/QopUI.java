@@ -43,6 +43,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.Calculation;
@@ -252,7 +253,7 @@ public class QopUI extends UI {
 			
 			LayerSource source = new DbLayerSource();
 			ConfigFile cf = ConfigFile.read();
-			IRouter router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort());
+			IRouter router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort(), Constants.SPLIT_DESTINATIONS_AT);
 			Calculation calculation = new Calculation(currentProfile, start, source, router);
 			calculation.run();
 

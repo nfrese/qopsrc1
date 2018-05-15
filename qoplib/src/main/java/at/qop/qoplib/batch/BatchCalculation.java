@@ -15,20 +15,18 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.WriteBatTable.BatRecord;
 import at.qop.qoplib.batch.WriteBatTable.ColGrp;
 import at.qop.qoplib.calculation.CRSTransform;
-import at.qop.qoplib.calculation.CalculationSection;
 import at.qop.qoplib.calculation.CreateTargetsMulti;
 import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.calculation.IRouter;
-import at.qop.qoplib.calculation.ISectionBuilderInput;
 import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerCalculationP1Result;
 import at.qop.qoplib.calculation.LayerSource;
 import at.qop.qoplib.calculation.MultiTarget;
-import at.qop.qoplib.calculation.SectionBuilder;
 import at.qop.qoplib.calculation.multi.LayerCalculationMultiEuclidean;
 import at.qop.qoplib.calculation.multi.LayerCalculationMultiSimple;
 import at.qop.qoplib.calculation.multi.LayerCalculationMultiTT;
@@ -64,7 +62,7 @@ public class BatchCalculation implements Runnable {
 
 		source = new DbLayerSource();
 		cf = ConfigFile.read();
-		router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort());
+		router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort(), Constants.SPLIT_DESTINATIONS_AT);
 	}
 
 	protected void progress(int overall_, int count_) {

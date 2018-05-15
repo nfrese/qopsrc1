@@ -20,25 +20,51 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.entities.ModeEnum;
+import at.qop.qoplib.osrmclient.matrix.Arr;
+import at.qop.qoplib.osrmclient.matrix.ArrImpl;
+import at.qop.qoplib.osrmclient.matrix.ArrView;
+import at.qop.qoplib.osrmclient.matrix.DoubleMatrix;
+import at.qop.qoplib.osrmclient.matrix.DoubleMatrixImpl;
 
 public class OSRMClient implements IRouter {
 	
+	private final int splitDestinationsAt;
 	private final String host;
 	private int baseport;
 	
-	public OSRMClient(String host, int baseport) {
+	public OSRMClient(String host, int baseport, int splitDestinationsAt) {
 		super();
 		this.host = host;
 		this.baseport = baseport;
+		this.splitDestinationsAt = splitDestinationsAt;
 	}
-	
+
 	@Override
 	public double[][] table(ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
+		
+		int rows = sources.length; int cols = destinations.length;
+
+		ArrImpl<LonLat> destinationsArr = new ArrImpl<>(destinations);
+		
+		DoubleMatrixImpl results = new DoubleMatrixImpl(rows, cols);
+		
+		for (ArrView<LonLat> destView : destinationsArr.views(splitDestinationsAt))
+		{
+			DoubleMatrix resultsView = results.createView(0, rows, destView.getStart(), destView.length());
+			
+			table_(resultsView, mode, sources, destView);
+		}
+		
+		return results.arr();
+	}
+	
+	
+	public void table_(DoubleMatrix results, ModeEnum mode, LonLat[] sources, Arr<LonLat> destinations) throws IOException {
 		// http://router.project-osrm.org/table/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?sources=0'
 		
-		if (destinations.length == 0)
+		if (destinations.length() == 0)
 		{
-			return new double[sources.length][0];
+			return;
 		}
 		
 		StringBuilder urlSb = new StringBuilder();
@@ -48,7 +74,7 @@ public class OSRMClient implements IRouter {
 		String sourcesStr = Arrays.stream(sources).map(p -> p.toString()).collect(Collectors.joining(";"));
 		urlSb.append(sourcesStr);
 		urlSb.append(';');
-		String targetsStr = Arrays.stream(destinations).map(p -> p.toString()).collect(Collectors.joining(";"));
+		String targetsStr = destinations.stream().map(p -> p.toString()).collect(Collectors.joining(";"));
 		urlSb.append(targetsStr);
 		int cnt = 0;
 		urlSb.append("?sources=");
@@ -58,7 +84,7 @@ public class OSRMClient implements IRouter {
 			urlSb.append(cnt++);
 		}
 		urlSb.append("&destinations=");
-		for (int i=0;i<destinations.length;i++)
+		for (int i=0;i<destinations.length();i++)
 		{
 			if (i>0) urlSb.append(';');
 			urlSb.append(cnt++);
@@ -73,14 +99,13 @@ public class OSRMClient implements IRouter {
 		try (InputStream is= con.getInputStream()) {
 			long t_callFinished = System.currentTimeMillis();
 			
-			double[][] parseTableResult = OSRMClient.parseTableResult(new BufferedReader(new InputStreamReader(is)), sources.length, destinations.length);
+			OSRMClient.parseTableResult(results, new BufferedReader(new InputStreamReader(is)));
 			long t_finished = System.currentTimeMillis();
 			
-			System.out.println(sources.length + "x" + destinations.length 
+			System.out.println(sources.length + "x" + destinations.length() 
 					+ " t_call=" + (t_callFinished - t_start) 
 					+ "ms t_parse="+ (t_finished - t_callFinished) + "ms " + url);
 			
-			return parseTableResult;
 		}
 	}
 
@@ -90,11 +115,18 @@ public class OSRMClient implements IRouter {
 	
 	public static double[][] parseTableResult(Reader jsonReader, int rows, int cols) throws JsonProcessingException, IOException
 	{
+		DoubleMatrixImpl dm = new DoubleMatrixImpl(rows, cols);
+		parseTableResult(dm , jsonReader);
+		return dm.arr();
+	}
+	
+	public static void parseTableResult(DoubleMatrix durationArr, Reader jsonReader) throws JsonProcessingException, IOException
+	{
+		int rows = durationArr.rows(); int cols = durationArr.columns();
+		
 		JsonFactory jfactory = new JsonFactory();
 		
 		JsonParser jParser = jfactory.createParser(jsonReader);
-		
-		double[][] durationArr = new double[rows][cols];
 		
 		while (jParser.nextToken() != JsonToken.END_OBJECT) {
 		    String fieldname = jParser.getCurrentName();
@@ -116,7 +148,7 @@ public class OSRMClient implements IRouter {
 		    	
 		    		int c=0;
 		    		while (jParser.nextToken() != JsonToken.END_ARRAY) {
-		    			durationArr[r][c] = jParser.getDoubleValue();
+		    			durationArr.set(r, c, jParser.getDoubleValue());
 						c++;
 		    		}
 			    	if (c != cols) throw new RuntimeException("c != cols");
@@ -125,7 +157,6 @@ public class OSRMClient implements IRouter {
 		    	if (r != rows) throw new RuntimeException("r != rows");
 		    }
 		}
-		return durationArr;
 	}
 
 	@Override
