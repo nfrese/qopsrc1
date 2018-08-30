@@ -7,54 +7,19 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import at.qop.qoplib.ConfigFile;
-import at.qop.qopwebui.components.EnterTextDialog;
+import at.qop.qopwebui.ProtectedUI;
 
 @Theme("valo")
-public class AdminUI extends UI {
+public class AdminUI extends ProtectedUI {
 	
 	private static final long serialVersionUID = 1L;
-
-	@Override
-    protected void init(VaadinRequest vaadinRequest) {
-		
-		boolean authenticated = "true".equals(UI.getCurrent().getSession().getAttribute("authenticated"));
-		
-		if (!authenticated)
-		{
-			String adminPassword = ConfigFile.read().getAdminPassword();
-			if (adminPassword == null)
-			{
-				init_(vaadinRequest);
-			}
-			else
-			{
-				new EnterTextDialog("Admin", "Passwort?").ok(v -> {
-					if (v.getValue().equals(adminPassword))
-					{
-						UI.getCurrent().getSession().setAttribute("authenticated", "true");
-						init_(vaadinRequest);
-					}
-					else
-					{
-						setContent(new Label("Falsches Passwort! Reload für neuen Versuch!"));
-					}
-				}).show();;
-			}
-		}
-		else
-		{
-			init_(vaadinRequest);
-		}
-	}
 	
-    protected void init_(VaadinRequest vaadinRequest) {
+	@Override
+    protected void ainit(VaadinRequest vaadinRequest) {
 		
         final VerticalLayout layout = new VerticalLayout();
        
@@ -100,4 +65,9 @@ public class AdminUI extends UI {
     public static class AdminUIServlet extends VaadinServlet {
 		private static final long serialVersionUID = 1L;
     }
+
+	@Override
+	protected boolean requiresAdminRole() {
+		return true;
+	}
 }

@@ -65,7 +65,7 @@ import at.qop.qopwebui.components.ChartDialog;
 import at.qop.qopwebui.components.ExceptionDialog;
 
 @Theme("valo")
-public class QopUI extends UI {
+public class QopUI extends ProtectedUI {
 
 	private static final long serialVersionUID = 1L;
 
@@ -85,7 +85,7 @@ public class QopUI extends UI {
 	private Label overallRatingLabel;
 
 	@Override
-	protected void init(VaadinRequest vaadinRequest) {
+	protected void ainit(VaadinRequest vaadinRequest) {
 
 
 		final Label title  = new Label("<big><b>QOP Standortbewertung</b></big>", ContentMode.HTML);
@@ -125,7 +125,7 @@ public class QopUI extends UI {
 						);
 		filtercombo.setDataProvider(dataProvider);
 
-		List<Profile> profiles = LookupSessionBeans.profileDomain().listProfiles();
+		List<Profile> profiles = profilesForUser();
 		ComboBox<Profile> profileCombo = new ComboBox<>("Profilauswahl", profiles);
 		if (profiles.size() > 0)
 		{
@@ -192,7 +192,7 @@ public class QopUI extends UI {
 
 		overallRatingLabel = new Label("",  ContentMode.HTML);
 		
-		VerticalLayout vl = new VerticalLayout(title, filtercombo, profileCombo, new Label(""), grid, overallRatingLabel);
+		VerticalLayout vl = new VerticalLayout(new HorizontalLayout(title, logoutButton()), filtercombo, profileCombo, new Label(""), grid, overallRatingLabel);
 		vl.setSizeUndefined();
 		Panel panel = new Panel();
 		panel.setContent(vl);
@@ -440,5 +440,10 @@ public class QopUI extends UI {
 	@VaadinServletConfiguration(ui = QopUI.class, productionMode = false)
 	public static class QopUIServlet extends VaadinServlet {
 		private static final long serialVersionUID = 1L;
+	}
+
+	@Override
+	protected boolean requiresAdminRole() {
+		return false;
 	}
 }

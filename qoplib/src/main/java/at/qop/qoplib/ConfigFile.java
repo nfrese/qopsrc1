@@ -3,6 +3,7 @@ package at.qop.qoplib;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 public class ConfigFile {
@@ -17,7 +18,7 @@ public class ConfigFile {
 		Properties props = new Properties();
 		String fileName = System.getProperty("jboss.server.config.dir") + "/qop.properties";
 		try(FileInputStream fis = new FileInputStream(fileName)) {
-		  props.load(fis);
+		  props.load(new InputStreamReader(fis, "UTF-8"));
 		} catch (FileNotFoundException e) {
 			System.out.println(e + " -> using defaults!");
 		} catch (IOException e) {
@@ -45,13 +46,31 @@ public class ConfigFile {
 		else return defaultValue;
 	}
 	
-	public String getAdminPassword()
+	public boolean hasUser(String username)
 	{
-		String key = "adminpasswd";
+		return getUserPassword(username) != null;
+	}
+	
+	public String getUserPassword(String username)
+	{
 		String defaultValue = null;
-		return getStrProp(key, defaultValue);
+		return getStrProp("password." + username, defaultValue);
+	}
+	
+	public boolean isAdmin(String username)
+	{
+		String defaultValue = "false";
+		return "true".equalsIgnoreCase(getStrProp("isadmin." + username, defaultValue));
 	}
 
+	public String[] getUserProfiles(String username)
+	{
+		String defaultValue = null;
+		String value = getStrProp("userprofiles." + username, defaultValue);
+		if (value == null) return null;
+		return value.split(",");
+	}
+	
 	public String getWorkingDir()
 	{
 		String key = "workingdir";
