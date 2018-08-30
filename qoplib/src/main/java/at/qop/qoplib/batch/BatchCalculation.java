@@ -29,14 +29,17 @@ public class BatchCalculation extends BatchCalculationAbstract {
 		super(currentProfile);
 	}
 
+	@Override
 	protected void initOutput() {
 		pbt = new PerformBatUpdate(currentProfile);
 	}
 	
-	protected QuadifyImpl initQuadify(int maxPerRect) {
+	@Override
+	protected QuadifyImpl initQuadify() {
 		return new QuadifyImpl(maxPerRect, Address.TABLENAME, geomField);
 	}
 	
+	@Override
 	protected List<Address> addressesForQuadrant(Envelope envelope) {
 		
 		String sql = "select * from " + Address.TABLENAME
@@ -82,6 +85,7 @@ public class BatchCalculation extends BatchCalculationAbstract {
 		return addresses;
 	}
 	
+	@Override
 	protected void outputRecs(BatRecord[] batRecs) {
 		pbt.wbt.insert(batRecs);
 	}
@@ -91,6 +95,7 @@ public class BatchCalculation extends BatchCalculationAbstract {
 		pbt.wbt.done();
 	}
 
+	@Override
 	protected void failed(Throwable t) {
 		t.printStackTrace();
 	}

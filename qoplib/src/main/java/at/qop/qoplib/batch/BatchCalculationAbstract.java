@@ -41,6 +41,7 @@ import at.qop.qoplib.osrmclient.OSRMClient;
 public abstract class BatchCalculationAbstract implements Runnable {
 
 	private static final CreateTargetsMulti CREATE_TARGETS_MULTI = new CreateTargetsMulti();
+	protected static final int maxPerRect = 3000;
 	protected final Profile currentProfile;
 	private LayerSource source;
 	private ConfigFile cf;
@@ -59,7 +60,7 @@ public abstract class BatchCalculationAbstract implements Runnable {
 	
 	protected abstract void initOutput();
 
-	protected abstract QuadifyImpl initQuadify(int maxPerRect);
+	protected abstract Quadify initQuadify();
 
 	protected abstract List<Address> addressesForQuadrant(Envelope envelope);
 
@@ -94,10 +95,8 @@ public abstract class BatchCalculationAbstract implements Runnable {
 	private void runInternal()
 	{
 		initOutput();
-		
-		int maxPerRect = 3000;
 
-		Quadify quadify = initQuadify(maxPerRect);
+		Quadify quadify = initQuadify();
 		quadify.run();
 		overall = quadify.getOverall();
 		

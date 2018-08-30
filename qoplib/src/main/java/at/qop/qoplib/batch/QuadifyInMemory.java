@@ -31,7 +31,7 @@ public class QuadifyInMemory<O> extends Quadify
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Collection<?> list(Envelope searchEnv) {
+	protected Collection<O> list(Envelope searchEnv) {
 		final ArrayList<O> items = new ArrayList<>();
 		
 		tree.query(searchEnv, item -> {
