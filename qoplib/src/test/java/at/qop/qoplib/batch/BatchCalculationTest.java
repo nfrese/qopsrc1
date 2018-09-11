@@ -1,17 +1,33 @@
 package at.qop.qoplib.batch;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKBWriter;
 import com.vividsolutions.jts.io.WKTReader;
 
+import at.qop.qoplib.Constants;
 import at.qop.qoplib.batch.WriteBatTable.BatRecord;
+import at.qop.qoplib.calculation.ILayerCalculationP1Params;
+import at.qop.qoplib.calculation.LayerCalculationP1Result;
+import at.qop.qoplib.calculation.LayerSource;
+import at.qop.qoplib.dbconnector.DbRecord;
+import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.entities.Address;
+import at.qop.qoplib.entities.Analysis;
+import at.qop.qoplib.entities.AnalysisFunction;
+import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.entities.Profile;
+import at.qop.qoplib.entities.ProfileAnalysis;
+import at.qop.qoplib.osrmclient.OSRMClient;
+import at.qop.qoplib.osrmclient.OSRMClientTest;
+import org.junit.Assert;
 
 public class BatchCalculationTest {
 	
@@ -65,11 +81,80 @@ public class BatchCalculationTest {
 		}
 
 		Profile currentProfile = new Profile();
-		BatchCalculationInMemory bc = new BatchCalculationInMemory(currentProfile, input);
+		currentProfile.name = "profile1";
 		
+		
+		ProfileAnalysis pa = new ProfileAnalysis();
+		pa.category = "cat1";
+		pa.categorytitle = "Catergory1";
+		Analysis analysis = new Analysis();
+		analysis.analysisfunction  = new AnalysisFunction();
+		analysis.analysisfunction.func = "var cnt=0;\n" + 
+				"var result=0;\n" + 
+				"var descriptionField=lc.table.textField('description');\n" + 
+				"for each (var target in lc.orderedTargets) {\n" + 
+				"        lc.result = target.time;\n" + 
+				"        var description = descriptionField.get(target.rec);\n" + 
+				"        target.caption = \"<b>\" + description + \"</b>\" \n" + 
+				"               + \"<br>Wegzeit Minuten: \" +  lc.result;\n" + 
+				"        lc.keep(target);\n" + 
+				"        break;\n" + 
+				"};";
+		analysis.mode = ModeEnum.foot;
+		analysis.geomfield = "GEOM";
+		analysis.radius = 2000;
+		analysis.name = "A1";
+		
+		pa.analysis = analysis;
+		
+		currentProfile.profileAnalysis = Arrays.asList(pa);
+		
+		BatchCalculationInMemory bc = new BatchCalculationInMemory(currentProfile, input) {
+
+			@Override
+			protected OSRMClient initRouter() {
+				return new OSRMClient(OSRMClientTest.OSRM_SERVER, 5000, Constants.SPLIT_DESTINATIONS_AT);
+			}
+
+			@Override
+			protected LayerSource initSource() {
+
+				return new LayerSource() {
+
+					@Override
+					public LayerCalculationP1Result load(Geometry start, ILayerCalculationP1Params layerParams) {
+
+						LayerCalculationP1Result r = new LayerCalculationP1Result();
+						r.table = new DbTable();
+						r.table.colNames = new String[] {"GEOM", "description"};
+						r.table.sqlTypes = new int[] {java.sql.Types.VARCHAR, java.sql.Types.VARCHAR};
+						r.table.typeNames = new String[] {"geometry", "text"};
+						r.records = new ArrayList<>();
+						{
+							DbRecord rec = new DbRecord();
+							try {
+								Point point = (Point) new WKTReader().read("POINT (16.3699659807455 48.2063095697309)");
+								String wkb = WKBWriter.toHex(new WKBWriter().write(point));
+								rec.values = new Object[] {wkb , "Ziel1"};
+								r.records.add(rec);
+							} catch (ParseException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+						}
+						return r;
+					}
+				};
+			}
+
+		};
 		bc.run();
 		
 		List<BatRecord> output = bc.getOutput();
+		
+		BatRecord r1 = output.stream().filter(r -> r.name.equals("Rauhensteingasse 10")).findFirst().get();
+		Assert.assertEquals(2.96, r1.colGrps[0].result, 0.1);
 		
 		System.out.println(output);
 		

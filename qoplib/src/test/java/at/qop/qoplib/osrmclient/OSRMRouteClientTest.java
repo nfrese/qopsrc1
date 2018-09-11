@@ -12,8 +12,6 @@ import at.qop.qoplib.entities.ModeEnum;
 
 public class OSRMRouteClientTest {
 
-	private static final String OSRM_SERVER = "http://10.0.0.17:5000";
-
 	@Test
 	public void parseResultTest() throws JsonProcessingException, IOException {
 

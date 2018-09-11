@@ -8,8 +8,11 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
+import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.WriteBatTable.BatRecord;
+import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.dbconnector.AbstractDbTableReader;
 import at.qop.qoplib.dbconnector.DBUtils;
 import at.qop.qoplib.dbconnector.DbRecord;
@@ -19,6 +22,7 @@ import at.qop.qoplib.dbconnector.fieldtypes.DbTextField;
 import at.qop.qoplib.domains.IGenericDomain;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
+import at.qop.qoplib.osrmclient.OSRMClient;
 
 public class BatchCalculation extends BatchCalculationAbstract {
 
@@ -30,8 +34,19 @@ public class BatchCalculation extends BatchCalculationAbstract {
 	}
 
 	@Override
+	protected OSRMClient initRouter() {
+		ConfigFile cf = ConfigFile.read();
+		return new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort(), Constants.SPLIT_DESTINATIONS_AT);
+	}
+	
+	@Override
 	protected void initOutput() {
 		pbt = new PerformBatUpdate(currentProfile);
+	}
+	
+	@Override
+	protected DbLayerSource initSource() {
+		return new DbLayerSource();
 	}
 	
 	@Override
@@ -99,6 +114,5 @@ public class BatchCalculation extends BatchCalculationAbstract {
 	protected void failed(Throwable t) {
 		t.printStackTrace();
 	}
-
 	
 }

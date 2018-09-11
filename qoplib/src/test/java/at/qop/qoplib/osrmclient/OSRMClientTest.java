@@ -14,7 +14,7 @@ import at.qop.qoplib.entities.ModeEnum;
 
 public class OSRMClientTest {
 
-	private static final String OSRM_SERVER = "10.0.0.17";
+	public static final String OSRM_SERVER = "10.0.0.19";
 
 	@Test
 	public void parseResultTest() throws JsonProcessingException, IOException {

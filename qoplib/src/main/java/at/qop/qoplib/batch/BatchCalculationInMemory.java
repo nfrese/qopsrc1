@@ -4,12 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKBWriter;
+import com.vividsolutions.jts.io.WKTReader;
 
 import at.qop.qoplib.batch.WriteBatTable.BatRecord;
+import at.qop.qoplib.calculation.DbLayerSource;
+import at.qop.qoplib.calculation.ILayerCalculationP1Params;
+import at.qop.qoplib.calculation.LayerCalculationP1Result;
+import at.qop.qoplib.calculation.LayerSource;
+import at.qop.qoplib.dbconnector.DbRecord;
+import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
 
-public class BatchCalculationInMemory extends BatchCalculationAbstract {
+public abstract class BatchCalculationInMemory extends BatchCalculationAbstract {
 
 	private List<BatRecord> output;
 
@@ -28,6 +39,7 @@ public class BatchCalculationInMemory extends BatchCalculationAbstract {
 	protected void initOutput() {
 		output = new ArrayList<>();
 	}
+
 	
 	@Override
 	protected Quadify initQuadify() {

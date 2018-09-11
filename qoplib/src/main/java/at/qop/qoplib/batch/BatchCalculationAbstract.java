@@ -44,7 +44,6 @@ public abstract class BatchCalculationAbstract implements Runnable {
 	protected static final int maxPerRect = 3000;
 	protected final Profile currentProfile;
 	private LayerSource source;
-	private ConfigFile cf;
 	private IRouter router;
 	public int overall = -1;
 	public int count = 0;
@@ -52,11 +51,11 @@ public abstract class BatchCalculationAbstract implements Runnable {
 
 	public BatchCalculationAbstract(Profile currentProfile) {
 		this.currentProfile = currentProfile;
-
-		source = new DbLayerSource();
-		cf = ConfigFile.read();
-		router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort(), Constants.SPLIT_DESTINATIONS_AT);
 	}
+	
+	protected abstract OSRMClient initRouter();
+	
+	protected abstract LayerSource initSource();
 	
 	protected abstract void initOutput();
 
@@ -94,6 +93,8 @@ public abstract class BatchCalculationAbstract implements Runnable {
 	
 	private void runInternal()
 	{
+		router = initRouter();
+		source = initSource();
 		initOutput();
 
 		Quadify quadify = initQuadify();
