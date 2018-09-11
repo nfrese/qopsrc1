@@ -9,7 +9,7 @@ public class QEXBatchResult {
 	public String name;
 	public double lat;
 	public double lon;
-	public Collection<QEXBatchResultGrp> grps = new ArrayList<>();
-	
+	public Collection<QEXBatchResultSection> categories = new ArrayList<>();
+	public double overallRating;
 
 }

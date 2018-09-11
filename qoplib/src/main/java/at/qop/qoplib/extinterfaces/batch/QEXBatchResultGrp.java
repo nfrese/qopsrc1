@@ -4,7 +4,7 @@ public class QEXBatchResultGrp {
 	
 	public String name;
 	public double result;
-	public double rating;
 	public double weight;
+	public double rating;
 
 }

@@ -1,6 +1,5 @@
 package at.qop.qoplib.batch;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import at.qop.qoplib.calculation.CalculationSection;
 import at.qop.qoplib.calculation.ILayerCalculation;
 import at.qop.qoplib.calculation.ISectionBuilderInput;
 import at.qop.qoplib.calculation.Rating;
-import at.qop.qoplib.calculation.SectionBuilder;
 import at.qop.qoplib.dbconnector.DbBatch;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.write.AbstractUpdater;
@@ -55,25 +53,15 @@ public class WriteBatTable extends AbstractUpdater {
 	}
 	
 	private Profile currentProfile;
-	protected Map<String,Integer> columnsMap = new HashMap<>(); 
-	private ArrayList<CalculationSection<ISectionBuilderInput>> sections;
+	protected Map<String,Integer> columnsMap = new HashMap<>();
+	private final WriteSectionsHelper sectionsHelper; 
+	
 
 	public WriteBatTable(Profile currentProfile) {
 		super();
 		this.currentProfile = currentProfile;
 		
-		List<ISectionBuilderInput> ll = this.currentProfile.profileAnalysis.stream().map(
-				pa -> { return new ISectionBuilderInput() {
-
-					@Override
-					public ProfileAnalysis getParams() {
-						return pa;
-					}
-
-				}; }
-				).collect(Collectors.toList());
-
-		sections = new SectionBuilder<ISectionBuilderInput>(ll).run();	
+		sectionsHelper = new WriteSectionsHelper(currentProfile);
 	}
 	
 	private List<String> names()
@@ -118,7 +106,7 @@ public class WriteBatTable extends AbstractUpdater {
 				sb.append(" numeric,");
 			};
 
-			for (CalculationSection<ISectionBuilderInput> section : sections)
+			for (CalculationSection<ISectionBuilderInput> section : sectionsHelper.getSections())
 			{
 				String n = section.getSectionColumnName();
 				sb.append(" " + n); columnsMap.put(n, col++);
@@ -160,7 +148,7 @@ public class WriteBatTable extends AbstractUpdater {
 			};
 		}
 
-		for (CalculationSection<ISectionBuilderInput> section : sections)
+		for (CalculationSection<ISectionBuilderInput> section : sectionsHelper.getSections())
 		{
 			sb.append(", ");
 			sb.append(section.getSectionColumnName());
@@ -175,7 +163,7 @@ public class WriteBatTable extends AbstractUpdater {
 			};
 		}
 		
-		for (int i = 0; i < sections.size(); i++)
+		for (int i = 0; i < sectionsHelper.numSections(); i++)
 		{
 			sb.append(", ?");
 		}
@@ -185,7 +173,7 @@ public class WriteBatTable extends AbstractUpdater {
 		DbBatch b = new DbBatch();
 		b.sql = sb.toString();
 		
-		int ncols = 3 + record.colGrps.length * 2 + sections.size();
+		int ncols = 3 + record.colGrps.length * 2 + sectionsHelper.numSections();
 		{
 			b.sqlTypes = new int[ncols];
 			int col = 0;
@@ -197,7 +185,7 @@ public class WriteBatTable extends AbstractUpdater {
 				b.sqlTypes[col++] = java.sql.Types.DOUBLE;
 				b.sqlTypes[col++] = java.sql.Types.DOUBLE;
 			}
-			for (int i = 0; i < sections.size(); i++)
+			for (int i = 0; i < sectionsHelper.numSections(); i++)
 			{
 				b.sqlTypes[col++] = java.sql.Types.DOUBLE;
 			}
@@ -206,8 +194,7 @@ public class WriteBatTable extends AbstractUpdater {
 		{
 			DbRecord rec = new DbRecord();
 			
-			List<CalculationSection<ColGrp>> _sects = assignedSections(record);
-			Rating<?> rating = rating(record, _sects);
+			Rating<ColGrp> rating = sectionsHelper.rating(record);
 			
 			rec.values = new Object[ncols];
 			int col = 0;
@@ -227,7 +214,7 @@ public class WriteBatTable extends AbstractUpdater {
 			
 			col += record.colGrps.length * 2;
 			
-			for (CalculationSection<ColGrp> section : _sects)
+			for (CalculationSection<ColGrp> section : rating.sections)
 			{
 				rec.values[col++] = section.rating;
 			}			
@@ -236,36 +223,6 @@ public class WriteBatTable extends AbstractUpdater {
 		}
 		
 		queue(b);
-	}
-
-	public Rating<?> rating(BatRecord record, List<CalculationSection<ColGrp>> _sects) {
-
-		Rating<?> rating = new Rating<ColGrp>(currentProfile, _sects);
-		rating.runRating();
-		return rating;
-	}
-
-	public List<CalculationSection<ColGrp>> assignedSections(BatRecord record) {
-		List<CalculationSection<ColGrp>> _sects = new ArrayList<>();
-		
-		for (CalculationSection<ISectionBuilderInput> s : sections)
-		{
-			CalculationSection<ColGrp> cgrS = new CalculationSection<ColGrp>();
-			
-			for (ISectionBuilderInput lc : s.lcs)
-			{
-				for (ColGrp grp : record.colGrps)
-				{
-					if (lc.getParams().analysis.name.equals(grp.pa.analysis.name))
-					{
-						cgrS.lcs.add(grp);
-					}
-				}					
-			}
-			_sects.add(cgrS);
-			
-		}
-		return _sects;
 	}
 
 	public void insert(BatRecord[] batRecs) {

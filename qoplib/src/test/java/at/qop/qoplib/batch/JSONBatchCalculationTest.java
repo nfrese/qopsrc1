@@ -31,8 +31,18 @@ public class JSONBatchCalculationTest extends BatchCalculationTest {
 			source.lat = 48.2061121370655;
 			
 			input.sources.add(source);
-			
 		}
+		
+		{
+			QEXBatchSourceLocation source = new QEXBatchSourceLocation();
+			source.id = 2;
+			source.name = "Location2";
+			source.lon = 16.3695610097329;  
+			source.lat = 48.2042327131692;
+			
+			input.sources.add(source);
+		}
+
 		
 		String json = new ObjectMapper().writeValueAsString(input);
 		System.out.println(json);
@@ -59,7 +69,7 @@ public class JSONBatchCalculationTest extends BatchCalculationTest {
 			}};
 
 			
-		String jsonIn = "{\"profile\":\"Wohnen\",\"sources\":[{\"id\":1,\"name\":\"Location1\",\"lat\":48.2061121370655,\"lon\":16.3724265546418}]}";
+		String jsonIn = "{\"profile\":\"Wohnen\",\"sources\":[{\"id\":1,\"name\":\"Location1\",\"lat\":48.2061121370655,\"lon\":16.3724265546418},{\"id\":2,\"name\":\"Location2\",\"lat\":48.2042327131692,\"lon\":16.3695610097329}]}";
 		String jsonResult = bh.jsonCall(jsonIn);
 		
 		System.out.println(jsonResult);
