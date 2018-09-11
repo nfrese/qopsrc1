@@ -229,6 +229,7 @@ public abstract class BatchCalculationAbstract implements Runnable {
 		for (int i = 0; i < addresses.size(); i++) {
 			Address addr = addresses.get(i);
 			BatRecord batRec = new BatRecord(profile.profileAnalysis.size());
+			batRec.gid = addr.gid;
 			batRec.name = addr.name;
 			batRec.geom = addr.geom;
 			batRecs[i] = batRec;

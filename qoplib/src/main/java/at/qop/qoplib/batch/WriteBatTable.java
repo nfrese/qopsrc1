@@ -25,17 +25,18 @@ public class WriteBatTable extends AbstractUpdater {
 		public BatRecord(int size) {
 			colGrps = new ColGrp[size];
 		}
-		String name;
-		Point geom;
-		ColGrp[] colGrps;
+		public int gid;
+		public String name;
+		public Point geom;
+		public ColGrp[] colGrps;
 	}
 	
 	public static class ColGrp implements ILayerCalculation {
-		String name;
-		double result;
-		double rating;
+		public String name;
+		public double result;
+		protected double rating;
 		
-		ProfileAnalysis pa;
+		protected ProfileAnalysis pa;
 
 		@Override
 		public ProfileAnalysis getParams() {

@@ -80,8 +80,23 @@ public class BatchCalculationTest {
 			input.add(adr);
 		}
 
+		Profile currentProfile = createProfile();
+		
+		BatchCalculationInMemory bc = initBC(input, currentProfile);
+		bc.run();
+		
+		List<BatRecord> output = bc.getOutput();
+		
+		BatRecord r1 = output.stream().filter(r -> r.name.equals("Rauhensteingasse 10")).findFirst().get();
+		Assert.assertEquals(2.96, r1.colGrps[0].result, 0.1);
+		
+		System.out.println(output);
+		
+	}
+
+	protected Profile createProfile() {
 		Profile currentProfile = new Profile();
-		currentProfile.name = "profile1";
+		currentProfile.name = "Wohnen";
 		
 		
 		ProfileAnalysis pa = new ProfileAnalysis();
@@ -108,8 +123,11 @@ public class BatchCalculationTest {
 		pa.analysis = analysis;
 		
 		currentProfile.profileAnalysis = Arrays.asList(pa);
-		
-		BatchCalculationInMemory bc = new BatchCalculationInMemory(currentProfile, input) {
+		return currentProfile;
+	}
+
+	protected BatchCalculationInMemory initBC(List<Address> input, Profile currentProfile) {
+		return new BatchCalculationInMemory(currentProfile, input) {
 
 			@Override
 			protected OSRMClient initRouter() {
@@ -149,15 +167,6 @@ public class BatchCalculationTest {
 			}
 
 		};
-		bc.run();
-		
-		List<BatRecord> output = bc.getOutput();
-		
-		BatRecord r1 = output.stream().filter(r -> r.name.equals("Rauhensteingasse 10")).findFirst().get();
-		Assert.assertEquals(2.96, r1.colGrps[0].result, 0.1);
-		
-		System.out.println(output);
-		
 	}
 
 }
