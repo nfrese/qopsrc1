@@ -36,7 +36,8 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Slider;
 import com.vaadin.ui.Slider.ValueOutOfBoundsException;
-import com.vaadin.ui.UI;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -45,6 +46,7 @@ import com.vividsolutions.jts.geom.Point;
 import at.qop.qoplib.ConfigFile;
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
+import at.qop.qoplib.Utils;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.CalculationSection;
@@ -63,6 +65,7 @@ import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.osrmclient.OSRMClient;
 import at.qop.qopwebui.components.ChartDialog;
 import at.qop.qopwebui.components.ExceptionDialog;
+import at.qop.qopwebui.components.InfoDialog;
 
 @Theme("valo")
 public class QopUI extends ProtectedUI {
@@ -79,6 +82,8 @@ public class QopUI extends ProtectedUI {
 
 	private Profile currentProfile;
 	private Address currentAddress;
+	private TextField lonLatTf;
+	private TabSheet locTabs;
 	private LMap leafletMap;
 	private LFeatureGroup lfgResults;
 	private GridLayout grid;
@@ -90,6 +95,21 @@ public class QopUI extends ProtectedUI {
 
 		final Label title  = new Label("<big><b>QOP Standortbewertung</b></big>", ContentMode.HTML);
 
+		List<Profile> profiles = profilesForUser();
+		ComboBox<Profile> profileCombo = new ComboBox<>("Profilauswahl", profiles);
+		if (profiles.size() > 0)
+		{
+			profileCombo.setSelectedItem(profiles.get(0));
+			currentProfile = profiles.get(0);
+		}
+		profileCombo.setEmptySelectionAllowed(false);
+		profileCombo.setTextInputAllowed(false);
+
+		profileCombo.addSelectionListener(event -> {
+			currentProfile = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
+			startCalculationWCatch();
+		});
+		
 		ComboBox<Address> filtercombo = new ComboBox<>("Adresse nachschlagen");
 		filtercombo.setWidth(400, Unit.PIXELS);
 		filtercombo.setEmptySelectionAllowed(true);
@@ -125,21 +145,10 @@ public class QopUI extends ProtectedUI {
 						);
 		filtercombo.setDataProvider(dataProvider);
 
-		List<Profile> profiles = profilesForUser();
-		ComboBox<Profile> profileCombo = new ComboBox<>("Profilauswahl", profiles);
-		if (profiles.size() > 0)
-		{
-			profileCombo.setSelectedItem(profiles.get(0));
-			currentProfile = profiles.get(0);
-		}
-		profileCombo.setEmptySelectionAllowed(false);
-		profileCombo.setTextInputAllowed(false);
-
-		profileCombo.addSelectionListener(event -> {
-			currentProfile = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
-			startCalculationWCatch();
-		});
-
+		lonLatTf = new TextField();
+		lonLatTf.setWidth(300, Unit.PIXELS);
+		Button toLonLatButton = new Button("Los");
+		
 		leafletMap = new LMap();
 		leafletMap.setWidth(100, Unit.PERCENTAGE);
 		leafletMap.setHeight(100, Unit.PERCENTAGE);
@@ -151,10 +160,30 @@ public class QopUI extends ProtectedUI {
 		LFeatureGroup lfg = new LFeatureGroup();
 		leafletMap.addLayer(lfg);
 
+		toLonLatButton.addClickListener(l -> {
+			String lonLatStr = lonLatTf.getValue();
+			try {
+				Point start = Utils.parseLonLatStr(lonLatStr);
+				
+				resetResults(lfg);
+				filtercombo.clear();
+				
+				LMarker lm = new LMarker(start);
+				lm.setCaption("<b>Lon, Lat Eingabe:</b><br>" +lonLatStr);
+				lfg.addComponent(lm);
+				
+				startCalculation(start);
+				leafletMap.zoomToContent();
+				
+			} catch (IllegalArgumentException ex)
+			{
+				new InfoDialog("Fehler", "lon, lat ungültig!").show();
+			}
+		});
+		
 		filtercombo.addSelectionListener(event -> {
 
-			lfg.removeAllComponents();
-			lfgResults.removeAllComponents();
+			resetResults(lfg);
 
 			currentAddress = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
 			if (currentAddress != null) {
@@ -173,10 +202,9 @@ public class QopUI extends ProtectedUI {
 		leafletMap.addClickListener(l -> {
 			org.vaadin.addon.leaflet.shared.Point start = l.getPoint();
 			Point startJts = CRSTransform.gfWGS84.createPoint(new Coordinate(start.getLon(), start.getLat()));
-			startCalculation(startJts);
+			setLonLat(startJts, true);
 			
-			lfg.removeAllComponents();
-			lfgResults.removeAllComponents();
+			resetResults(lfg);
 			filtercombo.clear();
 
 			LMarker lm = new LMarker(startJts);
@@ -192,7 +220,11 @@ public class QopUI extends ProtectedUI {
 
 		overallRatingLabel = new Label("",  ContentMode.HTML);
 		
-		VerticalLayout vl = new VerticalLayout(new HorizontalLayout(title, logoutButton()), filtercombo, profileCombo, new Label(""), grid, overallRatingLabel);
+		locTabs = new TabSheet();
+		locTabs.addTab(filtercombo, "Adresse");
+		locTabs.addTab(new HorizontalLayout(lonLatTf, toLonLatButton), "Lon, Lat");
+		
+		VerticalLayout vl = new VerticalLayout(new HorizontalLayout(title, logoutButton()), profileCombo, locTabs, new Label(""), grid, overallRatingLabel);
 		vl.setSizeUndefined();
 		Panel panel = new Panel();
 		panel.setContent(vl);
@@ -204,6 +236,20 @@ public class QopUI extends ProtectedUI {
 
 	}
 
+	protected void resetResults(LFeatureGroup lfg) {
+		lfg.removeAllComponents();
+		lfgResults.removeAllComponents();
+	}
+
+	private void setLonLat(Point point, boolean switchTab)
+	{
+		lonLatTf.setValue(point.getCoordinate().x + ", " + point.getCoordinate().y);
+		if (switchTab)
+		{
+			locTabs.setSelectedTab(1);
+		}
+	}
+	
 	private void startCalculationWCatch() {
 		try {
 			startCalculation();
@@ -215,6 +261,7 @@ public class QopUI extends ProtectedUI {
 
 
 	EventRouter evr = new EventRouter();
+
 	public static class SliderChangedEvent extends EventObject {
 
 		private static final long serialVersionUID = 1L;
@@ -241,7 +288,8 @@ public class QopUI extends ProtectedUI {
 	private void startCalculation() {
 		if (currentAddress != null)
 		{
-			Point start = currentAddress.geom; 
+			Point start = currentAddress.geom;
+			setLonLat(start, false);
 			startCalculation(start);
 		}
 	}

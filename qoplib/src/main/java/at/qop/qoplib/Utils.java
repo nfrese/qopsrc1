@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
+
+import at.qop.qoplib.calculation.CRSTransform;
+
 public class Utils {
 	
 	@SuppressWarnings("unchecked")
@@ -39,4 +44,24 @@ public class Utils {
 				.replace("ß", "ss");
 	}
 
+	public static Point parseLonLatStr(String lonLatStr) throws IllegalArgumentException {
+		
+		try {
+			String[] splitted = lonLatStr.trim().split(",\\s*|;\\s*|\\s+");
+
+			if (splitted.length == 2)
+			{
+				return CRSTransform.gfWGS84.createPoint(new Coordinate(
+						Double.valueOf(splitted[0]), Double.valueOf(splitted[1])));
+			}
+			else if (lonLatStr.matches(".*,.*,*")){
+				return parseLonLatStr(lonLatStr.replace(",", "."));
+			}
+
+		} catch (Exception ex) {
+			throw new IllegalArgumentException("Cannot parse " + lonLatStr, ex);
+		}
+		throw new IllegalArgumentException("Cannot parse " + lonLatStr);
+	}
+	
 }
