@@ -20,8 +20,13 @@ public class CalculationSection<L extends ISectionBuilderInput> {
 	
 	public String getSectionColumnName()
 	{
+		return "s_" + generateSectionColumnid();
+	}
+	
+	public String generateSectionColumnid()
+	{
 		String title = getTitle();
-		if (title == null) return "s_notitle";
-		return "s_" + Utils.toPGColumnName(title);
+		if (title == null) return "notitle";
+		return Utils.toPGColumnName(title);
 	}
 }

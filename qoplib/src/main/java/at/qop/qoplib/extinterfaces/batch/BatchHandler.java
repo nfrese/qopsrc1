@@ -69,7 +69,7 @@ public abstract class BatchHandler {
 			for (CalculationSection<ColGrp> rSection : rating.sections)
 			{
 				QEXBatchResultSection sectionBean = new QEXBatchResultSection();
-				sectionBean.catid = rSection.getSectionColumnName();
+				sectionBean.catid = rSection.generateSectionColumnid();
 				sectionBean.rating = rSection.rating; 
 				sectionBean.weight = rSection.weight;
 				sectionBean.title = rSection.getTitle();
@@ -79,10 +79,12 @@ public abstract class BatchHandler {
 				for (ColGrp colGrp : rSection.lcs)
 				{
 					QEXBatchResultGrp grpBean = new QEXBatchResultGrp();
-					grpBean.name = colGrp.name;
+					grpBean.analysisid = colGrp.name;
 					grpBean.result = colGrp.result;
+					grpBean.unit = colGrp.getParams().analysis.analysisfunction.rvalUnit;
 					grpBean.rating = colGrp.getRating();
 					grpBean.weight = colGrp.getWeight();
+					grpBean.description = colGrp.getParams().analysis.description;
 					sectionBean.analyses.add(grpBean);
 				}
 			}

@@ -4,7 +4,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Properties;
+import java.util.TreeSet;
+
+import at.qop.qoplib.entities.Profile;
 
 public class ConfigFile {
 	
@@ -108,4 +112,18 @@ public class ConfigFile {
 		return getStrProp(key, defaultValue);
 	}
 
+	public void checkUserProfile(String username, String profileName) {
+		String[] ups = getUserProfiles(username);
+		if (ups != null)
+		{
+			for (String name : ups)
+			{
+				if (name.equals(profileName))
+				{
+					return;
+				}
+			}
+		}
+		throw new RuntimeException("No permission to query profile: "+ profileName);
+	}
 }

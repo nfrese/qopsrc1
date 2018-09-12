@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 
+import at.qop.qoplib.Constants;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.extinterfaces.batch.BatchHandler;
@@ -69,7 +70,7 @@ public class JSONBatchCalculationTest extends BatchCalculationTest {
 			}};
 
 			
-		String jsonIn = "{\"profile\":\"Wohnen\",\"sources\":[{\"id\":1,\"name\":\"Location1\",\"lat\":48.2061121370655,\"lon\":16.3724265546418},{\"id\":2,\"name\":\"Location2\",\"lat\":48.2042327131692,\"lon\":16.3695610097329}]}";
+		String jsonIn = Constants.BATCH_CALCULATION_SAMPLE_JSON;
 		String jsonResult = bh.jsonCall(jsonIn);
 		
 		System.out.println(jsonResult);
