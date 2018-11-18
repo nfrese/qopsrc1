@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
@@ -62,6 +65,18 @@ public class Utils {
 			throw new IllegalArgumentException("Cannot parse " + lonLatStr, ex);
 		}
 		throw new IllegalArgumentException("Cannot parse " + lonLatStr);
+	}
+
+	public static String getApplicationName()
+	{
+		Object earName;
+		try {
+			earName = new InitialContext().lookup("java:app/AppName");
+			System.out.println(earName);
+			return String.valueOf(earName);
+		} catch (NamingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }

@@ -33,13 +33,16 @@ public class LookupSessionBeans {
 	}	
 	
 	public static <B> B lookupDomain(Class<B> beanClass) {
+		
+		String appName = Utils.getApplicationName();
+		
 		try {
 			Properties props = new Properties();
 			props.put("java.naming.factory.url.pkgs","org.jboss.ejb.client.naming");
 			InitialContext context = new InitialContext(props);
 
 			String beanName = beanClass.getSimpleName();        	 
-			String name = "java:global/qopear/qoplib/" + beanName;
+			String name = "java:global/" + appName + "/qoplib/" + beanName;
 			@SuppressWarnings("unchecked")
 			B bean = (B)context.lookup(name);
 			return bean;

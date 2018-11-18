@@ -4,11 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Properties;
-import java.util.TreeSet;
-
-import at.qop.qoplib.entities.Profile;
 
 public class ConfigFile {
 	
@@ -17,10 +13,13 @@ public class ConfigFile {
 	public ConfigFile(Properties props) {
 		this.props = props;
 	}
-
+	
 	public static ConfigFile read() {
+		
+		String appName = Utils.getApplicationName();
+		
 		Properties props = new Properties();
-		String fileName = System.getProperty("jboss.server.config.dir") + "/qop.properties";
+		String fileName = System.getProperty("jboss.server.config.dir") + "/" + appName + ".properties";
 		try(FileInputStream fis = new FileInputStream(fileName)) {
 		  props.load(new InputStreamReader(fis, "UTF-8"));
 		} catch (FileNotFoundException e) {
