@@ -25,8 +25,10 @@ import java.util.Set;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.AnalysisFunction;
@@ -37,7 +39,7 @@ import at.qop.qoplib.entities.ProfileAnalysis;
 @Local (IProfileDomain.class)
 public class ProfileDomain extends AbstractDomain implements IProfileDomain {
 	
-	@PersistenceContext(unitName = "qopPU")
+	@Inject
 	EntityManager em_;
 
 	public EntityManager em()

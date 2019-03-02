@@ -24,8 +24,10 @@ import java.util.List;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 
 import org.hibernate.Criteria;
 
@@ -35,7 +37,7 @@ import at.qop.qoplib.entities.Config;
 @Local (IConfigDomain.class)
 public class ConfigDomain extends AbstractDomain implements IConfigDomain {
 	
-	@PersistenceContext(unitName = "qopPU")
+	@Inject
 	EntityManager em_;
 
 	public EntityManager em()
