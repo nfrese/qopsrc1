@@ -31,10 +31,8 @@ import java.util.TreeSet;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 
 import at.qop.qoplib.dbconnector.AbstractDbTableReader;
 import at.qop.qoplib.dbconnector.DbBatch;
@@ -48,7 +46,7 @@ import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 @Local (IGenericDomain.class)
 public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	
-	@Inject
+	@PersistenceContext(unitName = "qopPU")
 	EntityManager em_;
 
 	public EntityManager em()

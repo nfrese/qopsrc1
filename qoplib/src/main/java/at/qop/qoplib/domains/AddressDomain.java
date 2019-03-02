@@ -26,7 +26,6 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Expression;
@@ -40,7 +39,7 @@ import at.qop.qoplib.entities.Address;
 @Local (IAddressDomain.class)
 public class AddressDomain extends AbstractDomain implements IAddressDomain {
 	
-	@PersistenceContext(type = PersistenceContextType.EXTENDED)
+	@PersistenceContext(unitName = "qopPU")
 	EntityManager em_;
 
 	public EntityManager em()
