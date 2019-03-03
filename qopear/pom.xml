@@ -12,6 +12,7 @@
 
   	<properties>
     	<application.name>qopwebui</application.name>
+    	<jta.data.source>java:/${application.name}DS</jta.data.source>
   	</properties>
 
     <dependencyManagement>
@@ -55,11 +56,13 @@
                 <artifactId>maven-ear-plugin</artifactId>
                 <version>3.0.1</version>
                 <configuration>
+                	<classifier>${application.name}</classifier>
                     <earName>${application.name}</earName>
                     <displayName>${application.name}</displayName>
                     <generateApplicationXml>true</generateApplicationXml>
                     <defaultLibBundleDir>lib/</defaultLibBundleDir>
                     <skinnyWars>true</skinnyWars>
+			        <filtering>true</filtering>
                     <modules>
                         <webModule>
                             <groupId>at.qop</groupId>

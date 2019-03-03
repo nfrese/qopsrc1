@@ -5,7 +5,8 @@
                          http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
     <persistence-unit name="qopPU">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <jta-data-source>java:/qopDS</jta-data-source>
+        <!-- <jta-data-source>java:/qopDS</jta-data-source>  -->
+        <jta-data-source>${jta.data.source}</jta-data-source>
         <properties>
             <!-- <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />  -->
             <!-- <property name="javax.persistence.schema-generation.database.action" value="create"/> -->
