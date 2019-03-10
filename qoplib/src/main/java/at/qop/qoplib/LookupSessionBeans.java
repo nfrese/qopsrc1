@@ -54,7 +54,7 @@ public class LookupSessionBeans {
 	
 	public static <B> B lookupDomain(Class<B> beanClass) {
 		
-		String appName = Utils.getApplicationName();
+		String appName = Utils.getEarName();
 		
 		try {
 			Properties props = new Properties();

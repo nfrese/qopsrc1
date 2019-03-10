@@ -16,7 +16,7 @@
     <packaging>ear</packaging>
 
   	<properties>
-    	<application.name>qopwebui</application.name>
+   		<application.name>qopwebui</application.name>  	
     	<jta.data.source>java:/${application.name}DS</jta.data.source>
   	</properties>
 
@@ -36,19 +36,19 @@
         <dependency>
             <groupId>at.qop</groupId>
             <artifactId>qoplib</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>${qop.version}</version>
             <type>ejb</type>
         </dependency>
         <dependency>
             <groupId>at.qop</groupId>
             <artifactId>qopwebui</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>${qop.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>at.qop</groupId>
             <artifactId>qopwebui</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>${qop.version}</version>
             <type>pom</type>
         </dependency>
     </dependencies>
@@ -56,6 +56,26 @@
     <build>
         <finalName>${application.name}</finalName>
         <plugins>
+ 			<plugin>
+    			<groupId>com.google.code.maven-replacer-plugin</groupId>
+    			<artifactId>replacer</artifactId>
+    			<version>1.5.2</version>
+    			<executions>
+     				<execution>
+      					<phase>resources</phase>
+      					<goals>
+       						<goal>replace</goal>
+      					</goals>
+     				</execution>
+    			</executions>
+    			<configuration>
+     			<includes>
+      				<include>target/**/persistence.xml</include>
+     			</includes>
+     			<token>java:/qopwebuiDS</token>
+     			<value>${jta.data.source}</value>
+    			</configuration>
+   			</plugin>        
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-ear-plugin</artifactId>
@@ -68,6 +88,13 @@
                     <defaultLibBundleDir>lib/</defaultLibBundleDir>
                     <skinnyWars>true</skinnyWars>
 			        <filtering>true</filtering>
+			        <env-entries>
+             			<env-entry>
+               				<env-entry-name>qop.application.name</env-entry-name>
+               				<env-entry-type>java.lang.String</env-entry-type>
+               				<env-entry-value>${application.name}</env-entry-value>
+			             </env-entry>
+		           </env-entries>
                     <modules>
                         <webModule>
                             <groupId>at.qop</groupId>

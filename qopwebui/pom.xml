@@ -93,7 +93,7 @@
 		<dependency>
 			<groupId>at.qop</groupId>
 			<artifactId>qoplib</artifactId>
-			<version>1.0.2-SNAPSHOT</version>
+			<version>${qop.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

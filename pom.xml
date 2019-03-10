@@ -14,7 +14,6 @@
    <qop.version>1.0.3-SNAPSHOT</qop.version>
 </properties>
 
-
 <modules>
     <module>qoplib</module>
     <module>qopwebui</module>

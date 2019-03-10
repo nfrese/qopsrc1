@@ -22,9 +22,14 @@ package at.qop.qoplib;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Properties;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -88,6 +93,21 @@ public class Utils {
 	}
 
 	public static String getApplicationName()
+	{
+		try {
+			Properties props = new Properties();
+			String resName = "META-INF/qop-application.properties";
+			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resName);
+			if (is == null) throw new RuntimeException("not found " + resName);
+			props.load(new InputStreamReader(is, "UTF-8"));
+			is.close();
+			return props.getProperty("application.name");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static String getEarName()
 	{
 		Object earName;
 		try {
