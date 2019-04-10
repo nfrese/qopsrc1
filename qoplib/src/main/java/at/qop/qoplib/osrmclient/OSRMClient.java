@@ -126,6 +126,10 @@ public class OSRMClient implements IRouter {
 					+ "ms t_parse="+ (t_finished - t_callFinished) + "ms " + url);
 			
 		}
+		catch (Exception ex)
+		{
+			throw new RuntimeException("osrm problem for " + url, ex);
+		}
 	}
 
 	private String baseUrl(ModeEnum mode) {

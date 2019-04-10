@@ -107,7 +107,7 @@ public class ConfigFile {
 			String key = "OSRMPort";
 			if (props.containsKey(key))
 			{
-				Integer startPort = Integer.valueOf(getStrProp(key, "5300"));
+				Integer startPort = Integer.valueOf(getStrProp(key, osrmConf.carPort+""));
 				osrmConf.carPort = startPort;
 				osrmConf.bicyclePort = startPort+1;
 				osrmConf.footPort = startPort+2;
