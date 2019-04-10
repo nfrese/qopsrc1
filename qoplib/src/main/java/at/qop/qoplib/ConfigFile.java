@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
+import at.qop.qoplib.entities.ModeEnum;
+
 public class ConfigFile {
 	
 	private final Properties props;
@@ -49,19 +51,88 @@ public class ConfigFile {
 		}
 		return new ConfigFile(props);
 	}
-	
-	public String getOSRMHost()
-	{
-		String key = "OSRMHost";
-		String defaultValue = "localhost";
-		return getStrProp(key, defaultValue);
-	}
 
-	public int getOSRMPort()
+	public static class OSRMConf
 	{
-		String key = "OSRMPort";
-		String defaultValue = "5000";
-		return Integer.valueOf(getStrProp(key, defaultValue));
+		public static final String DEFAULT_HOST="localhost";
+		
+		String carHost = DEFAULT_HOST;
+		int carPort = 5300;
+		String bicycleHost = DEFAULT_HOST;
+		int bicyclePort = 5301;
+		String footHost = DEFAULT_HOST;
+		int footPort = 5302;
+		
+		public String baseUrl(ModeEnum mode) {
+			String host;
+			int port = -1;
+			
+			switch (mode) {
+				case car:
+					host = carHost;
+					port = carPort;
+					break;
+				case bike:
+					host = bicycleHost;
+					port = bicyclePort;
+					break;
+				case foot:
+					host = footHost;
+					port = footPort;
+					break;
+				default: 
+					throw new RuntimeException("Unexcpected mode for OSRM base URL " + mode);
+			}
+			return "http://" + host + ":" + port;
+		}
+
+	}
+	
+	public OSRMConf getOSRMConf()
+	{
+		OSRMConf osrmConf = new OSRMConf();
+		
+		{
+			String key = "OSRMHost";
+			if (props.containsKey(key))
+			{
+				String host = getStrProp(key, osrmConf.carHost);
+				osrmConf.carHost = host;
+				osrmConf.bicycleHost = host;
+				osrmConf.footHost = host;
+			}
+		}
+		
+		{
+			String key = "OSRMPort";
+			if (props.containsKey(key))
+			{
+				Integer startPort = Integer.valueOf(getStrProp(key, "5300"));
+				osrmConf.carPort = startPort;
+				osrmConf.bicyclePort = startPort+1;
+				osrmConf.footPort = startPort+2;
+			}
+		}
+		
+		{
+			osrmConf.carHost = getStrProp("OSRMHost_car", osrmConf.carHost);
+			osrmConf.bicycleHost = getStrProp("OSRMHost_bicycle", osrmConf.bicycleHost);
+			osrmConf.footHost = getStrProp("OSRMHost_foot", osrmConf.footHost);
+			
+			{
+				String k = "OSRMPort_car";
+				if (props.containsKey(k)) osrmConf.carPort = Integer.valueOf(getStrProp(k, osrmConf.carPort+""));
+			}
+			{
+				String k = "OSRMPort_bicycle";
+				if (props.containsKey(k)) osrmConf.bicyclePort = Integer.valueOf(getStrProp(k, osrmConf.bicyclePort+""));
+			}
+			{
+				String k = "OSRMPort_foot";
+				if (props.containsKey(k)) osrmConf.footPort = Integer.valueOf(getStrProp(k, osrmConf.footPort+""));
+			}
+			return osrmConf;
+		}
 	}
 	
 	private String getStrProp(String key, String defaultValue) {

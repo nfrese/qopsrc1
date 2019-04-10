@@ -38,6 +38,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import at.qop.qoplib.ConfigFile.OSRMConf;
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.osrmclient.matrix.Arr;
@@ -49,13 +50,11 @@ import at.qop.qoplib.osrmclient.matrix.DoubleMatrixImpl;
 public class OSRMClient implements IRouter {
 	
 	private final int splitDestinationsAt;
-	private final String host;
-	private int baseport;
+	private OSRMConf osrmConf;
 	
-	public OSRMClient(String host, int baseport, int splitDestinationsAt) {
+	public OSRMClient(OSRMConf osrmConf, int splitDestinationsAt) {
 		super();
-		this.host = host;
-		this.baseport = baseport;
+		this.osrmConf = osrmConf;
 		this.splitDestinationsAt = splitDestinationsAt;
 	}
 
@@ -130,7 +129,7 @@ public class OSRMClient implements IRouter {
 	}
 
 	private String baseUrl(ModeEnum mode) {
-		return "http://" + host + ":" + (baseport + mode.osrmPortOffset);
+		return osrmConf.baseUrl(mode);
 	}
 	
 	public static double[][] parseTableResult(Reader jsonReader, int rows, int cols) throws JsonProcessingException, IOException

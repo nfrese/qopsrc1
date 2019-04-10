@@ -38,7 +38,7 @@ public class BatchCalculationInMemoryImpl extends BatchCalculationInMemory {
 	@Override
 	protected OSRMClient initRouter() {
 		ConfigFile cf = ConfigFile.read();
-		return new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort(), Constants.SPLIT_DESTINATIONS_AT);
+		return new OSRMClient(cf.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
 	}
 	
 	@Override

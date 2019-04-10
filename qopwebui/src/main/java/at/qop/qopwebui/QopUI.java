@@ -321,7 +321,7 @@ public class QopUI extends ProtectedUI {
 			
 			LayerSource source = new DbLayerSource();
 			ConfigFile cf = ConfigFile.read();
-			IRouter router = new OSRMClient(cf.getOSRMHost(), cf.getOSRMPort(), Constants.SPLIT_DESTINATIONS_AT);
+			IRouter router = new OSRMClient(cf.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
 			Calculation calculation = new Calculation(currentProfile, start, source, router);
 			calculation.run();
 
