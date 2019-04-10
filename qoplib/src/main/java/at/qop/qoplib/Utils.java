@@ -95,13 +95,9 @@ public class Utils {
 	public static String getApplicationName()
 	{
 		try {
-			Properties props = new Properties();
-			String resName = "META-INF/qop-application.properties";
-			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resName);
-			if (is == null) throw new RuntimeException("not found " + resName);
-			props.load(new InputStreamReader(is, "UTF-8"));
-			is.close();
-			return props.getProperty("application.name");
+			String appName = System.getenv("qop.application.name");
+			if (appName == null) return "qopwebui";
+			return appName;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
