@@ -32,6 +32,7 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBWriter;
 import com.vividsolutions.jts.io.WKTReader;
 
+import at.qop.qoplib.ConfigFile.OSRMConf;
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.batch.WriteBatTable.BatRecord;
 import at.qop.qoplib.calculation.ILayerCalculationP1Params;
@@ -151,7 +152,7 @@ public class BatchCalculationTest {
 
 			@Override
 			protected OSRMClient initRouter() {
-				return new OSRMClient(OSRMClientTest.OSRM_SERVER, 5000, Constants.SPLIT_DESTINATIONS_AT);
+				return new OSRMClient(osrmConfig(), Constants.SPLIT_DESTINATIONS_AT);
 			}
 
 			@Override
@@ -187,6 +188,10 @@ public class BatchCalculationTest {
 			}
 
 		};
+	}
+	
+	private OSRMConf osrmConfig() {
+		return new OSRMConf();
 	}
 
 }

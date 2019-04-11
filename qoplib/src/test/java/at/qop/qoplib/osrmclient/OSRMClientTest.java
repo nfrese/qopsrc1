@@ -30,10 +30,12 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import at.qop.qoplib.ConfigFile.OSRMConf;
 import at.qop.qoplib.entities.ModeEnum;
 
 public class OSRMClientTest {
 
+	
 	public static final String OSRM_SERVER = "10.0.0.19";
 
 	@Test
@@ -51,7 +53,7 @@ public class OSRMClientTest {
 	@Test
 	public void testSingle() throws IOException {
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000, 100);
+		OSRMClient client = new OSRMClient(osrmConfig(), 100);
 
 		LonLat[] sources = new LonLat[] {new LonLat(16.369561009437817, 48.20423271310815)};
 		LonLat[] targets = new LonLat[] {new LonLat(16.37741831002266, 48.20776186641345)};
@@ -60,10 +62,15 @@ public class OSRMClientTest {
 
 	}
 	
+	private OSRMConf osrmConfig() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	@Test
 	public void testMini() throws IOException {
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000, 100);
+		OSRMClient client = new OSRMClient(osrmConfig(), 100);
 
 		LonLat[] sources = demoData(5);
 		LonLat[] targets = demoData(5);
@@ -75,7 +82,7 @@ public class OSRMClientTest {
 	@Test
 	public void testMedium() throws IOException {
 
-		OSRMClient client = new OSRMClient(OSRM_SERVER, 5000, 100);
+		OSRMClient client = new OSRMClient(osrmConfig(), 100);
 
 		LonLat[] sources = demoData(100);
 		LonLat[] targets = demoData(100);
@@ -91,7 +98,7 @@ public class OSRMClientTest {
 		String r1Str;
 		
 		{
-			OSRMClient client = new OSRMClient(OSRM_SERVER, 5000, 3000);
+			OSRMClient client = new OSRMClient(osrmConfig(), 3000);
 
 			LonLat[] sources = demoData(-1);
 			LonLat[] targets = demoData(-1);
@@ -103,7 +110,7 @@ public class OSRMClientTest {
 
 		
 		{
-			OSRMClient client = new OSRMClient(OSRM_SERVER, 5000, 100);
+			OSRMClient client = new OSRMClient(osrmConfig(), 100);
 
 			LonLat[] sources = demoData(-1);
 			LonLat[] targets = demoData(-1);
