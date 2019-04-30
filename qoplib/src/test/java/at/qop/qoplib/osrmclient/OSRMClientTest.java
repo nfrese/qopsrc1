@@ -30,14 +30,15 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import at.qop.qoplib.ConfigFile.OSRMConf;
+import at.qop.qoplib.Config.OSRMConf;
 import at.qop.qoplib.entities.ModeEnum;
 
 public class OSRMClientTest {
-
 	
-	public static final String OSRM_SERVER = "10.0.0.19";
-
+	public static OSRMConf osrmConfig() {
+		return new OSRMConf();
+	}
+	
 	@Test
 	public void parseResultTest() throws JsonProcessingException, IOException {
 
@@ -60,11 +61,6 @@ public class OSRMClientTest {
 		double[][] result = client.table(ModeEnum.car, sources, targets);
 		System.out.println(Arrays.deepToString(result));
 
-	}
-	
-	private OSRMConf osrmConfig() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Test

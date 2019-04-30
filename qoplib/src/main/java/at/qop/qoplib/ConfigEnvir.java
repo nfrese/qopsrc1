@@ -20,24 +20,23 @@
 
 package at.qop.qoplib;
 
-import java.util.Properties;
-
-public class ConfigFile extends AbstractConfig {
+public class ConfigEnvir extends AbstractConfig {
 	
-	private final Properties props;
-	
-	public ConfigFile(Properties props) {
-		this.props = props;
+	public ConfigEnvir() {
 	}
 	
 	protected String getStrProp(String key, String defaultValue) {
-		if (props.containsKey(key)) return props.getProperty(key);
+		if (containsKey(key)) return qopEnvKey(key);
 		else return defaultValue;
 	}
 
 	@Override
 	protected boolean containsKey(String key) {
-		return props.containsKey(key);
+		String value = qopEnvKey(key);
+		return value != null;
 	}
 
+	protected String qopEnvKey(String key) {
+		return System.getenv("QOP_" + key.toUpperCase());
+	}
 }

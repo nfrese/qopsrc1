@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.TmpWorkingDir;
 import at.qop.qopwebui.components.ConfirmationDialog;
 import at.qop.qopwebui.components.DownloadDialog;
@@ -56,7 +56,7 @@ public class ExportShapefiles {
 		tmpDir = new TmpWorkingDir();
 		tmpDir.create();
 
-		ConfigFile cfgFile = ConfigFile.read();
+		Config cfgFile = Config.read();
 
 		List<String> cmds = new ArrayList<>();
 

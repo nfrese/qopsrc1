@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.BatchCalculationInMemory;
@@ -67,7 +67,7 @@ public class QOPBatchCalculationServlet extends HttpServlet {
 		String password = request.getParameter("password");
 		if (password == null) throw new RuntimeException("URL parameter password required");
 		
-		ConfigFile cfg = ConfigFile.read();
+		Config cfg = Config.read();
 		if (!password.equals(cfg.getUserPassword(username)))
 		{
 			throw new RuntimeException("Invalid username/password!");

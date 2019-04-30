@@ -22,7 +22,7 @@ package at.qop.qopwebui.admin.imports;
 
 import java.nio.file.Path;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.Utils;
 
 public class ImportShapefileCMD {
@@ -49,7 +49,7 @@ public class ImportShapefileCMD {
 		return getFilename().toLowerCase().replaceAll("\\.shp$", "");
 	}
 
-	public String cmd(ConfigFile cfgFile) {
+	public String cmd(Config cfgFile) {
 		String cmd = "shp2pgsql -d -w -I -s %SRID% -W \"%ENCODING%\" %SHAPEFILE% %TABLENAME%";
 		cmd += " | psql -h %HOST% -U %USER_NAME% -d %DB% -p %PORT%";
 		

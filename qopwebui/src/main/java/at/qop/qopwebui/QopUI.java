@@ -63,7 +63,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.Utils;
@@ -320,7 +320,7 @@ public class QopUI extends ProtectedUI {
 			
 			
 			LayerSource source = new DbLayerSource();
-			ConfigFile cf = ConfigFile.read();
+			Config cf = Config.read();
 			IRouter router = new OSRMClient(cf.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
 			Calculation calculation = new Calculation(currentProfile, start, source, router);
 			calculation.run();

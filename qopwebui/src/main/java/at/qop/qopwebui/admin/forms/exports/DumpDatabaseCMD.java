@@ -23,7 +23,7 @@ package at.qop.qopwebui.admin.forms.exports;
 import java.nio.file.Path;
 import java.util.List;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.Utils;
 
 public class DumpDatabaseCMD {
@@ -42,7 +42,7 @@ public class DumpDatabaseCMD {
 		return path.getFileName().toString();
 	}
 
-	public String cmd(ConfigFile cfgFile) {
+	public String cmd(Config cfgFile) {
 	
 		StringBuilder tablesString = new StringBuilder();
 		

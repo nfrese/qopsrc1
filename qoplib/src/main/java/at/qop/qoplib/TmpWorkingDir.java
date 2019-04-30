@@ -37,7 +37,7 @@ public class TmpWorkingDir {
 	
 	public void create()
 	{
-		String wdPath = ConfigFile.read().getWorkingDir();
+		String wdPath = Config.read().getWorkingDir();
 		File wd = new File(wdPath);
 		
 		if (!wd.isDirectory())

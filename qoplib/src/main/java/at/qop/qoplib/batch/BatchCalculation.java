@@ -28,7 +28,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.WriteBatTable.BatRecord;
@@ -55,7 +55,7 @@ public class BatchCalculation extends BatchCalculationAbstract {
 
 	@Override
 	protected OSRMClient initRouter() {
-		ConfigFile cf = ConfigFile.read();
+		Config cf = Config.read();
 		return new OSRMClient(cf.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
 	}
 	

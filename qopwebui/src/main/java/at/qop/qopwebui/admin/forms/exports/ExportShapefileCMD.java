@@ -22,7 +22,7 @@ package at.qop.qopwebui.admin.forms.exports;
 
 import java.nio.file.Path;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.Utils;
 
 public class ExportShapefileCMD {
@@ -41,7 +41,7 @@ public class ExportShapefileCMD {
 		return path.getFileName().toString();
 	}
 
-	public String cmd(ConfigFile cfgFile) {
+	public String cmd(Config cfgFile) {
 	
 		String cmd = "pgsql2shp -f %SHAPEFILE% -h %HOST% -u %USER_NAME% -p %PORT% %DB% %QRY%";
 		

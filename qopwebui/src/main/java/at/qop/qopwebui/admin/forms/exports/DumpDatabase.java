@@ -31,7 +31,7 @@ import java.util.List;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.TmpWorkingDir;
 import at.qop.qopwebui.components.ConfirmationDialog;
 import at.qop.qopwebui.components.DownloadDialog;
@@ -60,7 +60,7 @@ public class DumpDatabase {
 		tmpDir = new TmpWorkingDir();
 		tmpDir.create();
 
-		ConfigFile cfgFile = ConfigFile.read();
+		Config cfgFile = Config.read();
 
 
 		DumpDatabaseCMD s = new DumpDatabaseCMD(tmpDir.getPath(), tableNames);

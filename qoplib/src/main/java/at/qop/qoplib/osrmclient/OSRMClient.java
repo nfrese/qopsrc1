@@ -38,7 +38,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import at.qop.qoplib.ConfigFile.OSRMConf;
+import at.qop.qoplib.Config.OSRMConf;
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.osrmclient.matrix.Arr;

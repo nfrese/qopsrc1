@@ -36,7 +36,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.entities.Profile;
 
@@ -54,7 +54,7 @@ public abstract class ProtectedUI extends UI {
 		String u = currentUserName();
 		if (u != null)
 		{
-			ConfigFile cfg = ConfigFile.read();
+			Config cfg = Config.read();
 			String[] up = cfg.getUserProfiles(u);
 			return up;
 		}
@@ -67,7 +67,7 @@ public abstract class ProtectedUI extends UI {
 	@Override
 	protected void init(VaadinRequest vaadinRequest) {
 
-		ConfigFile cfg = ConfigFile.read();
+		Config cfg = Config.read();
 
 		String currUsername = currentUserName();
 
@@ -81,7 +81,7 @@ public abstract class ProtectedUI extends UI {
 		}
 	}
 
-	private void start(VaadinRequest vaadinRequest, ConfigFile cfg, String currUsername) {
+	private void start(VaadinRequest vaadinRequest, Config cfg, String currUsername) {
 		if (requiresAdminRole())
 		{
 			if (cfg.isAdmin(currUsername))
@@ -109,7 +109,7 @@ public abstract class ProtectedUI extends UI {
 		return VaadinService.getCurrentRequest().getWrappedSession();
 	}
 
-	private void showLogin(VaadinRequest vaadinRequest, ConfigFile cfg)
+	private void showLogin(VaadinRequest vaadinRequest, Config cfg)
 	{
 		TextField login = new TextField("Benutzername");
 

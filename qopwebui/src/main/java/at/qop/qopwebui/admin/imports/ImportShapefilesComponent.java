@@ -42,7 +42,7 @@ import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.TmpWorkingDir;
 import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
@@ -116,7 +116,7 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 
 			ImportShapefilesDialog isfd = new ImportShapefilesDialog("Auswahl der Shape-Dateien ", shapeFiles);
 			isfd.onDone = () -> {
-				ConfigFile cfgFile = ConfigFile.read();
+				Config cfgFile = Config.read();
 
 				List<String> cmds = new ArrayList<>();
 

@@ -22,7 +22,7 @@ package at.qop.qoplib.batch;
 
 import java.util.List;
 
-import at.qop.qoplib.ConfigFile;
+import at.qop.qoplib.Config;
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.calculation.DbLayerSource;
 import at.qop.qoplib.entities.Address;
@@ -37,7 +37,7 @@ public class BatchCalculationInMemoryImpl extends BatchCalculationInMemory {
 
 	@Override
 	protected OSRMClient initRouter() {
-		ConfigFile cf = ConfigFile.read();
+		Config cf = Config.read();
 		return new OSRMClient(cf.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
 	}
 	
