@@ -20,6 +20,9 @@
 
 package at.qop.qopwebui.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vaadin.server.Page;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -30,9 +33,11 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.Constants;
+import at.qop.qoplib.TmpWorkingDir;
 import at.qop.qoplib.imports.PerformAddressUpdate;
 import at.qop.qopwebui.admin.forms.exports.DumpDatabase;
 import at.qop.qopwebui.admin.imports.ImportShapefilesComponent;
+import at.qop.qopwebui.components.ExecDialog;
 
 public class MiscTab extends AbstractTab {
 
@@ -75,7 +80,28 @@ public class MiscTab extends AbstractTab {
 				dd.run();
 			});
 			
-			HorizontalLayout hl = new HorizontalLayout(dumpConfigButton, dumpAllButton);
+			Button systemInfoButton = new Button("System-Info");
+			systemInfoButton.addClickListener(e -> {
+				ExecDialog execDialog = new ExecDialog("System-Info");
+				List<String> commands = new ArrayList<>();
+				commands.add("uname -a");
+				commands.add("set");
+				commands.add("psql -V");
+				commands.add("pg_dump -V");
+				commands.add("pgsql2shp");
+				commands.add("shp2pgsql");
+				commands.add("zip -v");
+				commands.add("unzip -v");
+				
+				TmpWorkingDir tmpDir = new TmpWorkingDir();
+				tmpDir.create();
+				
+				execDialog.show();
+				execDialog.executeCommands(commands.iterator(), null, tmpDir.dir, true);
+
+			});
+			
+			HorizontalLayout hl = new HorizontalLayout(dumpConfigButton, dumpAllButton, systemInfoButton);
 			hl.setMargin(true);
 			p.setContent(hl);
 			vl.addComponent(p);

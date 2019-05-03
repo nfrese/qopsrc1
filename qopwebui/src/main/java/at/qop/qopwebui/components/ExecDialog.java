@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.function.IntConsumer;
 
 import com.vaadin.icons.VaadinIcons;
@@ -130,20 +131,35 @@ public class ExecDialog extends AbstractDialog {
 		return "OK";
 	}
 	
-	public void executeCommand(String command, String[] envp, File dir) {
-		executeCommands(Arrays.asList(command).iterator(), envp, dir);
+	public void executeCommand(String command, Map<String, String> addEnv, File dir) {
+		executeCommands(Arrays.asList(command).iterator(), addEnv, dir, false);
 	}
 	
-	public void executeCommands(Iterator<String> cmdIt, String[] envp, File dir) {
+	public void executeCommands(Iterator<String> cmdIt, Map<String, String> addEnv, File dir) {
+		executeCommands(cmdIt, addEnv, dir, false);
+	}
+	
+	public void executeCommands(Iterator<String> cmdIt, Map<String, String> addEnv, File dir, boolean keepOn) {
+		_executeCommands(cmdIt, addEnv, dir, keepOn, new ExitCode());
+	}
+	
+	private static class ExitCode { int value = 0; }
+	
+	private void _executeCommands(Iterator<String> cmdIt, Map<String, String> addEnv, File dir, boolean keepOn, ExitCode lastFailedExitCode) {
 		
 		if (cmdIt.hasNext())
 		{
-			executeCommand(cmdIt.next(), envp, dir, 
+			executeCommand(cmdIt.next(), addEnv, dir, 
 					(exit) -> {
-						if (exit == 0)
+						if (exit != 0)
+						{
+							lastFailedExitCode.value = exit;
+						}
+						
+						if (exit == 0 || keepOn)
 						{
 							getUI().access(() -> {
-								executeCommands(cmdIt, envp, dir);
+								_executeCommands(cmdIt, addEnv, dir, keepOn, lastFailedExitCode);
 							});
 						}
 						else
@@ -155,20 +171,33 @@ public class ExecDialog extends AbstractDialog {
 		}
 		else
 		{
-			done(0);
+			done(lastFailedExitCode.value);
 		}
 	}
 	
 	String lastLine = null;
 	int duplicateCount = 0;
 	
-	public void executeCommand(String command, String[] envp, File dir, IntConsumer singleDone) {
+	
+    public Process exec(String[] cmdarray, Map<String, String> addEnv, File dir)
+            throws IOException {
+    		ProcessBuilder pb = new ProcessBuilder(cmdarray)
+                .directory(dir)
+                ;
+    		if (addEnv != null)
+    		{
+    			pb.environment().putAll(addEnv);
+    		}
+            return pb.start();
+        }
+	
+	public void executeCommand(String command, Map<String, String> addEnv, File dir, IntConsumer singleDone) {
 
 		console.addComponent(new Label("<b>" + command + "</b>", ContentMode.HTML));
 		
 		try {
 			String[] carr = new String[] {"bash", "-c", command};
-			p = Runtime.getRuntime().exec(carr, envp, dir);
+			p = exec(carr, addEnv, dir);
 			
 			Thread ot = new Thread(new StreamGobbler(p.getInputStream()) {
 

@@ -26,7 +26,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
@@ -69,7 +71,10 @@ public class DumpDatabase {
 		ExecDialog execImp = new ExecDialogNext("Datenbank Backup erstellen");
 		execImp.show();
 
-		execImp.executeCommand(cmd, new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
+		Map<String, String> addEnv = new HashMap<>();
+		addEnv.put("PGPASSWORD", cfgFile.getDbPasswd());		
+		
+		execImp.executeCommand(cmd, addEnv, tmpDir.dir);
 		execImp.onOK = (exit1) -> {
 			
 			zipFile = new File(tmpDir.dir, "downloaddump.zip");

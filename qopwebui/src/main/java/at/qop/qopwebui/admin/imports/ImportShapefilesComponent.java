@@ -31,7 +31,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
@@ -131,7 +133,9 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 
 				ExecDialog execImp = new ExecDialog("Shape-Dateien in die Datenbank einspielen");
 				execImp.show();
-				execImp.executeCommands(cmds.iterator(), new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
+				Map<String, String> addEnv = new HashMap<>();
+				addEnv.put("PGPASSWORD", cfgFile.getDbPasswd());
+				execImp.executeCommands(cmds.iterator(), addEnv, tmpDir.dir);
 				execImp.onOK = (exit1) -> {
 					cleanup();
 				};

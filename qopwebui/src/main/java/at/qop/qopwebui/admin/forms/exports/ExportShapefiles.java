@@ -26,7 +26,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.vaadin.server.StreamResource;
@@ -70,7 +72,10 @@ public class ExportShapefiles {
 		ExecDialog execImp = new ExecDialogNext("Shape-Dateien aus der Datenbank exportieren");
 		execImp.show();
 
-		execImp.executeCommands(cmds.iterator(), new String[] {"PGPASSWORD=" + cfgFile.getDbPasswd()}, tmpDir.dir);
+		Map<String, String> addEnv = new HashMap<>();
+		addEnv.put("PGPASSWORD", cfgFile.getDbPasswd());
+		
+		execImp.executeCommands(cmds.iterator(), addEnv, tmpDir.dir);
 		execImp.onOK = (exit1) -> {
 			
 			zipFile = new File(tmpDir.dir, "downloadshapes.zip");
