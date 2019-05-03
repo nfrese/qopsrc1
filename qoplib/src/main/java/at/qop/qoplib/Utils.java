@@ -25,6 +25,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -108,6 +110,21 @@ public class Utils {
 		} catch (NamingException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public static String guessTableName(String query)
+	{
+		final Pattern p = Pattern.compile("^(.*) from ([a-zA-Z0-9_]+)( .*)?$");
+	    Matcher m = p.matcher(query);
+
+	    if (m.find()) {
+//	        System.out.println(m.group(0));
+//	        System.out.println(m.group(1));
+//	        System.out.println(m.group(2));
+//	        System.out.println(m.group(3));
+	        return m.group(2);
+	    }
+	    return null;
 	}
 	
 }

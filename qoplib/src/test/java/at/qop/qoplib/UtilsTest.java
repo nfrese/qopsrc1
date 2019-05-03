@@ -63,4 +63,16 @@ public class UtilsTest {
 		Assert.equals("POINT (16.39044652738694 48.21200859340763)", point+"");
 	}
 
+	@Test
+	public void guessTableNameTest1() {
+		String result = Utils.guessTableName("select * from autobahnanschluesse LIMIT 1");
+		Assert.equals("autobahnanschluesse", result);
+	}
+	
+	@Test
+	public void guessTableNameTest2() {
+		String result = Utils.guessTableName("select * from auto_bahn_anschluesse");
+		Assert.equals("auto_bahn_anschluesse", result);
+	}
+	
 }

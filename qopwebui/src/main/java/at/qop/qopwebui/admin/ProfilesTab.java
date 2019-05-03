@@ -21,11 +21,13 @@
 package at.qop.qopwebui.admin;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import com.vaadin.data.provider.DataProvider;
@@ -44,11 +46,13 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.VerticalLayout;
 
+import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.Utils;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qopwebui.admin.forms.ProfileForm;
+import at.qop.qopwebui.admin.forms.exports.DumpDatabase;
 import at.qop.qopwebui.components.ConfirmationDialog;
 
 public class ProfilesTab extends AbstractTab {
@@ -136,6 +140,35 @@ public class ProfilesTab extends AbstractTab {
         	}
         });
  
+        Button profileInfoButton = new Button("Export Database for selected Profiles", VaadinIcons.INFO);
+        profileInfoButton.setEnabled(false);
+        profileInfoButton.addClickListener(e -> {
+        	
+        	if (listSelect.getSelectedItems().size() > 0)
+        	{
+
+        		Set<String> collectedTablenames = new TreeSet<>();
+
+        		listSelect.getSelectedItems().stream().forEach(profile -> {
+        			System.out.println("******* collecting tablenames for profile " + profile.name); 
+
+        			profile.profileAnalysis.forEach(pa -> {
+        				String tableName = Utils.guessTableName(pa.analysis.query);
+        				System.out.println(pa.analysis.name + " -> " + tableName);
+        				collectedTablenames.add(tableName);
+
+        			});
+        		});
+
+        		collectedTablenames.add(Constants.Q_ADDRESSES);
+        		collectedTablenames.addAll(Constants.CONFIG_TABLES); 
+
+        		DumpDatabase dd = new DumpDatabase(new ArrayList<>(collectedTablenames));
+        		dd.run();
+        	}
+
+        });
+        
         TwinColSelect<ProfileAnalysis> twinSelect =
         	    new TwinColSelect<>("Auswertungen hinzufügen");
 
@@ -191,6 +224,7 @@ public class ProfilesTab extends AbstractTab {
 					removeProfileButton.setEnabled(event.getValue().size() == 1);
 					editProfileButton.setEnabled(event.getValue().size() == 1);
 					cloneProfileButton.setEnabled(event.getValue().size() == 1);
+					profileInfoButton.setEnabled(event.getValue().size() > 0);
 					
 					if (event.getValue().size() == 1)
 					{
@@ -210,7 +244,7 @@ public class ProfilesTab extends AbstractTab {
 		
 		twinSelect.setWidth(100, Unit.PERCENTAGE);
 		
-		VerticalLayout vl = new VerticalLayout(listSelect, addProfileButton, editProfileButton, cloneProfileButton, removeProfileButton);
+		VerticalLayout vl = new VerticalLayout(listSelect, addProfileButton, editProfileButton, cloneProfileButton, removeProfileButton, profileInfoButton);
 		vl.setExpandRatio(listSelect, 5.0f);
 		vl.setMargin(false);
 		vl.setHeight(100, Unit.PERCENTAGE);
