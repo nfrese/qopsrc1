@@ -47,14 +47,18 @@ public class DumpDatabase {
 	private TmpWorkingDir tmpDir;
 	private File zipFile;
 	
+	public DumpDatabase() {
+		super();
+		this.tableNames = Collections.emptyList(); // complete db
+	}
+	
 	public DumpDatabase(List<String> tableNames) {
 		super();
 		this.tableNames = tableNames;
 	}
+	
 
-	public DumpDatabase() {
-		super();
-		this.tableNames = Collections.emptyList(); // complete db
+	protected void afterDump(ExecDialog execImp, File dir) {
 	}
 	
 	public void run()
@@ -75,6 +79,9 @@ public class DumpDatabase {
 		addEnv.put("PGPASSWORD", cfgFile.getDbPasswd());		
 		
 		execImp.executeCommand(cmd, addEnv, tmpDir.dir);
+		
+		afterDump(execImp, tmpDir.dir);
+		
 		execImp.onOK = (exit1) -> {
 			
 			zipFile = new File(tmpDir.dir, "downloaddump.zip");

@@ -53,10 +53,12 @@ import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qopwebui.admin.forms.ProfileForm;
 import at.qop.qopwebui.admin.forms.exports.DumpDatabase;
+import at.qop.qopwebui.admin.forms.exports.DumpDatabaseAppendScript;
 import at.qop.qopwebui.components.ConfirmationDialog;
 
 public class ProfilesTab extends AbstractTab {
 
+	private static final String BSLNL = "\n";
 	private Profile currentProfile;
 	private boolean twinSelectSilent = false;
 
@@ -146,8 +148,15 @@ public class ProfilesTab extends AbstractTab {
         	
         	if (listSelect.getSelectedItems().size() > 0)
         	{
+        		StringBuilder sqlSb = new StringBuilder();
+        		
 
         		Set<String> collectedTablenames = new TreeSet<>();
+        		Set<String> collectedProfileNames = new TreeSet<>();
+        		Set<String> collectedAnalysisNames = new TreeSet<>();
+        		Set<String> collectedAnalysisFunctionNames = new TreeSet<>();
+        		
+        		collectedProfileNames.addAll(listSelect.getSelectedItems().stream().map(profile -> profile.name).collect(Collectors.toList()));
 
         		listSelect.getSelectedItems().stream().forEach(profile -> {
         			System.out.println("******* collecting tablenames for profile " + profile.name); 
@@ -156,14 +165,43 @@ public class ProfilesTab extends AbstractTab {
         				String tableName = Utils.guessTableName(pa.analysis.query);
         				System.out.println(pa.analysis.name + " -> " + tableName);
         				collectedTablenames.add(tableName);
-
+        				collectedAnalysisNames.add(pa.analysis.name);
+        				collectedAnalysisFunctionNames.add(pa.analysis.analysisfunction.name);
+        				
         			});
+        			
         		});
 
+//        		for (String tableName : collectedTablenames)
+//        		{
+//        			sqlSb.append("DELETE * FROM " + tableName + " INTO qopexport." + tableName);
+//        			sqlSb.append("\n");
+//        		}
+
+        		//sqlSb.append(BSLNL);
+
+        		String inProfileList = collectedProfileNames.stream().map(name -> "'" + name + "'").collect( Collectors.joining( ", " ) );
+        		sqlSb.append("DELETE FROM public.q_profileanalysis where profile_name not in (" + inProfileList + ");");
+        		//sqlSb.append(BSLNL);
+        		sqlSb.append("DELETE FROM public.q_profile where name not in (" + inProfileList + ");");
+        		//sqlSb.append(BSLNL);
+        		
+        		String inAnalysisIdList = collectedAnalysisNames.stream().map(id -> "'" + id + "'").collect( Collectors.joining( ", " ) );
+				sqlSb.append("DELETE FROM public.q_analysis where name not in (" + inAnalysisIdList + ");");
+				//sqlSb.append(BSLNL);
+				
+
+				String inAnalysesFunctionList = collectedAnalysisFunctionNames.stream().map(name -> "'" + name + "'").collect( Collectors.joining( ", " ) );
+				
+				sqlSb.append("DELETE FROM public.q_analysisfunction where name not in (" + inAnalysesFunctionList + ");");
+				//sqlSb.append(BSLNL);
+				
+				System.out.println(sqlSb);
+				
         		collectedTablenames.add(Constants.Q_ADDRESSES);
         		collectedTablenames.addAll(Constants.CONFIG_TABLES); 
 
-        		DumpDatabase dd = new DumpDatabase(new ArrayList<>(collectedTablenames));
+        		DumpDatabase dd = new DumpDatabaseAppendScript(new ArrayList<>(collectedTablenames), sqlSb.toString());
         		dd.run();
         	}
 
