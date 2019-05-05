@@ -1,9 +1,8 @@
 package at.qop.qopwebui.admin.forms.exports;
 
-import java.io.File;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-
-import at.qop.qopwebui.components.ExecDialog;
 
 public class DumpDatabaseAppendScript extends DumpDatabase {
 
@@ -16,8 +15,8 @@ public class DumpDatabaseAppendScript extends DumpDatabase {
 	}
 
 	@Override
-	protected void afterDump(ExecDialog execImp, File dir) {
-		execImp.executeCommand("echo \"" + appendSql + "\" >> dump.sql", null, dir); 
+	protected Iterator<String> addCmdAfterDump(String cmd) {
+		return Arrays.asList(cmd, "echo \"" + appendSql + "\" >> dump.sql").iterator();
 	}
 	
 }

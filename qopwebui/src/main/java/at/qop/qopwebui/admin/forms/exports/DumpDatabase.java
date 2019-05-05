@@ -25,8 +25,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -57,10 +59,6 @@ public class DumpDatabase {
 		this.tableNames = tableNames;
 	}
 	
-
-	protected void afterDump(ExecDialog execImp, File dir) {
-	}
-	
 	public void run()
 	{
 		tmpDir = new TmpWorkingDir();
@@ -78,9 +76,7 @@ public class DumpDatabase {
 		Map<String, String> addEnv = new HashMap<>();
 		addEnv.put("PGPASSWORD", cfgFile.getDbPasswd());		
 		
-		execImp.executeCommand(cmd, addEnv, tmpDir.dir);
-		
-		afterDump(execImp, tmpDir.dir);
+		execImp.executeCommands(addCmdAfterDump(cmd), addEnv, tmpDir.dir);
 		
 		execImp.onOK = (exit1) -> {
 			
@@ -103,6 +99,10 @@ public class DumpDatabase {
 			};
 		};
 		execImp.onExit = () -> { cleanup(); };
+	}
+
+	protected Iterator<String> addCmdAfterDump(String cmd) {
+		return Arrays.asList(cmd).iterator();
 	}
 
 	private void cleanup() {
