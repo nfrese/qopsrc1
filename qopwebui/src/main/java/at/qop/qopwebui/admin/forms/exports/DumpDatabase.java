@@ -25,12 +25,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
 
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
@@ -64,6 +67,14 @@ public class DumpDatabase {
 		tmpDir = new TmpWorkingDir();
 		tmpDir.create();
 
+		try {
+			URL inputUrl = getClass().getResource("/at/qop/qoplib/docker/Dockerfile");
+			File dest = new File(tmpDir.dir, "Dockerfile");
+			FileUtils.copyURLToFile(inputUrl, dest);
+		} catch (IOException e1) {
+			throw new RuntimeException(e1);
+		}
+		
 		Config cfgFile = Config.read();
 
 
