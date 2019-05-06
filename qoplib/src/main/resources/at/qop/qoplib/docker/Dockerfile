@@ -1,4 +1,4 @@
-FROM camptocamp/postgis:9.5
+FROM camptocamp/postgis:9.6
 
 ENV POSTGRES_USER qopuser
 ENV POSTGRES_DB qop
