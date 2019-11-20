@@ -23,6 +23,7 @@ package at.qop.qoplib.calculation;
 import java.sql.SQLException;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.dbconnector.DbTableReader;
@@ -38,17 +39,36 @@ public class DbLayerSource implements LayerSource {
 			DbTableReader tableReader = new DbTableReader();
 
 			String sql = layerParams.getQuery();
-			if (layerParams.hasRadius())
+			if (sql.toUpperCase().startsWith("#RASTERTABLE="))
 			{
-				Geometry buffer = CRSTransform.singleton.bufferWGS84Corr(start, layerParams.getRadius());
-				String stIntersectsSql = "ST_Intersects(" + layerParams.getGeomfield() + ", 'SRID=4326;" + buffer + "'::geometry)";
-				if (sql.toUpperCase().contains("WHERE"))
+				if (start instanceof Point)
 				{
-					sql += " AND " + stIntersectsSql;
+					Point p = (Point)start;
+
+					String rasterTablename = sql.split("=")[1];
+					sql = "SELECT g.geom as geom, rid, ST_Value(rast, 1, g.geom) As value"
+							+ " FROM " + rasterTablename + " r INNER JOIN (select ST_SetSRID(ST_Point(" + p.getX() + "," + p.getY() + "), 4326) as geom) as g"
+							+ " ON ST_Intersects(r.rast,g.geom)";
 				}
 				else
 				{
-					sql += " WHERE "+ stIntersectsSql;
+					throw new RuntimeException("unexpected geometry type for raster-queries= " + start);
+				}
+			}
+			else
+			{
+				if (layerParams.hasRadius())
+				{
+					Geometry buffer = CRSTransform.singleton.bufferWGS84Corr(start, layerParams.getRadius());
+					String stIntersectsSql = "ST_Intersects(" + layerParams.getGeomfield() + ", 'SRID=4326;" + buffer + "'::geometry)";
+					if (sql.toUpperCase().contains("WHERE"))
+					{
+						sql += " AND " + stIntersectsSql;
+					}
+					else
+					{
+						sql += " WHERE "+ stIntersectsSql;
+					}
 				}
 			}
 			gd_.readTable(sql, tableReader);
