@@ -45,9 +45,10 @@ public class OverallResult<T extends ILayerCalculation> {
 				for (ILayerCalculation lc : section.lcs)
 				{
 					if (Double.isNaN(lc.getRating()))
-							{
-						System.out.println();
-							}
+					{
+						System.err.println("skipping layer calculation - rating returns NaN " + lc.getParams().analysis.name);
+						continue;
+					}
 					
 					sectionSumRating += (lc.getRating() * lc.getWeight());
 					sectionSumWeight += lc.getWeight(); 
