@@ -18,30 +18,19 @@
  *
 */
 
-package at.qop.qoplib.dbconnector.metadata;
+package at.qop.qoplib.dbconnector.fieldtypes;
 
-import java.util.ArrayList;
-import java.util.List;
+import at.qop.qoplib.dbconnector.DbRecord;
 
-public class QopDBTable {
+public class DbInt4Field extends DbFieldAbstract {
+
+	public String[] expectedTypeName() {
+		return new String[] {"int4"};
+	}
 	
-	public String name;
-	
-	public List<QopDBColumn> columns = new ArrayList<>();
-	
-	public boolean isGeometric()
+	public Integer get(DbRecord rec)
 	{
-		return columns.stream().filter(c -> "geometry".equals(c.typename )).count() > 0;
+		return (Integer)rec.values[ix];
 	}
 	
-	public boolean isRaster()
-	{
-		return columns.stream().filter(c -> "raster".equals(c.typename )).count() > 0;
-	}
-	
-	@Override
-	public String toString() {
-		return name;
-	}
-
 }

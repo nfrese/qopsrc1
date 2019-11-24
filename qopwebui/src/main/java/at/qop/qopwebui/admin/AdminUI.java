@@ -66,10 +66,15 @@ public class AdminUI extends ProtectedUI {
         	tabs.addTab(c, "Auswertungsfunktionen");
         }
         {   
-        	LayerDataTab tab = new LayerDataTab();
+        	AbstractLayerDataTab tab = new VectorLayerDataTab();
         	Component c = tab.initialize(this.getPage());
-        	tabs.addTab(c, "Daten");
-        }                
+        	tabs.addTab(c, "Vektor Daten");
+        }
+        {   
+        	AbstractLayerDataTab tab = new RasterLayerDataTab();
+        	Component c = tab.initialize(this.getPage());
+        	tabs.addTab(c, "Raster Daten");
+        }        
         {
         	MiscTab tab = new MiscTab();
         	Component c = tab.initialize(this.getPage());

@@ -25,6 +25,7 @@ import at.qop.qoplib.dbconnector.fieldtypes.DbFieldAbstract;
 import at.qop.qoplib.dbconnector.fieldtypes.DbFloat4Field;
 import at.qop.qoplib.dbconnector.fieldtypes.DbFloat8Field;
 import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
+import at.qop.qoplib.dbconnector.fieldtypes.DbInt4Field;
 import at.qop.qoplib.dbconnector.fieldtypes.DbTextField;
 
 public class DbTable {
@@ -47,6 +48,10 @@ public class DbTable {
 		return this.field(colName, DbGeometryField.class);
 	}
 
+	public DbInt4Field int4Field(String colName) {
+		return this.field(colName, DbInt4Field.class);
+	}
+	
 	public DbDoubleField doubleField(String colName) {
 		return this.field(colName, DbDoubleField.class);
 	}

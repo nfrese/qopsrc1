@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,7 +68,7 @@ import at.qop.qopwebui.admin.forms.exports.ExportShapefiles;
 import at.qop.qopwebui.admin.imports.ImportShapefilesComponent;
 import at.qop.qopwebui.components.ConfirmationDialog;
 
-public class LayerDataTab extends AbstractTab {
+public abstract class AbstractLayerDataTab extends AbstractTab {
 
 	protected DbTable currentTable;
 	protected int currentLines;	
@@ -173,12 +174,48 @@ public class LayerDataTab extends AbstractTab {
         
         tableLines = new Label("");
         
+    	Button showAllGeomsButton = new Button("Alle in der Karte zeigen...", VaadinIcons.PIN);
+    	showAllGeomsButton.setEnabled(false);
+    	showAllGeomsButton.addClickListener(e -> {
+
+    		lfg.removeAllComponents();
+
+    		Optional<QopDBTable> table = listSelect.getSelectedItems().stream().findFirst();
+    		if (table.isPresent() && currentTable != null)
+    		{
+
+    			String baseSql = baseSql(table.get());
+    			String sql = baseSql;
+
+    			IGenericDomain gd_ = LookupSessionBeans.genericDomain();
+    			DbTableReader tableReader = new DbTableReader();
+    			try {
+    				gd_.readTable(sql, tableReader);
+    			} catch (SQLException e1) {
+    				throw new RuntimeException(e1);
+    			}
+
+    			for (DbRecord selectedItem : tableReader.records){
+
+    				Collection<Geometry> geoms = selectedItem.getGeometries(currentTable);
+    				for (Geometry geom : geoms)
+    				{
+    					Collection<LeafletLayer> lPoly = JTSUtil.toLayers(geom);
+    					lfg.addComponent(lPoly);
+    				}
+    			}
+    		}
+    		leafletMap.zoomToContent();
+    	});
+        
         final HorizontalLayout hlButtons = new HorizontalLayout();
         hlButtons.addComponent(importComponent);
         hlButtons.addComponent(deleteLayerButton);
         hlButtons.addComponent(exportLayerButton);
 
         hlButtons.addComponent(tableLines);
+        hlButtons.addComponent(showAllGeomsButton);
+
     	
     	VerticalLayout vl = new VerticalLayout(hl, hlButtons); 
     	vl.setSizeFull();
@@ -188,15 +225,13 @@ public class LayerDataTab extends AbstractTab {
     			event -> { 
     				deleteLayerButton.setEnabled(event.getValue().size() > 0);
     				exportLayerButton.setEnabled(event.getValue().size() > 0);
+    				showAllGeomsButton.setEnabled(event.getValue().size() > 0);
     			} );
 
     	return vl;
 	}
 
-	protected void refreshList(IGenericDomain gd, ListSelect<QopDBTable> listSelect) {
-		QopDBMetadata meta = gd.getMetadata();
-		listSelect.setItems(meta.tables.stream().filter(t->t.isGeometric()).collect(Collectors.toList()));
-	}
+	protected abstract void refreshList(IGenericDomain gd, ListSelect<QopDBTable> listSelect);
 	
 	public static interface DataService {
 
@@ -219,7 +254,7 @@ public class LayerDataTab extends AbstractTab {
 					IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 					try {
 						DBSingleResultTableReader tableReader = new DBSingleResultTableReader();
-						gd_.readTable("select count(gid) from " + table.name, tableReader);
+						gd_.readTable(countSQL(table), tableReader);
 						int lines = (int)tableReader.longResult();
 						currentLines = lines;
 						tableLines.setValue("Records: " + currentLines);
@@ -294,7 +329,7 @@ public class LayerDataTab extends AbstractTab {
 	
 	private void prepareGrid(Grid<DbRecord> grid, QopDBTable table) {
 		
-		String baseSql = "select * from " + table.name;
+		String baseSql = baseSql(table);
 		
 		grid.removeAllColumns();
 		grid.setDataProvider(dataProvider(table, baseSql));
@@ -321,21 +356,10 @@ public class LayerDataTab extends AbstractTab {
 		}
 	}
 
-	private Object stringRepresentation(DbTable table, final int i, DbRecord item) {
-		
-		int coltype = table.sqlTypes[i];
-		if ("geometry".equals(table.typeNames[i]))
-		{
-			WKBReader wkbReader = new WKBReader();  
-			try {
-				return wkbReader.read(WKBReader.hexToBytes(String.valueOf(item.values[i])));
-			} catch (ParseException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		
-		
-		return item.values[i];
-	}	
+	protected abstract String baseSql(QopDBTable table);
+
+	protected abstract String countSQL(QopDBTable table);
+	
+	protected abstract Object stringRepresentation(DbTable table, final int i, DbRecord item);
 
 }

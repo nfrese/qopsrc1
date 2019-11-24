@@ -24,10 +24,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
+
+import at.qop.qoplib.dbconnector.fieldtypes.DbDoubleField;
 
 public class DbRecord {
 	
@@ -52,7 +56,7 @@ public class DbRecord {
 	
 		for (int i = 0; i < table.colNames.length; i++)
 		{
-	
+
 			if ("geometry".equals(table.typeNames[i]))
 			{
 				WKBReader wkbReader = new WKBReader();  
@@ -62,6 +66,27 @@ public class DbRecord {
 				} catch (ParseException e) {
 					throw new RuntimeException(e);
 				}
+			} else 
+			if ("rid".equals(table.colNames[i]))
+			{
+				Integer width = table.int4Field("width").get(this);					
+				Integer height = table.int4Field("height").get(this);	
+				Double x1 = table.doubleField("upperleftx").get(this);					
+				Double y1 = table.doubleField("upperlefty").get(this);
+				Double scalex = table.doubleField("scalex").get(this);					
+				Double scaley = table.doubleField("scaley").get(this);				
+				
+				double x2 = x1 + width *  scalex;
+				double y2 = y1 + height *  scaley;
+				
+				Coordinate c1 = new Coordinate(x1,y1);
+				Coordinate c2 = new Coordinate(x2,y1);
+				Coordinate c3 = new Coordinate(x2,y2);
+				Coordinate c4 = new Coordinate(x1,y2);
+				Coordinate c5 = new Coordinate(x1,y1);
+				
+				Geometry geom = new GeometryFactory().createPolygon(new Coordinate[] {c1, c2, c3, c4, c5});
+				results.add(geom);
 			}
 		}
 		return results;
