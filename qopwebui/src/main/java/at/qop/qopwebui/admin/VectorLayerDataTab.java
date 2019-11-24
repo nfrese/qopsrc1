@@ -11,6 +11,8 @@ import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
+import at.qop.qopwebui.admin.imports.ImportFilesComponent;
+import at.qop.qopwebui.admin.imports.shape.ImportShapefilesComponent;
 
 public class VectorLayerDataTab extends AbstractLayerDataTab {
 
@@ -22,6 +24,9 @@ public class VectorLayerDataTab extends AbstractLayerDataTab {
 		return "select count(gid) from " + table.name;
 	}
 
+	protected ImportFilesComponent importFilesComponent() {
+		return new ImportShapefilesComponent();
+	}
 	
 	protected void refreshList(IGenericDomain gd, ListSelect<QopDBTable> listSelect) {
 		QopDBMetadata meta = gd.getMetadata();

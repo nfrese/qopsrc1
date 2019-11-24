@@ -47,9 +47,9 @@ public class ImportShapefilesDialog extends AbstractDialog {
 	
 	private HorizontalLayout hlButtons;
 	
-	final List<ImportShapefileCMD> shapeFiles;
+	final List<ImportFileCMD> shapeFiles;
 	
-	public ImportShapefilesDialog(String title, List<ImportShapefileCMD> shapeFiles)
+	public ImportShapefilesDialog(String title, List<ImportFileCMD> shapeFiles)
 	{
 		super(title);
 		this.shapeFiles = shapeFiles;
@@ -60,7 +60,7 @@ public class ImportShapefilesDialog extends AbstractDialog {
 		subContent.setSizeFull();
 		this.setContent(subContent);
 		
-		Grid<ImportShapefileCMD> grid = new Grid<ImportShapefileCMD>();
+		Grid<ImportFileCMD> grid = new Grid<ImportFileCMD>();
 		grid.setSizeFull();
 		
 		grid.addColumn(item -> item.importFlag).setCaption("Wird importiert")
@@ -88,8 +88,9 @@ public class ImportShapefilesDialog extends AbstractDialog {
 				});		
 		
 		grid.addColumn(item -> item.warning).setCaption("Warning");
+		grid.addColumn(item -> item.error).setCaption("Error");
 		
-		DataProvider<ImportShapefileCMD, ?> dataProvider = new ListDataProvider<ImportShapefileCMD>(
+		DataProvider<ImportFileCMD, ?> dataProvider = new ListDataProvider<ImportFileCMD>(
 				shapeFiles);
 		
 		grid.setDataProvider(dataProvider);
@@ -103,7 +104,7 @@ public class ImportShapefilesDialog extends AbstractDialog {
 			this.close();
 		});
 		okButton = new Button("Weiter", VaadinIcons.ARROW_RIGHT);
-		okButton.setEnabled(true);
+		okButton.setEnabled(shapeFiles.stream().allMatch(item -> item.isValid()));
 		okButton.addClickListener(e2 -> {
 			onDone.run();
 			this.close(); 

@@ -65,7 +65,8 @@ import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
 import at.qop.qopwebui.admin.forms.exports.ExportShapefiles;
-import at.qop.qopwebui.admin.imports.ImportShapefilesComponent;
+import at.qop.qopwebui.admin.imports.ImportFilesComponent;
+import at.qop.qopwebui.admin.imports.shape.ImportShapefilesComponent;
 import at.qop.qopwebui.components.ConfirmationDialog;
 
 public abstract class AbstractLayerDataTab extends AbstractTab {
@@ -74,6 +75,17 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
 	protected int currentLines;	
 	
 	protected Label tableLines = null;
+	
+	
+	protected abstract ImportFilesComponent importFilesComponent();
+
+	protected abstract void refreshList(IGenericDomain gd, ListSelect<QopDBTable> listSelect);
+
+	protected abstract String baseSql(QopDBTable table);
+
+	protected abstract String countSQL(QopDBTable table);
+	
+	protected abstract Object stringRepresentation(DbTable table, final int i, DbRecord item);	
 	
 	@Override
 	public Component initialize(Page page) {
@@ -139,7 +151,7 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
     	hl.setSizeFull();
     	hl.setMargin(true);
     	
-		ImportShapefilesComponent importComponent = new ImportShapefilesComponent();
+		ImportFilesComponent importComponent = importFilesComponent();
 		importComponent.init();
 
     	Button deleteLayerButton = new Button("Tabellen loeschen...", VaadinIcons.TRASH);
@@ -230,8 +242,6 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
 
     	return vl;
 	}
-
-	protected abstract void refreshList(IGenericDomain gd, ListSelect<QopDBTable> listSelect);
 	
 	public static interface DataService {
 
@@ -355,11 +365,5 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
 			
 		}
 	}
-
-	protected abstract String baseSql(QopDBTable table);
-
-	protected abstract String countSQL(QopDBTable table);
-	
-	protected abstract Object stringRepresentation(DbTable table, final int i, DbRecord item);
 
 }

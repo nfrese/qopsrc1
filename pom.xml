@@ -12,6 +12,7 @@
 
 <properties>
    <qop.version>1.0.3-SNAPSHOT</qop.version>
+   <geotools.version>17.4</geotools.version>
 </properties>
 
 <modules>

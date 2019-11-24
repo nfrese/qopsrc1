@@ -54,7 +54,7 @@ import at.qop.qopwebui.components.ExecDialog;
 import at.qop.qopwebui.components.ExecDialogNext;
 import at.qop.qopwebui.components.InfoDialog;
 
-public class ImportShapefilesComponent extends Panel implements Receiver, SucceededListener, ProgressListener{
+public abstract class ImportFilesComponent extends Panel implements Receiver, SucceededListener, ProgressListener{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -62,12 +62,18 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 	private TmpWorkingDir tmpDir;
 	private File zipFile;
 	private ProgressBar pgbar;
+
+	protected abstract boolean useFile(Path file);
+	
+	protected abstract ImportFileCMD importerInstance(Path file);
+
+	protected abstract String what();
 	
 	public void init()
 	{
 		vl = new VerticalLayout();
 		
-		Upload upload = new Upload("Gezippte Shape-Dateien importieren", this);
+		Upload upload = new Upload("Gezippte " + what() + " importieren", this);
 		upload.addProgressListener(this);
 		upload.addSucceededListener(this);
 		vl.addComponent(upload);
@@ -84,15 +90,15 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 		execUnzip.executeCommand("unzip " + zipFile.getName() , null, tmpDir.dir);
 		execUnzip.onOK = (exit) -> {
 			Path directory = tmpDir.getPath();
-			List<ImportShapefileCMD> shapeFiles = new ArrayList<>();				
+			List<ImportFileCMD> shapeFiles = new ArrayList<>();				
 			try {
 
 				Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-						if (file.getFileName().toString().toLowerCase().endsWith(".shp"))
+						if (useFile(file))
 						{
-							shapeFiles.add(new ImportShapefileCMD(file));
+							shapeFiles.add(importerInstance(file));
 						}
 						return FileVisitResult.CONTINUE;
 					}
@@ -101,12 +107,18 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 				throw new RuntimeException(e);
 			}
 			
+			
+			for (ImportFileCMD shape : shapeFiles)
+			{
+				shape.validate();
+			}
+			
 			IGenericDomain gd = LookupSessionBeans.genericDomain();
 
 			QopDBMetadata meta = gd.getMetadata();
 			for (QopDBTable table : meta.tables)
 			{
-				for (ImportShapefileCMD shape : shapeFiles)
+				for (ImportFileCMD shape : shapeFiles)
 				{
 					if (shape.tableName.equalsIgnoreCase(table.name))
 					{
@@ -116,13 +128,13 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 				}
 			}
 
-			ImportShapefilesDialog isfd = new ImportShapefilesDialog("Auswahl der Shape-Dateien ", shapeFiles);
+			ImportShapefilesDialog isfd = new ImportShapefilesDialog("Auswahl der " + what() + "", shapeFiles);
 			isfd.onDone = () -> {
 				Config cfgFile = Config.read();
 
 				List<String> cmds = new ArrayList<>();
 
-				for (ImportShapefileCMD s : shapeFiles)
+				for (ImportFileCMD s : shapeFiles)
 				{
 					if (s.importFlag)
 					{
@@ -131,7 +143,7 @@ public class ImportShapefilesComponent extends Panel implements Receiver, Succee
 					}
 				}
 
-				ExecDialog execImp = new ExecDialog("Shape-Dateien in die Datenbank einspielen");
+				ExecDialog execImp = new ExecDialog(what() + " in die Datenbank einspielen");
 				execImp.show();
 				Map<String, String> addEnv = new HashMap<>();
 				addEnv.put("PGPASSWORD", cfgFile.getDbPasswd());

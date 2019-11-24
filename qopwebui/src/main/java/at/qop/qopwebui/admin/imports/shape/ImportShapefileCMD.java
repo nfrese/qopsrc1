@@ -18,26 +18,18 @@
  *
 */
 
-package at.qop.qopwebui.admin.imports;
+package at.qop.qopwebui.admin.imports.shape;
 
 import java.nio.file.Path;
 
 import at.qop.qoplib.Config;
 import at.qop.qoplib.Utils;
+import at.qop.qopwebui.admin.imports.ImportFileCMD;
 
-public class ImportShapefileCMD {
-	
-	public final Path path;
-	public boolean importFlag=true;
-	public String tableName;
-	public int srid = 4326;
-	public String encoding = "LATIN1";
-	public String warning = null;
+public class ImportShapefileCMD extends ImportFileCMD {
 	
 	public ImportShapefileCMD(Path path) {
-		super();
-		this.path = path;
-		tableName = proposeTableName();
+		super(path);
 	}
 	
 	public String getFilename()
@@ -45,7 +37,7 @@ public class ImportShapefileCMD {
 		return path.getFileName().toString();
 	}
 
-	private String proposeTableName() {
+	protected String proposeTableName() {
 		return getFilename().toLowerCase().replaceAll("\\.shp$", "");
 	}
 
@@ -63,5 +55,9 @@ public class ImportShapefileCMD {
 		cmd = cmd.replace("%DB%", Utils.uxCmdStringEscape(cfgFile.getDb()));
 		cmd = cmd.replace("%PORT%", cfgFile.getPort()+"");
 		return cmd;
+	}
+
+	@Override
+	public void validate() {
 	}
 }

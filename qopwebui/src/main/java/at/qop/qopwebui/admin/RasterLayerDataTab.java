@@ -3,14 +3,14 @@ package at.qop.qopwebui.admin;
 import java.util.stream.Collectors;
 
 import com.vaadin.ui.ListSelect;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
 
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
+import at.qop.qopwebui.admin.imports.ImportFilesComponent;
+import at.qop.qopwebui.admin.imports.raster.ImportRasterfilesComponent;
 
 public class RasterLayerDataTab extends AbstractLayerDataTab {
 
@@ -20,15 +20,14 @@ public class RasterLayerDataTab extends AbstractLayerDataTab {
 	     + " FROM (SELECT rid, ST_MetaData(rast) As md, ST_MemSize(rast) as mem, filename"
 		 + " FROM " + table.name + " "
         + " ) As foo ";
-		
-//		return "SELECT rid, srid, x1, y1, (stats).*, filename"
-//		     + " FROM (SELECT rid, ST_SRID(rast) As srid, ST_UpperLeftX(rast) as x1, ST_UpperLeftX(rast) as y1, ST_SummaryStats(rast, 1) As stats, filename"
-//			 + " FROM " + table.name + " "
-//	         + " ) As foo ";
 	}
 	
 	protected String countSQL(QopDBTable table) {
 		return "select count(rid) from " + table.name;
+	}
+	
+	protected ImportFilesComponent importFilesComponent() {
+		return new ImportRasterfilesComponent();
 	}
 	
 	protected void refreshList(IGenericDomain gd, ListSelect<QopDBTable> listSelect) {

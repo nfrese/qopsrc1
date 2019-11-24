@@ -36,7 +36,7 @@ import at.qop.qoplib.Constants;
 import at.qop.qoplib.TmpWorkingDir;
 import at.qop.qoplib.imports.PerformAddressUpdate;
 import at.qop.qopwebui.admin.forms.exports.DumpDatabase;
-import at.qop.qopwebui.admin.imports.ImportShapefilesComponent;
+import at.qop.qopwebui.admin.imports.ImportFilesComponent;
 import at.qop.qopwebui.components.ExecDialog;
 
 public class MiscTab extends AbstractTab {
