@@ -21,6 +21,7 @@
 package at.qop.qopwebui.admin.imports;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
@@ -87,7 +88,7 @@ public class ImportShapefilesDialog extends AbstractDialog {
 					item.encoding = v; 
 				});		
 		
-		grid.addColumn(item -> item.warning).setCaption("Warning");
+		grid.addColumn(item -> item.warnings.stream().collect(Collectors.joining(";"))).setCaption("Warning");
 		grid.addColumn(item -> item.error).setCaption("Error");
 		
 		DataProvider<ImportFileCMD, ?> dataProvider = new ListDataProvider<ImportFileCMD>(

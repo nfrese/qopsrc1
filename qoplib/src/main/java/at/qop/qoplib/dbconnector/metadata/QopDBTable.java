@@ -44,4 +44,9 @@ public class QopDBTable {
 		return name;
 	}
 
+	public String nameSQLQuoted() {
+		
+		return "\"" + name + "\"";
+	}
+
 }

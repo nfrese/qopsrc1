@@ -17,11 +17,11 @@ import at.qop.qopwebui.admin.imports.shape.ImportShapefilesComponent;
 public class VectorLayerDataTab extends AbstractLayerDataTab {
 
 	protected String baseSql(QopDBTable table) {
-		return "select * from " + table.name;
+		return "select * from " + table.nameSQLQuoted();
 	}
 	
 	protected String countSQL(QopDBTable table) {
-		return "select count(gid) from " + table.name;
+		return "select count(gid) from " + table.nameSQLQuoted();
 	}
 
 	protected ImportFilesComponent importFilesComponent() {

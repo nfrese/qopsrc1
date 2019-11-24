@@ -18,12 +18,12 @@ public class RasterLayerDataTab extends AbstractLayerDataTab {
 		return 
 	     "SELECT rid, (foo.md).*, mem, filename"
 	     + " FROM (SELECT rid, ST_MetaData(rast) As md, ST_MemSize(rast) as mem, filename"
-		 + " FROM " + table.name + " "
+		 + " FROM " + table.nameSQLQuoted() + " "
         + " ) As foo ";
 	}
 	
 	protected String countSQL(QopDBTable table) {
-		return "select count(rid) from " + table.name;
+		return "select count(rid) from " + table.nameSQLQuoted() + " ";
 	}
 	
 	protected ImportFilesComponent importFilesComponent() {

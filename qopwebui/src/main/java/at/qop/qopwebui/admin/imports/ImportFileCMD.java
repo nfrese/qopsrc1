@@ -21,6 +21,8 @@
 package at.qop.qopwebui.admin.imports;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import at.qop.qoplib.Config;
 
@@ -31,7 +33,7 @@ public abstract class ImportFileCMD {
 	public String tableName;
 	public int srid = 4326;
 	public String encoding = "LATIN1";	
-	public String warning = null;
+	public List<String> warnings = new ArrayList<>();
 	public String error = null;
 	
 	public ImportFileCMD(Path path) {
@@ -50,5 +52,13 @@ public abstract class ImportFileCMD {
 	
 	public boolean isValid() {
 		return error == null;
+	}
+
+	public boolean isReprojectionRequired() {
+		return false;
+	}
+
+	public String reprojectCmd() {
+		return null;
 	}
 }

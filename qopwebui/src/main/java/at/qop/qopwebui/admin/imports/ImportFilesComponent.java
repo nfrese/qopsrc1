@@ -50,6 +50,7 @@ import at.qop.qoplib.TmpWorkingDir;
 import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
+import at.qop.qopwebui.components.ExceptionDialog;
 import at.qop.qopwebui.components.ExecDialog;
 import at.qop.qopwebui.components.ExecDialogNext;
 import at.qop.qopwebui.components.InfoDialog;
@@ -123,7 +124,7 @@ public abstract class ImportFilesComponent extends Panel implements Receiver, Su
 					if (shape.tableName.equalsIgnoreCase(table.name))
 					{
 						shape.importFlag = false;
-						shape.warning = table.name + " existiert bereits";
+						shape.warnings.add(table.name + " existiert bereits");
 					}
 				}
 			}
@@ -138,8 +139,17 @@ public abstract class ImportFilesComponent extends Panel implements Receiver, Su
 				{
 					if (s.importFlag)
 					{
-						String cmd = s.cmd(cfgFile);
-						cmds.add(cmd);
+						if (s.isReprojectionRequired())
+						{
+							String cmd = s.reprojectCmd();
+							cmds.add(cmd);							
+						}
+						
+						// run import
+						{
+							String cmd = s.cmd(cfgFile);
+							cmds.add(cmd);
+						}
 					}
 				}
 
@@ -176,7 +186,11 @@ public abstract class ImportFilesComponent extends Panel implements Receiver, Su
 	@Override
 	public OutputStream receiveUpload(String filename, String mimeType) {
 		if (tmpDir != null) throw new RuntimeException("Import already running!");
-		if (!mimeType.equals("application/zip")) throw new RuntimeException("mimeType != application/zip: " + mimeType);
+		if (!mimeType.equals("application/zip")) {
+			RuntimeException ex = new RuntimeException("mimeType != application/zip: " + mimeType);
+			new ExceptionDialog("ZIP-Datei erwartet!", ex).show();;
+			throw ex;
+		}
 		
 		tmpDir = new TmpWorkingDir();
 		tmpDir.create();

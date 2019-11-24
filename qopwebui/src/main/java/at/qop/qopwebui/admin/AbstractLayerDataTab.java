@@ -345,12 +345,13 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
 		grid.setDataProvider(dataProvider(table, baseSql));
 		
 		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
+		String sql = baseSql+ " LIMIT 1";
 		
 		DbTableScanner tableReader = new DbTableScanner();
 		try {
-			gd_.readTable(baseSql+ " LIMIT 1", tableReader);
+			gd_.readTable(sql, tableReader);
 		} catch (SQLException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("problem executing sql " + sql, e);
 		}
 
 		currentTable = tableReader.table; 

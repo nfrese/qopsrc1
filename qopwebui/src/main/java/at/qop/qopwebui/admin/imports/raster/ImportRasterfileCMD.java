@@ -31,6 +31,9 @@ import at.qop.qopwebui.admin.imports.ImportFileCMD;
 
 public class ImportRasterfileCMD extends ImportFileCMD {
 	
+
+	private boolean reprojectionRequired = false;
+	
 	public ImportRasterfileCMD(Path path) {
 		super(path);
 	}
@@ -39,9 +42,19 @@ public class ImportRasterfileCMD extends ImportFileCMD {
 	{
 		return path.getFileName().toString();
 	}
+	
+	private Path getTranslatedFilePath()
+	{
+		return path.getParent().resolve(path.getFileName() + "__translated4326.tif"); 
+	}
 
 	protected String proposeTableName() {
 		return getFilename().toLowerCase().replaceAll("\\.tif$", "").replaceAll("\\.tiff$", "");
+	}
+	
+	@Override
+	public boolean isReprojectionRequired() {
+		return reprojectionRequired;
 	}
 	
 	@Override
@@ -49,17 +62,42 @@ public class ImportRasterfileCMD extends ImportFileCMD {
 	{
 		GeoTiffFormat format = new GeoTiffFormat();
 		GeoTiffReader tiffReader = format.getReader(this.path +"");
-		boolean sridOk = tiffReader.getCoordinateReferenceSystem().getName().getCode().equals("GCS Name = WGS 84");
-		if (!sridOk) error = "Projection not WGS 84 (srid=4326)";
+		if (tiffReader != null && tiffReader.getCoordinateReferenceSystem() != null && tiffReader.getCoordinateReferenceSystem().getName() != null)
+		{
+			String code = tiffReader.getCoordinateReferenceSystem().getName().getCode();
+			boolean sridOk = code.equals("GCS Name = WGS 84");
+			if (!sridOk) warnings.add("Projection not WGS 84 (srid=4326). code: " + code + " -> reprojection required");
+			reprojectionRequired = true;
+		}
+		else {
+			warnings.add("validating crs - tiffReader == null -> reprojection required");
+			reprojectionRequired = true;
+		}
 	}
 
+	@Override
+	public String reprojectCmd()
+	{
+		String cmd = "gdalwarp %SHAPEFILE% %REPROJ_SHAPEFILE% -t_srs \"+proj=longlat +ellps=WGS84\""; 
+		cmd = cmd.replace("%SHAPEFILE%", Utils.uxCmdStringEscape(this.path +""));
+		cmd = cmd.replace("%REPROJ_SHAPEFILE%", Utils.uxCmdStringEscape(getTranslatedFilePath() +""));
+		return cmd;
+	}
+	
 	public String cmd(Config cfgFile) {
 		String cmd = "raster2pgsql -s %SRID% -I -C -M %SHAPEFILE% -F -t 500x500 %TABLENAME% ";
 		cmd += " | psql -h %HOST% -U %USER_NAME% -d %DB% -p %PORT%";
 		
 		cmd = cmd.replace("%SRID%", this.srid+"");
 		cmd = cmd.replace("%ENCODING%", Utils.uxCmdStringEscape(this.encoding));
-		cmd = cmd.replace("%SHAPEFILE%", Utils.uxCmdStringEscape(this.path +""));
+		if (reprojectionRequired)
+		{
+			cmd = cmd.replace("%SHAPEFILE%", Utils.uxCmdStringEscape(this.getTranslatedFilePath() +""));
+		}
+		else
+		{
+			cmd = cmd.replace("%SHAPEFILE%", Utils.uxCmdStringEscape(this.path +""));
+		}
 		cmd = cmd.replace("%TABLENAME%", Utils.uxCmdStringEscape("public." + this.tableName));
 		
 		cmd = cmd.replace("%HOST%", Utils.uxCmdStringEscape(cfgFile.getDbHost()));
