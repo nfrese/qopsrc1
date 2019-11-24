@@ -36,8 +36,8 @@ import org.vaadin.addon.leaflet.LTileLayer;
 import org.vaadin.addon.leaflet.LeafletLayer;
 import org.vaadin.addon.leaflet.util.JTSUtil;
 
-import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.data.provider.SortOrder;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
@@ -51,8 +51,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.VerticalLayout;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.PerformDelete;
@@ -61,12 +59,10 @@ import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.dbconnector.DbTableReader;
 import at.qop.qoplib.dbconnector.DbTableScanner;
-import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
-import at.qop.qopwebui.admin.forms.exports.ExportShapefiles;
+import at.qop.qopwebui.admin.forms.exports.ExportFiles;
 import at.qop.qopwebui.admin.imports.ImportFilesComponent;
-import at.qop.qopwebui.admin.imports.shape.ImportShapefilesComponent;
 import at.qop.qopwebui.components.ConfirmationDialog;
 
 public abstract class AbstractLayerDataTab extends AbstractTab {
@@ -177,8 +173,9 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
         		new ConfirmationDialog("Tabellen exportieren",listSelect.getSelectedItems() + " wirklich exportieren?")
         		.ok(
         			(evt) -> { 
-        				ExportShapefiles expSh = new ExportShapefiles(listSelect.getSelectedItems().stream().map(item -> item.name).collect(Collectors.toList()));
-        				expSh.run();
+        				List<String> tableNames = listSelect.getSelectedItems().stream().map(item -> item.name).collect(Collectors.toList());
+						ExportFiles exp = exportTables(tableNames);
+        				exp.run();
         			}  
         		).show();
         	}
@@ -242,6 +239,8 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
 
     	return vl;
 	}
+
+	protected abstract ExportFiles exportTables(List<String> tableNames);
 	
 	public static interface DataService {
 

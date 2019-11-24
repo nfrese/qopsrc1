@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,13 +43,13 @@ import at.qop.qopwebui.components.ExecDialog;
 import at.qop.qopwebui.components.ExecDialogNext;
 import at.qop.qopwebui.components.InfoDialog;
 
-public class ExportShapefiles {
+public abstract class ExportFiles {
 
 	private final List<String> tableNames;
 	private TmpWorkingDir tmpDir;
 	private File zipFile;
 	
-	public ExportShapefiles(List<String> tableNames) {
+	public ExportFiles(List<String> tableNames) {
 		super();
 		this.tableNames = tableNames;
 	}
@@ -64,12 +65,13 @@ public class ExportShapefiles {
 
 		for (String tableName : tableNames)
 		{
-			ExportShapefileCMD s = new ExportShapefileCMD(tmpDir.getPath() , tableName);
+			Path path = tmpDir.getPath();
+			ExportFileCMD s = exportFileCMD(tableName, path);
 			String cmd = s.cmd(cfgFile);
 			cmds.add(cmd);
 		}
 
-		ExecDialog execImp = new ExecDialogNext("Shape-Dateien aus der Datenbank exportieren");
+		ExecDialog execImp = new ExecDialogNext(what() + " aus der Datenbank exportieren");
 		execImp.show();
 
 		Map<String, String> addEnv = new HashMap<>();
@@ -78,7 +80,7 @@ public class ExportShapefiles {
 		execImp.executeCommands(cmds.iterator(), addEnv, tmpDir.dir);
 		execImp.onOK = (exit1) -> {
 			
-			zipFile = new File(tmpDir.dir, "downloadshapes.zip");
+			zipFile = new File(tmpDir.dir, downloadFileName());
 			
 			ExecDialog execZip = new ExecDialogNext("Einpacken");
 			execZip.show();
@@ -98,6 +100,12 @@ public class ExportShapefiles {
 		};
 		execImp.onExit = () -> { cleanup(); };
 	}
+
+	protected abstract ExportFileCMD exportFileCMD(String tableName, Path path);
+
+	protected abstract String downloadFileName();
+
+	protected abstract String what();
 
 	private void cleanup() {
 		try {

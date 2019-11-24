@@ -1,5 +1,6 @@
 package at.qop.qopwebui.admin;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.ui.ListSelect;
@@ -11,6 +12,8 @@ import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
+import at.qop.qopwebui.admin.forms.exports.ExportFiles;
+import at.qop.qopwebui.admin.forms.exports.shape.ExportShapefiles;
 import at.qop.qopwebui.admin.imports.ImportFilesComponent;
 import at.qop.qopwebui.admin.imports.shape.ImportShapefilesComponent;
 
@@ -26,6 +29,10 @@ public class VectorLayerDataTab extends AbstractLayerDataTab {
 
 	protected ImportFilesComponent importFilesComponent() {
 		return new ImportShapefilesComponent();
+	}
+	
+	protected ExportFiles exportTables(List<String> tableNames) {
+		return new ExportShapefiles(tableNames);
 	}
 	
 	protected void refreshList(IGenericDomain gd, ListSelect<QopDBTable> listSelect) {
