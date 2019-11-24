@@ -23,14 +23,7 @@ package at.qop.qopwebui.admin.forms;
 import com.vaadin.data.ValidationResult;
 import com.vaadin.data.Validator;
 import com.vaadin.data.ValueContext;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
-import at.qop.qoplib.LookupSessionBeans;
-import at.qop.qoplib.calculation.DbLayerSource.RastTableSQL;
-import at.qop.qoplib.dbconnector.DBSingleResultTableReader;
-import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
-import at.qop.qoplib.domains.IGenericDomain;
 import at.qop.qoplib.entities.Analysis;
 
 public class AnalysisQueryValidator implements Validator<String> {
@@ -53,27 +46,9 @@ public class AnalysisQueryValidator implements Validator<String> {
 		}
 	}
 
-	private boolean check(String sql) {
-		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
-		DBSingleResultTableReader tableReader = new DBSingleResultTableReader();
+	private boolean check(String query) {
 		try {
-			RastTableSQL rastTabelSQL = new RastTableSQL(sql);
-			if (rastTabelSQL.isRasterTable())
-			{
-				gd_.readTable(rastTabelSQL.buildRasterSQL(new GeometryFactory().createPoint(new Coordinate(0,0))), tableReader);
-			}
-			else
-			{
-				gd_.readTable(sql + " LIMIT 1", tableReader);
-			}
-			if (analysisForm.analysis.geomfield != null && !analysisForm.analysis.geomfield.trim().isEmpty())
-			{
-				DbGeometryField geomField = tableReader.table.geometryField(analysisForm.analysis.geomfield);
-				if ( geomField == null) throw new IllegalArgumentException("geomfield not in result");
-			}
-			else {
-				throw new IllegalArgumentException("geomfield required");
-			}
+			Analysis.checkQuery(analysisForm.analysis, query);
 			return true;
 		} catch (Exception e) {
 			this.e = e;

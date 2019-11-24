@@ -21,6 +21,7 @@
 package at.qop.qoplib.entities;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,8 +37,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+
+import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.Utils;
 import at.qop.qoplib.calculation.ILayerCalculationP1Params;
+import at.qop.qoplib.calculation.DbLayerSource.RastTableSQL;
+import at.qop.qoplib.dbconnector.DBSingleResultTableReader;
+import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
+import at.qop.qoplib.domains.IGenericDomain;
 
 @Entity
 @Table(name="q_analysis")
@@ -103,7 +112,34 @@ public class Analysis implements Serializable, ILayerCalculationP1Params {
 
 	@Transient
 	public String checkValid() {
+		try {
+			checkQuery(this, query);
+		} catch (Exception ex) {
+			return "FAIL";
+		}
 		return "OK";
+	}
+	
+	public static void checkQuery(Analysis analysis, String query) throws SQLException {
+		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
+		DBSingleResultTableReader tableReader = new DBSingleResultTableReader();
+		RastTableSQL rastTabelSQL = new RastTableSQL(query);
+		if (rastTabelSQL.isRasterTable())
+		{
+			gd_.readTable(rastTabelSQL.buildRasterSQL(new GeometryFactory().createPoint(new Coordinate(0,0))), tableReader);
+		}
+		else
+		{
+			gd_.readTable(query + " LIMIT 1", tableReader);
+		}
+		if (analysis.geomfield != null && !analysis.geomfield.trim().isEmpty())
+		{
+			DbGeometryField geomField = tableReader.table.geometryField(analysis.geomfield);
+			if ( geomField == null) throw new IllegalArgumentException("geomfield not in result");
+		}
+		else {
+			throw new IllegalArgumentException("geomfield required");
+		}
 	}
 
 }
