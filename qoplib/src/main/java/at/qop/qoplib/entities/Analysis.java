@@ -101,4 +101,9 @@ public class Analysis implements Serializable, ILayerCalculationP1Params {
 		return Utils.toPGColumnName(this.name);
 	}
 
+	@Transient
+	public String checkValid() {
+		return "OK";
+	}
+
 }

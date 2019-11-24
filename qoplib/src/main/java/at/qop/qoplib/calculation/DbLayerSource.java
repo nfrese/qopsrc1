@@ -31,6 +31,29 @@ import at.qop.qoplib.domains.IGenericDomain;
 
 public class DbLayerSource implements LayerSource {
 
+	public static class RastTableSQL
+	{
+		public final String sql;
+
+		public RastTableSQL(String sql) {
+			super();
+			this.sql = sql;
+		}
+		
+		public boolean isRasterTable()
+		{
+			return sql.toUpperCase().startsWith("#RASTERTABLE=");
+		}
+		
+		public String buildRasterSQL(Point p) {
+			String rasterTablename = sql.split("=")[1];
+			String resultSql = "SELECT g.geom as geom, rid, ST_Value(rast, 1, g.geom) As value"
+					+ " FROM " + rasterTablename + " r INNER JOIN (select ST_SetSRID(ST_Point(" + p.getX() + "," + p.getY() + "), 4326) as geom) as g"
+					+ " ON ST_Intersects(r.rast,g.geom)";
+			return resultSql;
+		}
+	}
+	
 	@Override
 	public LayerCalculationP1Result load(Geometry start, ILayerCalculationP1Params layerParams) {
 
@@ -39,16 +62,14 @@ public class DbLayerSource implements LayerSource {
 			DbTableReader tableReader = new DbTableReader();
 
 			String sql = layerParams.getQuery();
-			if (sql.toUpperCase().startsWith("#RASTERTABLE="))
+			RastTableSQL rasterTableSql = new RastTableSQL(sql);
+			if (rasterTableSql.isRasterTable())
 			{
 				if (start instanceof Point)
 				{
 					Point p = (Point)start;
 
-					String rasterTablename = sql.split("=")[1];
-					sql = "SELECT g.geom as geom, rid, ST_Value(rast, 1, g.geom) As value"
-							+ " FROM " + rasterTablename + " r INNER JOIN (select ST_SetSRID(ST_Point(" + p.getX() + "," + p.getY() + "), 4326) as geom) as g"
-							+ " ON ST_Intersects(r.rast,g.geom)";
+					sql = rasterTableSql.buildRasterSQL(p);
 				}
 				else
 				{

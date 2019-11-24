@@ -132,6 +132,7 @@ public class AnalysisTab extends AbstractTab {
 
 	private void refreshGrid(Grid<Analysis> grid) {
 		grid.removeAllColumns();
+		grid.addColumn(item -> item.checkValid()).setCaption("Status");
 		grid.addColumn(item -> item.name).setCaption("Name");
 		grid.addColumn(item -> item.description).setCaption("Beschreibung").setMaximumWidth(300);
 		grid.addColumn(item -> item.query).setCaption("SQL").setMaximumWidth(300);

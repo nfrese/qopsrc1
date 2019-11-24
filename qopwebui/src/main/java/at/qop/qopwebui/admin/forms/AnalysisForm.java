@@ -31,6 +31,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.LookupSessionBeans;
@@ -43,7 +44,7 @@ public class AnalysisForm extends AbstractForm {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private final Analysis analysis;
+	final Analysis analysis;
 	private Binder<Analysis> binder;
 	
 	public AnalysisForm(String title, Analysis analysis, boolean create) {
@@ -76,7 +77,7 @@ public class AnalysisForm extends AbstractForm {
 			TextField textField = new TextField("SQL");
 			textField.setWidth(600, Unit.PIXELS);
 			vl.addComponent(textField);
-			binder.bind(textField, o -> o.query, (o,v) -> o.query = v);
+			binder.forField(textField).withValidator(new AnalysisQueryValidator(this)).bind(o -> o.query, (o,v) -> o.query = v);
 		}	
 		{
 			ComboBox<ModeEnum> modeCombo = new ComboBox<>("Routing Modus", Arrays.asList(ModeEnum.values()));
@@ -120,7 +121,7 @@ public class AnalysisForm extends AbstractForm {
 			binder.writeBean(analysis);
 		} catch (ValidationException e) {
 			new Notification("Validation error count: "
-					+ e.getValidationErrors().size()).show((Page)this.getParent());
+					+ e.getValidationErrors().size()).show((UI.getCurrent().getPage()));
 		}
 	}
 	
