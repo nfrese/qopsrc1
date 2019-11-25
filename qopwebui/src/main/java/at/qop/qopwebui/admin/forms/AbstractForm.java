@@ -20,11 +20,13 @@
 
 package at.qop.qopwebui.admin.forms;
 
+import com.vaadin.data.ValidationException;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -44,9 +46,17 @@ public abstract class AbstractForm extends Window {
 		subContent.addComponent(c);
 		this.setContent(subContent);
 		
+		Label validationMessage=new Label();
+		
 		Button okButton = new Button("Speichern", VaadinIcons.CHECK);
 		okButton.addClickListener(e2 -> {
-			saveData();
+			try {
+				saveData();
+			} catch (Exception e) {
+				validationMessage.setCaption(e.getMessage());
+				e.printStackTrace();
+				return;
+			}
 			if (cl != null) cl.buttonClick(null);
 			this.close();
 		});
@@ -55,7 +65,7 @@ public abstract class AbstractForm extends Window {
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});
-		subContent.addComponent(new HorizontalLayout(okButton, cancelButton));
+		subContent.addComponent(new HorizontalLayout(okButton, cancelButton, validationMessage));
 	}
 
 	public void show()
@@ -70,7 +80,7 @@ public abstract class AbstractForm extends Window {
 		return this;
 	}
 	
-	protected abstract void saveData();
+	protected abstract void saveData() throws ValidationException;
 
 	protected abstract Component initComponents(boolean create);
 }

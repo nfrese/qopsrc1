@@ -20,40 +20,26 @@
 
 package at.qop.qopwebui.admin.forms;
 
+import java.sql.SQLException;
+
 import com.vaadin.data.ValidationResult;
 import com.vaadin.data.Validator;
 import com.vaadin.data.ValueContext;
 
 import at.qop.qoplib.entities.Analysis;
-
-public class AnalysisQueryValidator implements Validator<String> {
+public class AnalysisQueryValidator implements Validator<Analysis> {
 
 	private static final long serialVersionUID = 1L;
-	private final AnalysisForm analysisForm;
 	private Exception e;
 
-	public AnalysisQueryValidator(AnalysisForm analysisForm) {
-		this.analysisForm = analysisForm;
-	}
-
 	@Override
-	public ValidationResult apply(String sql, ValueContext context) {
-		if(check(sql)) {
-			return ValidationResult.ok();
-		} else {
-			e.printStackTrace();
+	public ValidationResult apply(Analysis analysis, ValueContext context) {
+		try {
+			Analysis.checkQuery(analysis, analysis.query);
+		} catch (SQLException e) {
 			return ValidationResult.error(e.getMessage());
 		}
-	}
-
-	private boolean check(String query) {
-		try {
-			Analysis.checkQuery(analysisForm.analysis, query);
-			return true;
-		} catch (Exception e) {
-			this.e = e;
-			return false;
-		}
+		return ValidationResult.ok();
 	}
 
 }

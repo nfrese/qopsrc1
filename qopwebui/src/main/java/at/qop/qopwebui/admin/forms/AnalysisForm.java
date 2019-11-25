@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.ValidationException;
+import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.server.Page;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
@@ -77,7 +78,7 @@ public class AnalysisForm extends AbstractForm {
 			TextField textField = new TextField("SQL");
 			textField.setWidth(600, Unit.PIXELS);
 			vl.addComponent(textField);
-			binder.forField(textField).withValidator(new AnalysisQueryValidator(this)).bind(o -> o.query, (o,v) -> o.query = v);
+			binder.bind(textField, o -> o.query, (o,v) -> o.query = v);
 		}	
 		{
 			ComboBox<ModeEnum> modeCombo = new ComboBox<>("Routing Modus", Arrays.asList(ModeEnum.values()));
@@ -112,17 +113,15 @@ public class AnalysisForm extends AbstractForm {
 			binder.bind(textField, o -> o.radius + "", (o,v) -> o.radius = Double.parseDouble(v));
 		}
 		
+		binder.withValidator(new AnalysisQueryValidator());
+		
 		return vl;
 	}
 
 	@Override
-	protected void saveData() {
-		try {
+	protected void saveData() throws ValidationException {
 			binder.writeBean(analysis);
-		} catch (ValidationException e) {
-			new Notification("Validation error count: "
-					+ e.getValidationErrors().size()).show((UI.getCurrent().getPage()));
-		}
+
 	}
 	
 
