@@ -20,7 +20,7 @@ public class RasterLayerDataTab extends AbstractLayerDataTab {
 	protected String baseSql(QopDBTable table) {
 		return 
 	     "SELECT rid, (foo.md).*, mem, filename"
-	     + " FROM (SELECT rid, ST_MetaData(rast) As md, ST_Mem_Size(rast) as mem, filename"
+	     + " FROM (SELECT rid, ST_MetaData(rast) As md, pg_column_size(rast) as mem, filename"
 		 + " FROM " + table.nameSQLQuoted() + " "
         + " ) As foo ";
 	}
