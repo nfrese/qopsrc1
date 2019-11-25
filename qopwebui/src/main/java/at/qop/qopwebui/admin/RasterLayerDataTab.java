@@ -12,7 +12,6 @@ import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 import at.qop.qoplib.domains.IGenericDomain;
 import at.qop.qopwebui.admin.forms.exports.ExportFiles;
 import at.qop.qopwebui.admin.forms.exports.raster.ExportRasters;
-import at.qop.qopwebui.admin.forms.exports.shape.ExportShapefiles;
 import at.qop.qopwebui.admin.imports.ImportFilesComponent;
 import at.qop.qopwebui.admin.imports.raster.ImportRasterfilesComponent;
 
@@ -21,7 +20,7 @@ public class RasterLayerDataTab extends AbstractLayerDataTab {
 	protected String baseSql(QopDBTable table) {
 		return 
 	     "SELECT rid, (foo.md).*, mem, filename"
-	     + " FROM (SELECT rid, ST_MetaData(rast) As md, ST_MemSize(rast) as mem, filename"
+	     + " FROM (SELECT rid, ST_MetaData(rast) As md, ST_Mem_Size(rast) as mem, filename"
 		 + " FROM " + table.nameSQLQuoted() + " "
         + " ) As foo ";
 	}
