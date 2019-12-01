@@ -160,7 +160,7 @@ public class ProfilesTab extends AbstractTab {
         		Profile profile = sel.iterator().next();
         		
 				try {
-					final String json = new ExportProfile().exportProfile(profile);
+					final String json = new ExportProfile().asJson(profile);
 					System.out.println(json);
 					
 					StreamSource source = new StreamSource() {

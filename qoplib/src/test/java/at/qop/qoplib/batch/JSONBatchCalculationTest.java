@@ -9,6 +9,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -17,9 +19,11 @@ import at.qop.qoplib.Constants;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.Profile;
+import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.extinterfaces.batch.BatchHandler;
 import at.qop.qoplib.extinterfaces.batch.QEXBatchInput;
 import at.qop.qoplib.extinterfaces.batch.QEXBatchSourceLocation;
+import at.qop.qoplib.extinterfaces.json.ExportProfile;
 
 /* 
  * Copyright (C) 2018 Norbert Frese
@@ -1097,6 +1101,17 @@ public class JSONBatchCalculationTest extends BatchCalculationTest {
 	@Test
 	public void testAll() throws JsonProcessingException, IOException
 	{
+		BatchHandler bh = batchHandler();
+
+			
+		String jsonIn = Constants.BATCH_CALCULATION_SAMPLE_JSON;
+		String jsonResult = bh.jsonCall(jsonIn);
+		
+		System.out.println(jsonResult);
+		
+	}
+
+	protected BatchHandler batchHandler() {
 		BatchHandler bh = new BatchHandler() {
 			
 			private Profile profile_ = createProfile();
@@ -1115,13 +1130,54 @@ public class JSONBatchCalculationTest extends BatchCalculationTest {
 			protected Analysis lookupAnalysis(String analysis) {
 				return profile_.profileAnalysis.iterator().next().analysis;
 			}};
-
+		return bh;
+	}
+	
+	@Test
+	public void customProfileTest() throws IOException
+	{
+		Profile profile_ = createProfile();
+		profile_.name = "custom1";
+		ProfileAnalysis pa = profile_.profileAnalysis.iterator().next();
+		pa.weight = 0.5;
+		pa.category = "4.1";
+		pa.categorytitle = "XXXXX 4.1";
+		
+		QEXBatchInput input = new QEXBatchInput();
+		input.profile = null;
+		input.customProfile = new ExportProfile().map(profile_);
+		
+		{
+			QEXBatchSourceLocation source = new QEXBatchSourceLocation();
+			source.id = 1;
+			source.name = "Location1";
+			source.lon = 16.3724265546418; 
+			source.lat = 48.2061121370655;
 			
-		String jsonIn = Constants.BATCH_CALCULATION_SAMPLE_JSON;
-		String jsonResult = bh.jsonCall(jsonIn);
+			input.sources.add(source);
+		}
 		
-		System.out.println(jsonResult);
+		{
+			QEXBatchSourceLocation source = new QEXBatchSourceLocation();
+			source.id = 2;
+			source.name = "Location2";
+			source.lon = 16.3695610097329;  
+			source.lat = 48.2042327131692;
+			
+			input.sources.add(source);
+		}
+
 		
+		PrettyPrinter pp = new DefaultPrettyPrinter();
+		String jsonIn = new ObjectMapper().setDefaultPrettyPrinter(pp).enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(input);
+		System.out.println(jsonIn);
+		
+		BatchHandler bh = batchHandler();
+		String result = bh.jsonCall(jsonIn);
+		System.out.println("---------------------------------------");
+		System.out.println(result);
+		
+		Assert.assertTrue(result.contains("\"overallRating\" : 0.298"));
 	}
 	
 

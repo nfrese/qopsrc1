@@ -140,6 +140,7 @@ public class BatchCalculationTest extends AbstractOSRMClientTest {
 		analysis.geomfield = "GEOM";
 		analysis.radius = 2000;
 		analysis.name = "A1";
+		analysis.ratingfunc = "lc.rating = Math.min(lc.result /10, 1);";
 		
 		pa.analysis = analysis;
 		

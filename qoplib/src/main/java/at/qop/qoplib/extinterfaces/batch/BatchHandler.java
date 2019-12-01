@@ -60,7 +60,7 @@ public abstract class BatchHandler {
 			profile = lookupProfile(input.profile);
 			if (profile == null) throw new RuntimeException("profile " + input.profile + " not found!");
 		} else {
-			profile = readProfile(input.profileAdd);
+			profile = readProfile(input.customProfile);
 		}
 		
 		List<Address> addresses = new ArrayList<>();
@@ -141,11 +141,11 @@ public abstract class BatchHandler {
 			pa.altratingfunc = pab.altratingfunc;
 			pa.category = pab.category;
 			pa.categorytitle = pab.categorytitle;
-			pa.ratingvisible = pab.ratingvisible;			
-			
+			pa.ratingvisible = pab.ratingvisible;	
+			profile.profileAnalysis.add(pa);
 		}
 		
-		return null;
+		return profile;
 	}
 
 	protected abstract BatchCalculationInMemory createBC(Profile profile, List<Address> addresses);

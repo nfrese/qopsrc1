@@ -29,7 +29,7 @@ public class QEXBatchInput {
 	
 	public String profile;
 	
-	public QEXProfile profileAdd;
+	public QEXProfile customProfile;
 	
 	public Collection<QEXBatchSourceLocation> sources = new ArrayList<>();
 

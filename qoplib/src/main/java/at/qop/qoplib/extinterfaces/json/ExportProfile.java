@@ -14,8 +14,14 @@ import at.qop.qoplib.entities.ProfileAnalysis;
 
 public class ExportProfile {
 	
-	public String exportProfile(Profile profile) throws JsonProcessingException {
+	public String asJson(Profile profile) throws JsonProcessingException {
 		PrettyPrinter pp = new DefaultPrettyPrinter();
+		QEXProfile profileBean = map(profile);
+
+		return new ObjectMapper().setDefaultPrettyPrinter(pp).enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(profileBean);
+	}
+
+	public QEXProfile map(Profile profile) {
 		QEXProfile profileBean = new QEXProfile();
 
 		profileBean.name = profile.name;
@@ -33,8 +39,7 @@ public class ExportProfile {
 			pab.ratingvisible = pa.ratingvisible;
 			profileBean.profileAnalysis.add(pab);
 		}
-
-		return new ObjectMapper().setDefaultPrettyPrinter(pp).enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(profileBean);
+		return profileBean;
 	}
 
 }
