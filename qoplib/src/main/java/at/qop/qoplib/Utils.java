@@ -127,4 +127,10 @@ public class Utils {
 	    return null;
 	}
 	
+	public static <T extends Comparable<T>> int nullSafeCompareTo(T o1, T o2)
+	{
+		if (o1 == null || o2 == null) return String.valueOf(o1).compareTo(String.valueOf(o2));
+		return o1.compareTo(o2);
+	}
+	
 }

@@ -20,7 +20,10 @@
 
 package at.qop.qopwebui.admin;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,11 +33,15 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
+import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
@@ -51,10 +58,12 @@ import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.Utils;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
+import at.qop.qoplib.extinterfaces.json.ExportProfile;
 import at.qop.qopwebui.admin.forms.ProfileForm;
 import at.qop.qopwebui.admin.forms.exports.DumpDatabase;
 import at.qop.qopwebui.admin.forms.exports.DumpDatabaseAppendScript;
 import at.qop.qopwebui.components.ConfirmationDialog;
+import at.qop.qopwebui.components.DownloadDialog;
 
 public class ProfilesTab extends AbstractTab {
 
@@ -142,9 +151,45 @@ public class ProfilesTab extends AbstractTab {
         	}
         });
  
-        Button profileInfoButton = new Button("Export Database for selected Profiles", VaadinIcons.INFO);
-        profileInfoButton.setEnabled(false);
-        profileInfoButton.addClickListener(e -> {
+        Button profileAsJsonButton = new Button("Profile as JSON", VaadinIcons.DOWNLOAD);
+        profileAsJsonButton.setEnabled(false);
+        profileAsJsonButton.addClickListener(e -> {
+        	Set<Profile> sel = listSelect.getSelectedItems();
+        	if (sel.size() == 1)
+        	{
+        		Profile profile = sel.iterator().next();
+        		
+				try {
+					final String json = new ExportProfile().exportProfile(profile);
+					System.out.println(json);
+					
+					StreamSource source = new StreamSource() {
+						private static final long serialVersionUID = 1L;
+
+						@Override
+						public InputStream getStream() {
+							try {
+								return new ByteArrayInputStream(json.getBytes("UTF-8"));
+							} catch (UnsupportedEncodingException e) {
+								throw new RuntimeException(e);
+							}
+						}
+					};
+					
+	        		Resource resource = new StreamResource(source, "export_profile_" + profile.name + ".json");
+					DownloadDialog dd = new DownloadDialog("Downlaod JSON", "Profiles", resource);
+					dd.show();
+
+					
+				} catch (JsonProcessingException e1) {
+					throw new RuntimeException(e1);
+				}
+        	}
+        });
+        
+        Button profileExportButton = new Button("Export Database for selected Profiles", VaadinIcons.INFO);
+        profileExportButton.setEnabled(false);
+        profileExportButton.addClickListener(e -> {
         	
         	if (listSelect.getSelectedItems().size() > 0)
         	{
@@ -262,7 +307,8 @@ public class ProfilesTab extends AbstractTab {
 					removeProfileButton.setEnabled(event.getValue().size() == 1);
 					editProfileButton.setEnabled(event.getValue().size() == 1);
 					cloneProfileButton.setEnabled(event.getValue().size() == 1);
-					profileInfoButton.setEnabled(event.getValue().size() > 0);
+					profileAsJsonButton.setEnabled(event.getValue().size() == 1);
+					profileExportButton.setEnabled(event.getValue().size() > 0);
 					
 					if (event.getValue().size() == 1)
 					{
@@ -282,7 +328,13 @@ public class ProfilesTab extends AbstractTab {
 		
 		twinSelect.setWidth(100, Unit.PERCENTAGE);
 		
-		VerticalLayout vl = new VerticalLayout(listSelect, addProfileButton, editProfileButton, cloneProfileButton, removeProfileButton, profileInfoButton);
+		VerticalLayout vl = new VerticalLayout(listSelect, 
+				addProfileButton, 
+				editProfileButton, 
+				cloneProfileButton, 
+				removeProfileButton,
+				profileExportButton,
+				profileAsJsonButton);
 		vl.setExpandRatio(listSelect, 5.0f);
 		vl.setMargin(false);
 		vl.setHeight(100, Unit.PERCENTAGE);
