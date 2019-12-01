@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.entities.Address;
+import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.extinterfaces.batch.BatchHandler;
 import at.qop.qoplib.extinterfaces.batch.QEXBatchInput;
@@ -1097,6 +1098,8 @@ public class JSONBatchCalculationTest extends BatchCalculationTest {
 	public void testAll() throws JsonProcessingException, IOException
 	{
 		BatchHandler bh = new BatchHandler() {
+			
+			private Profile profile_ = createProfile();
 
 			@Override
 			protected BatchCalculationInMemory createBC(Profile profile, List<Address> addresses) {
@@ -1105,7 +1108,12 @@ public class JSONBatchCalculationTest extends BatchCalculationTest {
 
 			@Override
 			protected Profile lookupProfile(String profile) {
-				return createProfile();
+				return profile_;
+			}
+
+			@Override
+			protected Analysis lookupAnalysis(String analysis) {
+				return profile_.profileAnalysis.iterator().next().analysis;
 			}};
 
 			

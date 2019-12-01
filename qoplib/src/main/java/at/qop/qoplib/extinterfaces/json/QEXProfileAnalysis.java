@@ -1,6 +1,6 @@
 package at.qop.qoplib.extinterfaces.json;
 
-public class ProfileAnalysisBean {
+public class QEXProfileAnalysis {
 	
 	
 	public String analysis_name;

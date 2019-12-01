@@ -26,18 +26,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import at.qop.qoplib.Config.OSRMConf;
 import at.qop.qoplib.entities.ModeEnum;
+import at.qop.qoplib.integration.QoplibIntegrationTest;
 
-public class OSRMClientTest {
-	
-	public static OSRMConf osrmConfig() {
-		return new OSRMConf();
-	}
+public class OSRMClientTest extends AbstractOSRMClientTest {
 	
 	@Test
 	public void parseResultTest() throws JsonProcessingException, IOException {

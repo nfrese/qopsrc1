@@ -21,14 +21,11 @@
 package at.qop.qoplib.osrmclient;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
-import at.qop.qoplib.entities.ModeEnum;
 
 public class OSRMRouteClientTest {
 

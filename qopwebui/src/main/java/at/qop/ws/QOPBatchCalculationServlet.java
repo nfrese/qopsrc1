@@ -38,6 +38,7 @@ import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.BatchCalculationInMemory;
 import at.qop.qoplib.batch.BatchCalculationInMemoryImpl;
 import at.qop.qoplib.entities.Address;
+import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.extinterfaces.batch.BatchHandler;
 
@@ -97,6 +98,19 @@ public class QOPBatchCalculationServlet extends HttpServlet {
 					{
 						cfg.checkUserProfile(username, profile.name);
 						return profile;
+					}
+				}
+				return null;
+			}
+
+			@Override
+			protected Analysis lookupAnalysis(String analysisName) {
+				List<Analysis> profiles = LookupSessionBeans.profileDomain().listAnalyses();
+				for (Analysis analysis : profiles)
+				{
+					if (analysis.name.equals(analysisName))
+					{
+						return analysis;
 					}
 				}
 				return null;

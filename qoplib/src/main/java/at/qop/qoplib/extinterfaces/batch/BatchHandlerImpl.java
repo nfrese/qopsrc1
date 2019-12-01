@@ -24,6 +24,7 @@ import java.util.List;
 
 import at.qop.qoplib.batch.BatchCalculationInMemoryImpl;
 import at.qop.qoplib.entities.Address;
+import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.Profile;
 
 public class BatchHandlerImpl extends BatchHandler {
@@ -34,8 +35,14 @@ public class BatchHandlerImpl extends BatchHandler {
 		return null;
 	}
 
+	@Override
+	protected Analysis lookupAnalysis(String analysis) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	protected BatchCalculationInMemoryImpl createBC(Profile profile, List<Address> addresses) {
 		return new BatchCalculationInMemoryImpl(profile, addresses);
 	}
-	
+
 }

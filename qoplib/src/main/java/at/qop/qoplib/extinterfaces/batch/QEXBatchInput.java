@@ -23,9 +23,13 @@ package at.qop.qoplib.extinterfaces.batch;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import at.qop.qoplib.extinterfaces.json.QEXProfile;
+
 public class QEXBatchInput {
 	
 	public String profile;
+	
+	public QEXProfile profileAdd;
 	
 	public Collection<QEXBatchSourceLocation> sources = new ArrayList<>();
 

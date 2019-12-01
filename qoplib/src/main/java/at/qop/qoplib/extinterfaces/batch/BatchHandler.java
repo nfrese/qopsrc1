@@ -41,7 +41,11 @@ import at.qop.qoplib.batch.WriteSectionsHelper;
 import at.qop.qoplib.calculation.CalculationSection;
 import at.qop.qoplib.calculation.Rating;
 import at.qop.qoplib.entities.Address;
+import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.Profile;
+import at.qop.qoplib.entities.ProfileAnalysis;
+import at.qop.qoplib.extinterfaces.json.QEXProfile;
+import at.qop.qoplib.extinterfaces.json.QEXProfileAnalysis;
 
 public abstract class BatchHandler {
 	
@@ -50,9 +54,14 @@ public abstract class BatchHandler {
 		ObjectReader reader = new ObjectMapper().readerFor(QEXBatchInput.class);
 		QEXBatchInput input = (QEXBatchInput)reader.readValue(jsonIn);
 		
-		
-		Profile profile = lookupProfile(input.profile);
-		if (profile == null) throw new RuntimeException("profile " + input.profile + " not found!");
+		Profile profile;
+		if (input.profile != null)
+		{
+			profile = lookupProfile(input.profile);
+			if (profile == null) throw new RuntimeException("profile " + input.profile + " not found!");
+		} else {
+			profile = readProfile(input.profileAdd);
+		}
 		
 		List<Address> addresses = new ArrayList<>();
 		
@@ -116,8 +125,33 @@ public abstract class BatchHandler {
 		return new ObjectMapper().setDefaultPrettyPrinter(pp).enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(outBean);
 	}
 
+	private Profile readProfile(QEXProfile profileAdd) {
+		Profile profile = new Profile();
+		profile.name = profileAdd.name;
+		profile.description = profileAdd.description;
+		profile.aggrfn = profileAdd.aggrfn;
+		for (QEXProfileAnalysis pab : profileAdd.profileAnalysis)
+		{
+			ProfileAnalysis pa = new ProfileAnalysis();
+			
+			pa.analysis = lookupAnalysis(pab.analysis_name);
+			if (pa.analysis == null) throw new RuntimeException("analysis " + pab.analysis_name + " not found");
+			
+			pa.weight = pab.weight;
+			pa.altratingfunc = pab.altratingfunc;
+			pa.category = pab.category;
+			pa.categorytitle = pab.categorytitle;
+			pa.ratingvisible = pab.ratingvisible;			
+			
+		}
+		
+		return null;
+	}
+
 	protected abstract BatchCalculationInMemory createBC(Profile profile, List<Address> addresses);
 
+	protected abstract Analysis lookupAnalysis(String analysis);
+	
 	protected abstract Profile lookupProfile(String profile);
 
 }

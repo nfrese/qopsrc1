@@ -16,7 +16,7 @@ public class ExportProfile {
 	
 	public String exportProfile(Profile profile) throws JsonProcessingException {
 		PrettyPrinter pp = new DefaultPrettyPrinter();
-		ProfileBean profileBean = new ProfileBean();
+		QEXProfile profileBean = new QEXProfile();
 
 		profileBean.name = profile.name;
 		profileBean.description = profile.description;
@@ -24,7 +24,7 @@ public class ExportProfile {
 		
 		for (ProfileAnalysis pa : profile.profileAnalysis.stream().sorted((pa1, pa2) -> Utils.nullSafeCompareTo(pa1.category, pa2.category)).collect(Collectors.toList()))
 		{
-			ProfileAnalysisBean pab = new ProfileAnalysisBean();
+			QEXProfileAnalysis pab = new QEXProfileAnalysis();
 			pab.analysis_name = pa.analysis.name;
 			pab.weight= pa.weight;
 			pab.altratingfunc = pa.altratingfunc;

@@ -45,11 +45,12 @@ import at.qop.qoplib.entities.AnalysisFunction;
 import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
+import at.qop.qoplib.osrmclient.AbstractOSRMClientTest;
 import at.qop.qoplib.osrmclient.OSRMClient;
 import at.qop.qoplib.osrmclient.OSRMClientTest;
 import org.junit.Assert;
 
-public class BatchCalculationTest {
+public class BatchCalculationTest extends AbstractOSRMClientTest {
 	
 	@Test
 	public void test() throws ParseException

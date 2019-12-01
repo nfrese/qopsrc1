@@ -15,12 +15,12 @@ public interface Config {
 	{
 		public static final String DEFAULT_HOST="localhost";
 		
-		String carHost = DEFAULT_HOST;
-		int carPort = 5300;
-		String bicycleHost = DEFAULT_HOST;
-		int bicyclePort = 5301;
-		String footHost = DEFAULT_HOST;
-		int footPort = 5302;
+		public String carHost = DEFAULT_HOST;
+		public int carPort = 5300;
+		public String bicycleHost = DEFAULT_HOST;
+		public int bicyclePort = 5301;
+		public String footHost = DEFAULT_HOST;
+		public int footPort = 5302;
 		
 		public String baseUrl(ModeEnum mode) {
 			String host;
