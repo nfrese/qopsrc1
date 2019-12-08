@@ -18,35 +18,48 @@ import org.junit.Assert;
 
 public class QoplibIntegrationTest {
 
-	  private static final Logger LOGGER = LoggerFactory.getLogger(QoplibIntegrationTest.class);
-	  static Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOGGER);
-	  
-	  static String WAIT_PATTERN =
-			    ".*database system is ready to accept connections.*\\s";
-	  
-	  @ClassRule
-	  public static GenericContainer<?> postgres =
-	    new GenericContainer<>("camptocamp/postgis:9.5")
-	      .withClasspathResourceMapping("/integrationtests/qop_testdb.sql", "/docker-entrypoint-initdb.d/01_qop.sql", BindMode.READ_ONLY)
-	      .withEnv("POSTGRES_USER", "qopuser")
-	  	  .withEnv("POSTGRES_DB", "qop")
-	  	  .withEnv("POSTGRES_PASSWORD", "autoxtest")
-	  	  .withLogConsumer(logConsumer)
-          .waitingFor(Wait.forLogMessage(WAIT_PATTERN, 2))
-  		  ;
+	private static final Logger LOGGER = LoggerFactory.getLogger(QoplibIntegrationTest.class);
+	static Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOGGER);
 
-	  @Test
-	  public void test() throws SQLException, InterruptedException {
+	static String WAIT_PATTERN =
+			".*database system is ready to accept connections.*\\s";
 
-		  try (Connection conn = connection()) {
+	@ClassRule
+	public static GenericContainer<?> postgres =
+	new GenericContainer<>("camptocamp/postgis:9.6")
+	.withClasspathResourceMapping("/integrationtests/qop_testdb.sql", "/docker-entrypoint-initdb.d/01_qop.sql", BindMode.READ_ONLY)
+	.withEnv("POSTGRES_USER", "qopuser")
+	.withEnv("POSTGRES_DB", "qop")
+	.withEnv("POSTGRES_PASSWORD", "autoxtest")
+	.withLogConsumer(logConsumer)
+	.waitingFor(Wait.forLogMessage(WAIT_PATTERN, 2))
+	;
 
-			  ResultSet rs = conn.createStatement().executeQuery("select count(*) from public.autobahnanschluesse");
-			  if (rs.next())
-			  {
-				  Assert.assertEquals(106, (long)rs.getObject(1));
-			  }
-		  }
-	  }
+	@Test
+	public void test1() throws SQLException, InterruptedException {
+
+		try (Connection conn = connection()) {
+
+			ResultSet rs = conn.createStatement().executeQuery("select count(*) from public.autobahnanschluesse");
+			if (rs.next())
+			{
+				Assert.assertEquals(106, (long)rs.getObject(1));
+			}
+		}
+	}
+
+	@Test
+	public void test2() throws SQLException, InterruptedException {
+
+		try (Connection conn = connection()) {
+
+			ResultSet rs = conn.createStatement().executeQuery("select count(*) from public.\"1\"");
+			if (rs.next())
+			{
+				Assert.assertEquals(1, (long)rs.getObject(1));
+			}
+		}
+	}
 
 	protected Connection connection() throws SQLException {
 		String host = postgres.getContainerIpAddress();
@@ -57,5 +70,5 @@ public class QoplibIntegrationTest {
 		Connection conn = DriverManager.getConnection(url, user, password);
 		return conn;
 	}
-	
+
 }
