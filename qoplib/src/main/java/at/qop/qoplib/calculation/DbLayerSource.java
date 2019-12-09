@@ -45,8 +45,12 @@ public class DbLayerSource implements LayerSource {
 			return sql.toUpperCase().startsWith("#RASTERTABLE=");
 		}
 		
+		public String getRasterTablename() {
+			return sql.split("=")[1];
+		}
+		
 		public String buildRasterSQL(Point p) {
-			String rasterTablename = sql.split("=")[1];
+			String rasterTablename = getRasterTablename();
 			String resultSql = "SELECT g.geom as geom, rid, ST_Value(rast, 1, g.geom) As value"
 					+ " FROM " + rasterTablename + " r INNER JOIN (select ST_SetSRID(ST_Point(" + p.getX() + "," + p.getY() + "), 4326) as geom) as g"
 					+ " ON ST_Intersects(r.rast,g.geom)";

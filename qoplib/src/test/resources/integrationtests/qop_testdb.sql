@@ -538,7 +538,8 @@ COPY public.q_analysis (name, description, geomfield, mode, query, radius, ratin
 autobahnanschluesse	Fahrzeit (PKW) nächster Autobahnanschluss [max. 15 Min]	geom	car	select geom, featuren_1 as description from autobahnanschluesse	20000	if (lc.result > 0) {\nlc.rating = lc.result > 3 ? Math.max(0, (15 - lc.result) / 12) : 1;\n} else {\nlc.rating = 0;\n}	next_time
 Restaurant	Anzahl der Restaurants in Gehdistanz (5 Min) [10 ER = 1]	geom	foot	select geom, name as description from restaurant	800	if (lc.result > 0) {\nlc.rating = Math.min(lc.result /10, 1);\n} else {\nlc.rating = 0;\n}	within_5min
 Supermarkt	Anzahl der Supermärkte in Gehdistanz (5 Min) [3 ER = 1]	geom	foot	select geom, name as description from supermarket	800	if (lc.result > 0) {\nlc.rating = Math.min(1, lc.result/3);\n} else {\nlc.rating = 0\n}	within_5min
-gruen_sum		geom	air	#RASTERTABLE=gruen_sum	1	if (lc.result > 0) {\nlc.rating = lc.result / 5000;\n} else {\nlc.rating = 0;\n}	next_value
+gruen_sum	D1	geom	air	#RASTERTABLE=gruen_sum	1	if (lc.result > 0) {\nlc.rating = lc.result / 5000;\n} else {\nlc.rating = 0;\n}	next_value
+raster1	D2	geom	air	#RASTERTABLE="1"	1		next_value
 \.
 
 
@@ -4103,7 +4104,7 @@ ALTER TABLE ONLY public.q_analysis
 -- PostgreSQL database dump complete
 --
 
-DELETE FROM public.q_profileanalysis where profile_name not in ('autotest');DELETE FROM public.q_profile where name not in ('autotest');DELETE FROM public.q_analysis where name not in ('Restaurant', 'Supermarkt', 'autobahnanschluesse');DELETE FROM public.q_analysisfunction where name not in ('next_time', 'within_5min');
+-- DELETE FROM public.q_profileanalysis where profile_name not in ('autotest');DELETE FROM public.q_profile where name not in ('autotest');DELETE FROM public.q_analysis where name not in ('Restaurant', 'Supermarkt', 'autobahnanschluesse');DELETE FROM public.q_analysisfunction where name not in ('next_time', 'within_5min');
 
 
 -- **************** Raster Table *******************

@@ -6,6 +6,8 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.images.ImagePullPolicy;
+import org.testcontainers.utility.DockerImageName;
 
 import at.qop.qoplib.osrmclient.OSRMClientTest;
 
@@ -20,12 +22,13 @@ public class QoplibIntegrationTestBase {
 			".*database system is ready to accept connections.*\\s";
 
 	protected static GenericContainer<?> initPostgisContainer() {
+
 		return new GenericContainer<>("camptocamp/postgis:9.6")
 				.withClasspathResourceMapping("/integrationtests/qop_testdb.sql", "/docker-entrypoint-initdb.d/01_qop.sql", BindMode.READ_ONLY)
 				.withEnv("POSTGRES_USER", QOPDB_TEST_USER)
 				.withEnv("POSTGRES_DB", "qop")
 				.withEnv("POSTGRES_PASSWORD", QOPDB_TEST_PASSWORD)
-				.withLogConsumer(logConsumer)
+				.withLogConsumer(logConsumer).withReuse(false)
 				.waitingFor(Wait.forLogMessage(WAIT_PATTERN, 2));
 	}
 	

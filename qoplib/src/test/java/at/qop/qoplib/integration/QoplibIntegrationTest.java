@@ -44,6 +44,37 @@ public class QoplibIntegrationTest extends AbstractOSRMClientTest {
 		}
 	}
 	
+	@Test
+	public void test3a() throws SQLException, InterruptedException {
+		System.out.println("containerid=" + postgres.getContainerId());
+		
+		try (Connection conn = connection()) {
+
+			ResultSet rs = conn.createStatement().executeQuery("select * from public.q_analysis");
+			while (rs.next())
+			{
+				for (int i=0;i<rs.getMetaData().getColumnCount();i++)
+				{
+					System.out.print(rs.getObject(i+1) + "\t");
+				}
+				System.out.println();
+			}
+		}
+	}
+	
+	@Test
+	public void test3() throws SQLException, InterruptedException {
+
+		try (Connection conn = connection()) {
+
+			ResultSet rs = conn.createStatement().executeQuery("select count(*) from public.q_analysis");
+			if (rs.next())
+			{
+				Assert.assertEquals(5, (long)rs.getObject(1));
+			}
+		}
+	}
+	
 	protected Connection connection() throws SQLException {
 		String url = connectionUrl();
 		String user = QOPDB_TEST_USER;

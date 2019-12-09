@@ -35,6 +35,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.calculation.CRSTransform;
+import at.qop.qoplib.calculation.DbLayerSource.RastTableSQL;
 
 public class Utils {
 	
@@ -114,6 +115,12 @@ public class Utils {
 	
 	public static String guessTableName(String query)
 	{
+		RastTableSQL rasterTableSql = new RastTableSQL(query);
+		if (rasterTableSql.isRasterTable())
+		{
+			return rasterTableSql.getRasterTablename();
+		}
+		
 		final Pattern p = Pattern.compile("^(.*) from ([a-zA-Z0-9_]+)( .*)?$");
 	    Matcher m = p.matcher(query);
 
