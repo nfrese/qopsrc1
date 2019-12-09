@@ -51,4 +51,9 @@ public class ConfigDomain extends AbstractDomain implements IConfigDomain {
 		return crit.list();
 	}
 
+	@Override
+	public void injectEm(EntityManager em) {
+		this.em_ = em;
+	}
+
 }

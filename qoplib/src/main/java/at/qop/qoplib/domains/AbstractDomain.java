@@ -29,6 +29,8 @@ public abstract class AbstractDomain {
 	
 	public abstract EntityManager em();
 	
+	public abstract void injectEm(EntityManager em);
+	
 	protected Session hibSess()
 	{
 		return  (Session) em().getDelegate();

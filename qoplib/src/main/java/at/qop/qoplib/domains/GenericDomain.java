@@ -202,5 +202,9 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 		System.out.println((System.currentTimeMillis() - t_start) + " ms readTable: " + sql);
 	}
 
+	@Override
+	public void injectEm(EntityManager em) {
+		this.em_ = em;
+	}
 
 }

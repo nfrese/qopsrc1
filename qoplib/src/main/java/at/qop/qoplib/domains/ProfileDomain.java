@@ -137,5 +137,11 @@ public class ProfileDomain extends AbstractDomain implements IProfileDomain {
 		hibSess().update(f);
 		hibSess().delete(f);
 	}
+	
+	@Override
+	public void injectEm(EntityManager em) {
+		this.em_ = em;
+	}
+
 
 }

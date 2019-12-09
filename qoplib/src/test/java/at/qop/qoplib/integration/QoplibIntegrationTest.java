@@ -5,35 +5,18 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.strategy.Wait;
 
-import org.junit.Assert;
+import at.qop.qoplib.osrmclient.AbstractOSRMClientTest;
 
-public class QoplibIntegrationTest {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(QoplibIntegrationTest.class);
-	static Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOGGER);
-
-	static String WAIT_PATTERN =
-			".*database system is ready to accept connections.*\\s";
+public class QoplibIntegrationTest extends AbstractOSRMClientTest {
 
 	@ClassRule
-	public static GenericContainer<?> postgres =
-	new GenericContainer<>("camptocamp/postgis:9.6")
-	.withClasspathResourceMapping("/integrationtests/qop_testdb.sql", "/docker-entrypoint-initdb.d/01_qop.sql", BindMode.READ_ONLY)
-	.withEnv("POSTGRES_USER", "qopuser")
-	.withEnv("POSTGRES_DB", "qop")
-	.withEnv("POSTGRES_PASSWORD", "autoxtest")
-	.withLogConsumer(logConsumer)
-	.waitingFor(Wait.forLogMessage(WAIT_PATTERN, 2))
-	;
+	public static GenericContainer<?> postgres = initPostgisContainer();
+
 
 	@Test
 	public void test1() throws SQLException, InterruptedException {
@@ -60,15 +43,20 @@ public class QoplibIntegrationTest {
 			}
 		}
 	}
-
+	
 	protected Connection connection() throws SQLException {
+		String url = connectionUrl();
+		String user = QOPDB_TEST_USER;
+		String password = QOPDB_TEST_PASSWORD;
+		Connection conn = DriverManager.getConnection(url, user, password);
+		return conn;
+	}
+
+	protected String connectionUrl() {
 		String host = postgres.getContainerIpAddress();
 		int port = postgres.getMappedPort(5432);
 		String url = "jdbc:postgresql://"+host+":"+port+"/qop";
-		String user = "qopuser";
-		String password = "autoxtest";
-		Connection conn = DriverManager.getConnection(url, user, password);
-		return conn;
+		return url;
 	}
 
 }

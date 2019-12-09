@@ -33,12 +33,12 @@
 	</repositories>
 
 	<dependencies>
-		<dependency>
+		<!-- <dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>persistence-api</artifactId>
 			<version>1.0.2</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>  -->
 		<dependency>
    			<groupId>javax.enterprise</groupId>
    			<artifactId>cdi-api</artifactId>
@@ -161,6 +161,12 @@
 			<artifactId>log4j-slf4j-impl</artifactId>
 			<version>2.11.2</version>
 			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+    		<groupId>org.hibernate.javax.persistence</groupId>
+    		<artifactId>hibernate-jpa-2.1-api</artifactId>
+    		<version>1.0.2.Final</version>
 		</dependency>
 		
 	</dependencies>

@@ -77,5 +77,11 @@ public class AddressDomain extends AbstractDomain implements IAddressDomain {
 		return qry.list().size();
 	}
 	
+	@Override
+	public void injectEm(EntityManager em) {
+		this.em_ = em;
+	}
+
+	
 
 }

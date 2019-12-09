@@ -1,31 +1,22 @@
 package at.qop.qoplib.osrmclient;
 
 import org.junit.ClassRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 import at.qop.qoplib.Config.OSRMConf;
+import at.qop.qoplib.integration.QoplibIntegrationTestBase;
 
-public class AbstractOSRMClientTest {
+public class AbstractOSRMClientTest extends QoplibIntegrationTestBase {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(OSRMClientTest.class);
-	static Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOGGER);
 
 	@ClassRule
-	public static GenericContainer<?> osrmCar =
-	new GenericContainer<>("qopimages/qop-routing-car:latest")
-	.withExposedPorts(5300)
-	.withLogConsumer(logConsumer)
+	public static GenericContainer<?> osrmCar =	initOsrmCarContainer()
 	;
 
 	@ClassRule
-	public static GenericContainer<?> osrmFoot =
-	new GenericContainer<>("qopimages/qop-routing-foot:latest")
-	.withExposedPorts(5302)
-	.withLogConsumer(logConsumer)
+	public static GenericContainer<?> osrmFoot = initOsrmFootContainer();
 	;
+
 
 	public static OSRMConf osrmConfig() {
 		OSRMConf osrmConf = new OSRMConf();
