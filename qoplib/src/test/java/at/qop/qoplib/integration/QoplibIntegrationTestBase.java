@@ -28,7 +28,8 @@ public class QoplibIntegrationTestBase {
 				.withEnv("POSTGRES_USER", QOPDB_TEST_USER)
 				.withEnv("POSTGRES_DB", "qop")
 				.withEnv("POSTGRES_PASSWORD", QOPDB_TEST_PASSWORD)
-				.withLogConsumer(logConsumer).withReuse(false)
+				.withLogConsumer(logConsumer)
+				.withReuse(false)
 				.waitingFor(Wait.forLogMessage(WAIT_PATTERN, 2));
 	}
 	

@@ -159,7 +159,7 @@ public abstract class BatchCalculationAbstract implements Runnable {
 			if (cancelled) throw new CancellationException();
 			
 			Analysis params = profileAnalysis.analysis;
-			LayerCalculationP1Result loaded = source.load(start, params);
+			LayerCalculationP1Result loaded = source.load(start, addresses, params);
 
 			DbGeometryField geomField = loaded.table.field(params.geomfield, DbGeometryField.class);
 

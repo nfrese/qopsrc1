@@ -21,6 +21,8 @@
 package at.qop.qoplib.calculation;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -28,6 +30,7 @@ import com.vividsolutions.jts.geom.Point;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.dbconnector.DbTableReader;
 import at.qop.qoplib.domains.IGenericDomain;
+import at.qop.qoplib.entities.Address;
 
 public class DbLayerSource implements LayerSource {
 
@@ -56,10 +59,14 @@ public class DbLayerSource implements LayerSource {
 					+ " ON ST_Intersects(r.rast,g.geom)";
 			return resultSql;
 		}
+
+		public String buildRasterSQL(List<Point> points) {
+			return points.stream().map(p -> buildRasterSQL(p)).collect(Collectors.joining(" UNION "));
+		}
 	}
 	
 	@Override
-	public LayerCalculationP1Result load(Geometry start, ILayerCalculationP1Params layerParams) {
+	public LayerCalculationP1Result load(Geometry start, List<Address> addresses, ILayerCalculationP1Params layerParams) {
 
 		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 		try {
@@ -77,7 +84,10 @@ public class DbLayerSource implements LayerSource {
 				}
 				else
 				{
-					throw new RuntimeException("unexpected geometry type for raster-queries= " + start);
+					List<Point> points = addresses.stream().map( a-> a.geom).collect(Collectors.toList());
+					sql = rasterTableSql.buildRasterSQL(points);
+					System.out.println(sql);
+					//throw new RuntimeException("unexpected geometry type for raster-queries= " + start);
 				}
 			}
 			else

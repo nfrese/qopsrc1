@@ -22,6 +22,7 @@ package at.qop.qoplib.calculation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.StringJoiner;
 
@@ -33,6 +34,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;
+import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.AnalysisFunction;
 import at.qop.qoplib.entities.ProfileAnalysis;
@@ -78,7 +80,7 @@ public class LayerCalculationTest {
 		LayerSource source = new LayerSource() {
 
 			@Override
-			public LayerCalculationP1Result load(Geometry start, ILayerCalculationP1Params layerParams) {
+			public LayerCalculationP1Result load(Geometry start, List<Address> addresses, ILayerCalculationP1Params layerParams) {
 
 				LayerCalculationP1Result r = new LayerCalculationP1Result();
 				r.table = new DbTable();

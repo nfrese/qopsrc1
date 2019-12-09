@@ -51,6 +51,22 @@ public class QopLibJPAIntegrationTest extends QoplibIntegrationTest {
 		QEXBatchInput input = new QEXBatchInput();
 		input.profile = null;
 		input.customProfile = profileBean;
+		addSources(input);
+		
+		String json = new ObjectMapper().writeValueAsString(input);
+		System.out.println(json);
+		
+		BatchHandler bh = new MyBatchHandler();
+		
+		String jsonOut = bh.jsonCall(json);
+		
+		System.out.println(jsonOut);
+		Assert.assertTrue(jsonOut.contains("\"result\" : 4.0,"));
+		Assert.assertTrue(jsonOut.contains("\"result\" : 3.0,"));
+	
+	}
+
+	protected void addSources(QEXBatchInput input) {
 		{
 			QEXBatchSourceLocation source = new QEXBatchSourceLocation();
 			source.id = 1;
@@ -62,16 +78,16 @@ public class QopLibJPAIntegrationTest extends QoplibIntegrationTest {
 			input.sources.add(source);
 		}
 		
-		String json = new ObjectMapper().writeValueAsString(input);
-		System.out.println(json);
-		
-		BatchHandler bh = new MyBatchHandler();
-		
-		String jsonOut = bh.jsonCall(json);
-		
-		System.out.println(jsonOut);
-		Assert.assertTrue(jsonOut.contains("\"result\" : 4.0,"));
-	
+		{
+			QEXBatchSourceLocation source = new QEXBatchSourceLocation();
+			source.id = 2;
+			source.name = "Q.Straße 160";
+			
+			source.lon = 16.357969708589458; 
+			source.lat = 48.177949361447176;
+			
+			input.sources.add(source);
+		}
 	}
 	
 	@Test
@@ -99,16 +115,7 @@ public class QopLibJPAIntegrationTest extends QoplibIntegrationTest {
 		QEXBatchInput input = new QEXBatchInput();
 		input.profile = null;
 		input.customProfile = profileBean;
-		{
-			QEXBatchSourceLocation source = new QEXBatchSourceLocation();
-			source.id = 1;
-			source.name = "Lat/Lon R.platz 1";
-			
-			source.lon = 16.38970161567575; 
-			source.lat = 48.21044134351946;
-			
-			input.sources.add(source);
-		}
+		addSources(input);
 		
 		String json = new ObjectMapper().writeValueAsString(input);
 		System.out.println(json);
@@ -119,7 +126,7 @@ public class QopLibJPAIntegrationTest extends QoplibIntegrationTest {
 		
 		System.out.println(jsonOut);
 		Assert.assertTrue(jsonOut.contains("\"result\" : 74.52"));
-	
+		Assert.assertTrue(jsonOut.contains("\"result\" : 73.475"));
 	}
 
 	protected void initTestContext() {

@@ -162,7 +162,7 @@ public class BatchCalculationTest extends AbstractOSRMClientTest {
 				return new LayerSource() {
 
 					@Override
-					public LayerCalculationP1Result load(Geometry start, ILayerCalculationP1Params layerParams) {
+					public LayerCalculationP1Result load(Geometry start, List<Address> addresses, ILayerCalculationP1Params layerParams) {
 
 						LayerCalculationP1Result r = new LayerCalculationP1Result();
 						r.table = new DbTable();

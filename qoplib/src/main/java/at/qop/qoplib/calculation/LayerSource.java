@@ -20,10 +20,14 @@
 
 package at.qop.qoplib.calculation;
 
+import java.util.List;
+
 import com.vividsolutions.jts.geom.Geometry;
+
+import at.qop.qoplib.entities.Address;
 
 public interface LayerSource {
 
-	LayerCalculationP1Result load(Geometry start, ILayerCalculationP1Params layerParams);
+	LayerCalculationP1Result load(Geometry start, List<Address> addresses, ILayerCalculationP1Params layerParams);
 
 }

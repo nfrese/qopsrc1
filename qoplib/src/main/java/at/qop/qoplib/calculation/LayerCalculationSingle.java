@@ -23,6 +23,7 @@ package at.qop.qoplib.calculation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -50,7 +51,7 @@ public class LayerCalculationSingle extends LayerCalculation {
 	@Override
 	public void p0loadTargets() {
 		Collection<DbRecord> records;
-		LayerCalculationP1Result r = source.load(start, analysis());
+		LayerCalculationP1Result r = source.load(start, Collections.emptyList(), analysis());
 		table = r.table;
 		records = r.records;
 		
