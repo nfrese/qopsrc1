@@ -61,12 +61,16 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.Config;
 import at.qop.qoplib.Constants;
+import at.qop.qoplib.GLO;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.Utils;
+import at.qop.qoplib.addresses.HTTPAddressClient;
+import at.qop.qoplib.addresses.AddressLookup;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.CalculationSection;
@@ -91,14 +95,6 @@ import at.qop.qopwebui.components.InfoDialog;
 public class QopUI extends ProtectedUI {
 
 	private static final long serialVersionUID = 1L;
-
-	public interface AddressService {
-		List<Address> fetchAddresses(
-				int offset,
-				int limit,
-				String namePrefix);
-		int getAddressCount(String namePrefix);
-	}
 
 	private Profile currentProfile;
 	private Address currentAddress;
@@ -133,21 +129,7 @@ public class QopUI extends ProtectedUI {
 		ComboBox<Address> filtercombo = new ComboBox<>("Adresse nachschlagen");
 		filtercombo.setWidth(400, Unit.PIXELS);
 		filtercombo.setEmptySelectionAllowed(true);
-		AddressService addressService = new AddressService() {
-
-			@Override
-			public List<Address> fetchAddresses(int offset, int limit, String namePrefix) {
-				IAddressDomain ad = LookupSessionBeans.addressDomain();
-				return ad.findAddresses(offset, limit, namePrefix);
-			}
-
-			@Override
-			public int getAddressCount(String namePrefix) {
-				IAddressDomain ad = LookupSessionBeans.addressDomain();
-				return ad.countAddresses(namePrefix);
-			}
-
-		};
+		AddressLookup addressService = new HTTPAddressClient(Config.read().getAddressLookupURL());
 		DataProvider<Address, String> dataProvider =
 				DataProvider.fromFilteringCallbacks(
 						query -> {

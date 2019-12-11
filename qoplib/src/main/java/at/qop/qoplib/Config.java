@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
+
 import at.qop.qoplib.entities.ModeEnum;
 
 public interface Config {
@@ -20,6 +22,7 @@ public interface Config {
 		public String bicycleHost = DEFAULT_HOST;
 		public int bicyclePort = 5301;
 		public String footHost = DEFAULT_HOST;
+		
 		public int footPort = 5302;
 		
 		public String baseUrl(ModeEnum mode) {
@@ -71,6 +74,8 @@ public interface Config {
 
 	String getDbPasswd();
 	
+	String getAddressLookupURL();
+	
 	boolean isAdmin(String username);
 	
 	boolean hasUser(String username);
@@ -108,5 +113,4 @@ public interface Config {
 	static Config readFromEnvir() {
 		return new ConfigEnvir();
 	}
-
 }

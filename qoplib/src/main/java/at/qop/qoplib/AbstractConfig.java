@@ -146,6 +146,13 @@ public abstract class AbstractConfig implements Config {
 	}
 
 	@Override
+	public String getAddressLookupURL() {
+		String key = "addresslookupbaseurl";
+		String defaultValue = "https://nominatim.openstreetmap.org/search?format=json&q="; // demo
+		return getStrProp(key, defaultValue);
+	}
+	
+	@Override
 	public void checkUserProfile(String username, String profileName) {
 		String[] ups = getUserProfiles(username);
 		if (ups != null)
