@@ -42,7 +42,7 @@ public class HTTPAddressClient implements AddressLookup {
 			URLConnection con = url.openConnection();
 			try (InputStream is= con.getInputStream()) {
 				
-				BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 				
 				ObjectMapper mapper = new ObjectMapper();
 				JsonNode root = mapper.readTree(reader);

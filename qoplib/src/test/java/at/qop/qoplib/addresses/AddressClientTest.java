@@ -21,6 +21,7 @@ public class AddressClientTest {
 			System.out.println(result);
 		}
 		
+		Assert.assertTrue(String.valueOf(results).contains("Gasthaus Wild"));
 		Assert.assertTrue(results.size() == 2);
 	}
 
