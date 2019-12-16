@@ -31,6 +31,9 @@ import com.vaadin.server.WrappedSession;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.LoginForm;
+import com.vaadin.ui.LoginForm.LoginEvent;
+import com.vaadin.ui.LoginForm.LoginListener;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -112,31 +115,31 @@ public abstract class ProtectedUI extends UI {
 
 	private void showLogin(VaadinRequest vaadinRequest, Config cfg)
 	{
-		TextField login = new TextField("Benutzername");
+		LoginForm loginForm = new LoginForm();
+		Label message = new Label();		
+		
+		loginForm.addLoginListener(new LoginListener() {
 
-		PasswordField password = new PasswordField("Passwort");
-		Button ok = new Button("Anmelden");
-		ok.setClickShortcut( KeyCode.ENTER ) ;
-		ok.addStyleName( ValoTheme.BUTTON_PRIMARY ) ;
-		Label message = new Label();
-		ok.addClickListener(e -> {
+			private static final long serialVersionUID = 1L;
 
-			String passwd = cfg.getUserPassword(login.getValue());
-			if (passwd != null && passwd.equals(password.getValue()))
-			{
-				message.setValue("");
-				httpSess().setAttribute(AUTHENTICATED_AS, login.getValue());
-				start(vaadinRequest, cfg, currentUserName());
-			}
-			else
-			{
-				message.setValue("Falscher Benutzername/Passwort");
+			@Override
+			public void onLogin(LoginEvent event) {
+				String userName = event.getLoginParameter("username");
+				String passwd = cfg.getUserPassword(userName);
+				if (passwd != null && passwd.equals(event.getLoginParameter("password")))
+				{
+					message.setValue("");
+					httpSess().setAttribute(AUTHENTICATED_AS, userName);
+					start(vaadinRequest, cfg, currentUserName());
+				}
+				else
+				{
+					message.setValue("Falscher Benutzername/Passwort");
+				}
 			}
 		});
-
-		HorizontalLayout buttonsHl = new HorizontalLayout(ok);
-
-		VerticalLayout vl = new VerticalLayout(login, password, buttonsHl, message);		
+		
+		VerticalLayout vl = new VerticalLayout(loginForm, message);		
 		setContent(vl);
 	}
 	
