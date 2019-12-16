@@ -33,12 +33,15 @@ public class HTTPAddressClient implements AddressLookup {
 			int offset,
 			int limit,
 			String queryTxt) {
+		
+		
 		List<Address> results = new ArrayList<Address>();
-		if (queryTxt == null) return results;
+		if (queryTxt == null || queryTxt.length() < 4) return results;
 		
 		URL url;
 		try {
 			url = new URL(urlBase + URLEncoder.encode(queryTxt, "UTF-8"));
+			System.out.println("start " + url);
 			URLConnection con = url.openConnection();
 			try (InputStream is= con.getInputStream()) {
 				
@@ -61,6 +64,8 @@ public class HTTPAddressClient implements AddressLookup {
 	                }
 	            }
 			}
+		
+			System.out.println("end " + queryTxt + " -> " + results.size());
 			
 			return results.subList(offset, Math.min(results.size(), offset+limit));
 			

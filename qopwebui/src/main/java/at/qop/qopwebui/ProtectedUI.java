@@ -23,6 +23,7 @@ package at.qop.qopwebui;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
@@ -115,6 +116,8 @@ public abstract class ProtectedUI extends UI {
 
 		PasswordField password = new PasswordField("Passwort");
 		Button ok = new Button("Anmelden");
+		ok.setClickShortcut( KeyCode.ENTER ) ;
+		ok.addStyleName( ValoTheme.BUTTON_PRIMARY ) ;
 		Label message = new Label();
 		ok.addClickListener(e -> {
 

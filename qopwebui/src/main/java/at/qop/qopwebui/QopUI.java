@@ -27,7 +27,6 @@ import java.util.EventObject;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
-import javax.annotation.Resource;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.annotation.WebServlet;
@@ -40,29 +39,27 @@ import org.vaadin.addon.leaflet.LPolyline;
 import org.vaadin.addon.leaflet.LTileLayer;
 import org.vaadin.addon.leaflet.LeafletLayer;
 import org.vaadin.addon.leaflet.util.JTSUtil;
+import org.vaadin.addons.autocomplete.AutocompleteExtension;
 import org.vaadin.addons.autocomplete.converter.SuggestionCaptionConverter;
 import org.vaadin.addons.autocomplete.converter.SuggestionValueConverter;
+import org.vaadin.addons.autocomplete.event.SuggestionSelectEvent;
+import org.vaadin.addons.autocomplete.event.SuggestionSelectListener;
 import org.vaadin.addons.autocomplete.generator.SuggestionGenerator;
-import org.vaadin.addons.searchbox.SearchBox;
-import org.vaadin.addons.searchbox.SearchBox.ButtonPosition;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.data.provider.DataChangeEvent;
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.DataProviderListener;
-import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.event.EventRouter;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Page;
+import com.vaadin.server.Page.Styles;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.ui.slider.SliderOrientation;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.ComboBox.CaptionFilter;
-import com.vaadin.ui.ComboBox.NewItemHandler;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -77,16 +74,13 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.Config;
 import at.qop.qoplib.Constants;
-import at.qop.qoplib.GLO;
-import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.Utils;
-import at.qop.qoplib.addresses.HTTPAddressClient;
 import at.qop.qoplib.addresses.AddressLookup;
+import at.qop.qoplib.addresses.HTTPAddressClient;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.Calculation;
 import at.qop.qoplib.calculation.CalculationSection;
@@ -99,7 +93,6 @@ import at.qop.qoplib.calculation.LayerTarget;
 import at.qop.qoplib.calculation.LayerTargetDissolved;
 import at.qop.qoplib.calculation.charts.QopChart;
 import at.qop.qoplib.calculation.charts.QopPieChart;
-import at.qop.qoplib.domains.IAddressDomain;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.osrmclient.OSRMClient;
@@ -136,7 +129,6 @@ public class QopUI extends ProtectedUI {
 			currentProfile = profiles.get(0);
 		}
 		profileCombo.setEmptySelectionAllowed(false);
-		//profileCombo.setTextInputAllowed(false);
 		
 		profileCombo.addSelectionListener(event -> {
 			currentProfile = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
@@ -144,16 +136,20 @@ public class QopUI extends ProtectedUI {
 		});
 		AddressLookup addressService = new HTTPAddressClient(Config.read().getAddressLookupURL());
 		
-		SearchBox sb = new SearchBox("Adresse nachschlagen", ButtonPosition.RIGHT);
+		TextField addressSearchField = new TextField();
+		addressSearchField.setWidth(100, Unit.PERCENTAGE);
+		addressSearchField.focus();
 		
 		SuggestionGenerator<Address> generator = new SuggestionGenerator<Address>() {
 
 			@Override
 			public List<Address> apply(String query, Integer limit) {
-				return addressService.fetchAddresses(
+				List<Address> addresses = addressService.fetchAddresses(
 						0,
 						limit,
 						query);
+				System.out.println(addresses);
+				return addresses;
 			}};
 			
 			
@@ -169,34 +165,19 @@ public class QopUI extends ProtectedUI {
 
 			@Override
 			public String apply(Address suggestion, String query) {
-				return suggestion.name;
+			    return "<div class='suggestion-container'>"
+			            //+ "<img src='" + user.getPicture() + "' class='userimage'>"
+			            + "<span class='username'>"
+			            + suggestion.name.replaceAll("(?i)(" + query + ")", "<b>$1</b>")
+			            + "</span>"
+			            + "</div>";
 			}
 			
 		};
-		sb.setSuggestionGenerator(generator, valueConverter, captionConverter);
-		
-		
-		SearchComboBox<Address> filtercombo = new SearchComboBox<>("Adresse nachschlagen");
-		filtercombo.setWidth(400, Unit.PIXELS);
-		filtercombo.setEmptySelectionAllowed(true);
-
-//		DataProvider<Address, String> dataProvider =
-//				DataProvider.fromFilteringCallbacks(
-//						query -> {
-//							String filter = query.getFilter().orElse(null);
-//							return addressService.fetchAddresses(
-//									query.getOffset(),
-//									query.getLimit(),
-//									filter
-//									).stream();
-//						},
-//						query -> {
-//							String filter = query.getFilter().orElse(null);
-//							return addressService.getAddressCount(filter);
-//						}
-//						);
-		
-		filtercombo.setDataProvider(new LazyDataProvider(filtercombo, getThreadFactory(), addressService));
+		AutocompleteExtension<Address> ace = new AutocompleteExtension<Address>(addressSearchField);
+		ace.setSuggestionGenerator(generator, valueConverter, captionConverter);
+		ace.showSuggestions();
+		ace.setSuggestionDelay(350);
 
 		lonLatTf = new TextField();
 		lonLatTf.setWidth(300, Unit.PIXELS);
@@ -219,7 +200,7 @@ public class QopUI extends ProtectedUI {
 				Point start = Utils.parseLonLatStr(lonLatStr);
 				
 				resetResults(lfg);
-				filtercombo.clear();
+				resetAddressSearch(addressSearchField);
 				
 				LMarker lm = new LMarker(start);
 				lm.setCaption("<b>Lon, Lat Eingabe:</b><br>" +lonLatStr);
@@ -234,21 +215,26 @@ public class QopUI extends ProtectedUI {
 			}
 		});
 		
-		filtercombo.addSelectionListener(event -> {
+		ace.addSuggestionSelectListener(new SuggestionSelectListener<Address>() {
+			
+			private static final long serialVersionUID = 1L;
 
-			resetResults(lfg);
+			@Override
+			public void suggestionSelect(SuggestionSelectEvent<Address> event) {
+				resetResults(lfg);
 
-			currentAddress = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
-			if (currentAddress != null) {
-				LMarker lm = new LMarker(currentAddress.geom);
-				lm.setCaption("<b>Aktuelle Adresse:</b><br>" + currentAddress.name);
-				lfg.addComponent(lm);
-				startCalculationWCatch();
-				leafletMap.zoomToContent();
+				currentAddress = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
+				if (currentAddress != null) {
+					LMarker lm = new LMarker(currentAddress.geom);
+					lm.setCaption("<b>Aktuelle Adresse:</b><br>" + currentAddress.name);
+					lfg.addComponent(lm);
+					startCalculationWCatch();
+					leafletMap.zoomToContent();
+				}
+				
 			}
-
 		});
-
+		
 		lfgResults = new LFeatureGroup();
 		leafletMap.addLayer(lfgResults);
 
@@ -258,7 +244,7 @@ public class QopUI extends ProtectedUI {
 			setLonLat(startJts, true);
 			
 			resetResults(lfg);
-			filtercombo.clear();
+			resetAddressSearch(addressSearchField);
 
 			LMarker lm = new LMarker(startJts);
 			lm.setCaption("<b>Aktuelle Position:</b><br>" +startJts);
@@ -274,8 +260,16 @@ public class QopUI extends ProtectedUI {
 		overallRatingLabel = new Label("",  ContentMode.HTML);
 		
 		locTabs = new TabSheet();
-		locTabs.addTab(filtercombo, "Adresse");
+		{
+			HorizontalLayout t = new HorizontalLayout(addressSearchField);
+			t.setHeight(50, Unit.PIXELS);
+			t.setWidth(100, Unit.PERCENTAGE);
+			locTabs.addTab(t, "Adresse");
+			Alignment alignment = Alignment.TOP_LEFT;
+			t.setComponentAlignment(addressSearchField, alignment);
+		}
 		locTabs.addTab(new HorizontalLayout(lonLatTf, toLonLatButton), "Lon, Lat");
+		
 		
 		progress = new ProgressBar();
 		progress.setVisible(false);
@@ -290,7 +284,15 @@ public class QopUI extends ProtectedUI {
 		hl.setSplitPosition(60, Unit.PERCENTAGE);
 		hl.setSizeFull();
 		setContent(hl);
+		Styles styles = Page.getCurrent().getStyles();
+		styles.add(".autocomplete-suggestion-list-wrapper{\n" + 
+				"position: fixed;\n" + 
+				"}");
 
+	}
+
+	protected void resetAddressSearch(TextField filtercombo) {
+		filtercombo.setValue("");
 	}
 
 	protected void resetResults(LFeatureGroup lfg) {
@@ -354,7 +356,7 @@ public class QopUI extends ProtectedUI {
 	private void startCalculation(Point start) {
 		
 		progress.setVisible(true);
-		grid.removeAllComponents();
+		clearResults();
 		
 		final UI currentUI = UI.getCurrent();
 		
@@ -375,7 +377,7 @@ public class QopUI extends ProtectedUI {
 						calculationFinished(calculation);
 					});
 				}
-				catch (Exception ex)
+				catch (Throwable ex)
 				{
 					ex.printStackTrace();
 					progress.setVisible(false);
@@ -398,7 +400,7 @@ public class QopUI extends ProtectedUI {
 	private void calculationFinished(Calculation calculation) {
 
 
-			grid.removeAllComponents();
+			clearResults();
 
 			for (CalculationSection<ILayerCalculation> section : calculation.getSections())
 			{
@@ -555,6 +557,11 @@ public class QopUI extends ProtectedUI {
 			});
 			refreshOverallRating(calculation);
 		}
+
+	protected void clearResults() {
+		grid.removeAllComponents();
+		overallRatingLabel.setValue("");
+	}
 	
 
 	public void gridAddHeaders() {
