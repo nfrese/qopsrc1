@@ -28,6 +28,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.WrappedSession;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -42,6 +43,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 import at.qop.qoplib.Config;
 import at.qop.qoplib.LookupSessionBeans;
+import at.qop.qoplib.QopLibManifest;
 import at.qop.qoplib.entities.Profile;
 
 public abstract class ProtectedUI extends UI {
@@ -115,6 +117,10 @@ public abstract class ProtectedUI extends UI {
 
 	private void showLogin(VaadinRequest vaadinRequest, Config cfg)
 	{
+		Label version = new Label();
+		QopLibManifest manifest = new QopLibManifest();
+		version.setValue(manifest.getShortInfo());
+		
 		LoginForm loginForm = new LoginForm();
 		Label message = new Label();		
 		
@@ -139,8 +145,14 @@ public abstract class ProtectedUI extends UI {
 			}
 		});
 		
-		VerticalLayout vl = new VerticalLayout(loginForm, message);		
-		setContent(vl);
+		VerticalLayout vl = new VerticalLayout(loginForm, message);
+		vl.setSizeFull();
+		VerticalLayout vl2 = new VerticalLayout(vl, version);
+		vl2.setComponentAlignment(vl, Alignment.TOP_CENTER);
+		vl2.setComponentAlignment(version, Alignment.TOP_CENTER);
+		vl2.setSizeFull();
+		setContent(vl2);
+		setSizeFull();
 	}
 	
 	protected Button logoutButton()
