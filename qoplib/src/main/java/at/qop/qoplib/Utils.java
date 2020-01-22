@@ -23,8 +23,10 @@ package at.qop.qoplib;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -138,6 +140,13 @@ public class Utils {
 	{
 		if (o1 == null || o2 == null) return String.valueOf(o1).compareTo(String.valueOf(o2));
 		return o1.compareTo(o2);
+	}
+	
+	public static String readResourceToString(String resPath) {
+		InputStream resourceAsStream = Utils.class.getResourceAsStream(resPath);
+		if (resourceAsStream == null) throw new RuntimeException("Utils.class.getResourceAsStream(" + resPath +") failed");
+		String str = new Scanner(resourceAsStream, "UTF-8").useDelimiter("\\A").next();
+		return str;
 	}
 	
 }

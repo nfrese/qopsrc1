@@ -1,0 +1,351 @@
+{
+  "profile" : null,
+  "customProfile" : {
+    "name" : "Wohnen",
+    "description" : "Wohnnutzung",
+    "aggrfn" : null,
+    "profileAnalysis" : [ {
+      "analysis_name" : "piechart_supermarkt_ketten_innerhalb_10min",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "",
+      "categorytitle" : "",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "autobahnanschluesse",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "1.01",
+      "categorytitle" : "Mobilität",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "haltestellen_neu",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "1.02",
+      "categorytitle" : "Mobilität",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "haltestellen_neu/ubahn",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "1.03",
+      "categorytitle" : "Mobilität",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Citybike",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "1.04",
+      "categorytitle" : "Mobilität",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "E-Charge",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "1.05",
+      "categorytitle" : "Mobilität",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Fahrradabstellanlage",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "1.06",
+      "categorytitle" : "Mobilität",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Taxi",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "1.07",
+      "categorytitle" : "Mobilität",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Anz_Fahradabstellplaetze",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "1.08",
+      "categorytitle" : "Mobilität",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Radwegelaenge",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "1.10",
+      "categorytitle" : "Mobilität",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Bäume pro Meter Straßenraum",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "2.01",
+      "categorytitle" : "Ambience",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Straßenlaerm",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "2.02",
+      "categorytitle" : "Ambience",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Mikroklima",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "2.03",
+      "categorytitle" : "Ambience",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Weltkulturerbe",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "2.04",
+      "categorytitle" : "Ambience",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Park",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "2.05",
+      "categorytitle" : "Ambience",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "cafe",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "3.01",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "post",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "3.02",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "aerzte",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "3.03",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "apotheke",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "3.04",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "ATM",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "3.05",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "bakery",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "3.06",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "bank",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "3.07",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Imbiss",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "3.08",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Zahnarzt",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "3.09",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Krankenhaus",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "3.12",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Markt",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "3.13",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Pub",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "3.15",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Restaurant",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "3.16",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Retail",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "3.17",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Supermarkt",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "3.18",
+      "categorytitle" : "Nahversorgung",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Badestellen",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "4.01",
+      "categorytitle" : "Kultur & Freizeit",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "cinema",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "4.02",
+      "categorytitle" : "Kultur & Freizeit",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Fitness-Center",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "4.03",
+      "categorytitle" : "Kultur & Freizeit",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Museen",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "4.04",
+      "categorytitle" : "Kultur & Freizeit",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Religion",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "4.05",
+      "categorytitle" : "Kultur & Freizeit",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Schwimmbad",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "4.06",
+      "categorytitle" : "Kultur & Freizeit",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Sehenswuerdigkeiten",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "4.07",
+      "categorytitle" : "Kultur & Freizeit",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Sportstaetten",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "4.08",
+      "categorytitle" : "Kultur & Freizeit",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Theater",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "4.09",
+      "categorytitle" : "Kultur & Freizeit",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Burgen/Schloesser",
+      "weight" : 0.5,
+      "altratingfunc" : null,
+      "category" : "4.10",
+      "categorytitle" : "Kultur & Freizeit",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Kindergärten",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "5.01",
+      "categorytitle" : "Bildung & Soziales",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Schulen",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "5.02",
+      "categorytitle" : "Bildung & Soziales",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Universitaeten",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "5.03",
+      "categorytitle" : "Bildung & Soziales",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Volkshochschulen",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "5.04",
+      "categorytitle" : "Bildung & Soziales",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Bevölkerung",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "6.01",
+      "categorytitle" : "Social Dynamics",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Bev_Entwicklung_01_13",
+      "weight" : 2.0,
+      "altratingfunc" : null,
+      "category" : "6.02",
+      "categorytitle" : "Social Dynamics",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "Handelsanteil",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : "6.04",
+      "categorytitle" : "Social Dynamics",
+      "ratingvisible" : true
+    }, {
+      "analysis_name" : "treesperme",
+      "weight" : 1.0,
+      "altratingfunc" : null,
+      "category" : null,
+      "categorytitle" : null,
+      "ratingvisible" : true
+    } ]
+  },
+  "sources" : [ {
+    "id" : 1,
+    "name" : "5, Stephansplatz, Stubenviertel, KG Innere Stadt, Innere Stadt, Wien, 1010, Österreich",
+    "lon" : 16.3742072,
+    "lat" : 48.2082517
+  } ]
+}

@@ -20,7 +20,10 @@
 
 package at.qop.qopwebui;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.EventObject;
@@ -46,6 +49,10 @@ import org.vaadin.addons.autocomplete.event.SuggestionSelectEvent;
 import org.vaadin.addons.autocomplete.event.SuggestionSelectListener;
 import org.vaadin.addons.autocomplete.generator.SuggestionGenerator;
 
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.event.EventRouter;
@@ -53,6 +60,9 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.Styles;
+import com.vaadin.server.Resource;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ContentMode;
@@ -95,8 +105,12 @@ import at.qop.qoplib.calculation.charts.QopChart;
 import at.qop.qoplib.calculation.charts.QopPieChart;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Profile;
+import at.qop.qoplib.extinterfaces.batch.QEXBatchInput;
+import at.qop.qoplib.extinterfaces.batch.QEXBatchSourceLocation;
+import at.qop.qoplib.extinterfaces.json.ExportProfile;
 import at.qop.qoplib.osrmclient.OSRMClient;
 import at.qop.qopwebui.components.ChartDialog;
+import at.qop.qopwebui.components.DownloadDialog;
 import at.qop.qopwebui.components.ExceptionDialog;
 import at.qop.qopwebui.components.InfoDialog;
 
@@ -275,7 +289,21 @@ public class QopUI extends ProtectedUI {
 		progress.setVisible(false);
 		progress.setIndeterminate(true);
 		
-		VerticalLayout vl = new VerticalLayout(new HorizontalLayout(title, logoutButton(),  progress), profileCombo, locTabs, new Label(""), grid, overallRatingLabel);
+		HorizontalLayout topHl = new HorizontalLayout(title, logoutButton(),  progress);
+		
+		boolean isAdmin = true;
+		if (isAdmin)
+		{
+			Button exportJSONButton = new Button("JSON");
+			exportJSONButton.addStyleName(ValoTheme.BUTTON_LINK);
+			exportJSONButton.addClickListener(l -> {
+				exportCurrentAsJSON();
+			});
+			
+			topHl.addComponent(exportJSONButton);
+		}
+		
+		VerticalLayout vl = new VerticalLayout(topHl, profileCombo, locTabs, new Label(""), grid, overallRatingLabel);
 		vl.setSizeUndefined();
 		Panel panel = new Panel();
 		panel.setContent(vl);
@@ -289,6 +317,63 @@ public class QopUI extends ProtectedUI {
 				"position: fixed;\n" + 
 				"}");
 
+	}
+
+	private void exportCurrentAsJSON() {
+		if (this.currentProfile==null || currentAddress==null) {
+			new InfoDialog("Fehler", "Für diese Funktion muss eine Adresse und ein Profil ausgewählt sein").show();
+			return;
+		}
+		try {
+			QEXBatchInput input = new QEXBatchInput();
+			input.profile = null;
+			input.customProfile = new ExportProfile().map(this.currentProfile);
+
+			{
+				QEXBatchSourceLocation source = new QEXBatchSourceLocation();
+				source.id = 1;
+				source.name = currentAddress.name;
+				source.lon = currentAddress.geom.getX(); 
+				source.lat = currentAddress.geom.getY();
+
+				input.sources.add(source);
+			}
+
+			PrettyPrinter pp = new DefaultPrettyPrinter();
+			String json = new ObjectMapper().setDefaultPrettyPrinter(pp).enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(input);
+			
+			StringBuilder bashScript = new StringBuilder();
+			
+			bashScript.append("#!/bin/bash\n");
+			bashScript.append("cat > topost.json <<- EOM\n");
+			bashScript.append(json);
+			bashScript.append("\n");
+			bashScript.append("EOM\n");
+			bashScript.append("\n");
+			bashScript.append("curl -X POST -H \"Content-Type: application/json\" -d @topost.json \"http://SERVER:PORT/qopwebui/batchcalculation_servlet?username=USERNAME&password=PASSWORD\"\n");
+			
+			
+			StreamSource source = new StreamSource() {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public InputStream getStream() {
+					try {
+						return new ByteArrayInputStream(bashScript.toString().getBytes("UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			};
+			
+    		Resource resource = new StreamResource(source, "export_" + this.currentProfile + "_at_" + this.currentAddress + ".sh");
+			DownloadDialog dd = new DownloadDialog("Downlaod JSON", "CurrentRequestAsScript", resource);
+			dd.show();
+		}
+		catch (Exception ex)
+		{
+			throw new RuntimeException(ex);
+		}
 	}
 
 	protected void resetAddressSearch(TextField filtercombo) {

@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import at.qop.qoplib.Constants;
+import at.qop.qoplib.Utils;
 import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.Profile;
@@ -1178,6 +1179,21 @@ public class JSONBatchCalculationTest extends BatchCalculationTest {
 		System.out.println(result);
 		
 		Assert.assertTrue(result.contains("\"overallRating\" : 0.298"));
+	}
+	
+	@Test
+	public void customProfileJSONSample1Test() throws Exception {
+		String resPath = "/at/qop/qoplib/batch/export_sample1.json";
+		String jsonIn = Utils.readResourceToString(resPath);
+		
+		
+		BatchHandler bh = batchHandler();
+		String result = bh.jsonCall(jsonIn);
+		System.out.println("---------------------------------------");
+		System.out.println(result);
+		
+		Assert.assertTrue(result.contains("\"overallRating\" : 0.5899999999999996"));
+		
 	}
 	
 

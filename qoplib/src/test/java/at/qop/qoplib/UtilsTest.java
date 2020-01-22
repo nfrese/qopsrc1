@@ -75,4 +75,13 @@ public class UtilsTest {
 		Assert.equals("auto_bahn_anschluesse", result);
 	}
 	
+	
+	@Test
+	public void readResourceToStringTest() {
+		String resPath = "/at/qop/qoplib/batch/export_sample1.json";
+		String json = Utils.readResourceToString(resPath);
+		
+		System.out.println(json);
+		
+	}
 }
