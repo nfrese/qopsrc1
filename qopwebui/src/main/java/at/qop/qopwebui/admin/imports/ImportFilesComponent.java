@@ -31,9 +31,12 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
@@ -183,11 +186,13 @@ public abstract class ImportFilesComponent extends Panel implements Receiver, Su
 		}
 	}
 
+	private static final Set<String> zipMimeTypes = new TreeSet<>(Arrays.asList("application/zip", "application/octet-stream", "application/x-zip-compressed", "multipart/x-zip"));
+	
 	@Override
 	public OutputStream receiveUpload(String filename, String mimeType) {
 		if (tmpDir != null) throw new RuntimeException("Import already running!");
-		if (!mimeType.equals("application/zip")) {
-			RuntimeException ex = new RuntimeException("mimeType != application/zip: " + mimeType);
+		if (!zipMimeTypes.contains(mimeType)) {
+			RuntimeException ex = new RuntimeException("unexpected mimeType: " + mimeType + " expected: " + zipMimeTypes);
 			new ExceptionDialog("ZIP-Datei erwartet!", ex).show();;
 			throw ex;
 		}
