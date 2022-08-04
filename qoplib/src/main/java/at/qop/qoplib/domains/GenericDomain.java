@@ -28,6 +28,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ThreadFactory;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
@@ -49,6 +50,9 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	@PersistenceContext(unitName = "qopPU")
 	EntityManager em_;
 
+	@javax.annotation.Resource(lookup = "java:jboss/ee/concurrency/factory/default")
+	private ThreadFactory threadFactory;
+	
 	public EntityManager em()
 	{
 		return em_;
@@ -205,6 +209,11 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	@Override
 	public void injectEm(EntityManager em) {
 		this.em_ = em;
+	}
+	
+	@Override
+	public ThreadFactory getThreadFactory() {
+		return threadFactory;
 	}
 
 }

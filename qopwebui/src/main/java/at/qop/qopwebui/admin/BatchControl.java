@@ -22,6 +22,7 @@ package at.qop.qopwebui.admin;
 
 import java.util.List;
 import java.util.concurrent.CancellationException;
+import java.util.stream.Collectors;
 
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
@@ -30,11 +31,14 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.BatchCalculation;
+import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
+import at.qop.qoplib.domains.IGenericDomain;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qopwebui.components.ExceptionDialog;
 import at.qop.qopwebui.components.InfoDialog;
@@ -46,6 +50,8 @@ public class BatchControl {
 	private Button batchButton;
 	private Button cancelButton;
 	private ComboBox<Profile> profileCombo;
+	private ComboBox<String> pointsTableCombo;
+	private TextField nameColumnTextField;
 	private ProgressBar progressBar;
 	private Label progressLabel;
 
@@ -61,6 +67,14 @@ public class BatchControl {
 			bc.cancelled = true;
 		}
 
+		IGenericDomain gd = LookupSessionBeans.genericDomain();
+		QopDBMetadata meta = gd.getMetadata();
+		pointsTableCombo = new ComboBox<>("Points Table");
+		pointsTableCombo.setItems(meta.tables.stream().filter(t->t.isGeometric()).map(t->t.name).collect(Collectors.toList()));		
+		
+		nameColumnTextField = new TextField("Caption column");
+		nameColumnTextField.setValue("name");
+		
 		progressLabel = new Label("", ContentMode.HTML);
 		batchInfoLabel = new Label("", ContentMode.HTML);
 
@@ -71,7 +85,11 @@ public class BatchControl {
 			{
 				if (bc != null) throw new RuntimeException("dont!");
 
-				bc = new BatchCalculation(currentProfile) {
+				String pointTableName = pointsTableCombo.getSelectedItem().get();
+				String geomFieldName = "geom";
+				String nameFieldName = nameColumnTextField.getValue();
+				
+				bc = new BatchCalculation(currentProfile, pointTableName, geomFieldName, nameFieldName) {
 					@Override
 					protected void progress(int overall_, int count_) {
 						super.progress(overall_, count_);
@@ -122,7 +140,7 @@ public class BatchControl {
 					}
 				};
 
-				Thread t = new Thread(bc);
+				Thread t = LookupSessionBeans.genericDomain().getThreadFactory().newThread(bc);
 				t.start();
 				updateButtons();
 				currentUI.setPollInterval(500);
@@ -155,7 +173,7 @@ public class BatchControl {
 
 		updateButtons();
 
-		return new VerticalLayout(profileCombo, new HorizontalLayout(batchButton, cancelButton, progressBar, progressLabel), batchInfoLabel);
+		return new VerticalLayout(new HorizontalLayout(profileCombo, this.pointsTableCombo, this.nameColumnTextField), new HorizontalLayout(batchButton, cancelButton, progressBar, progressLabel), batchInfoLabel);
 
 	}
 

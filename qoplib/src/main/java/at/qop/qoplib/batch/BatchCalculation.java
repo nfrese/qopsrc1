@@ -46,11 +46,16 @@ import at.qop.qoplib.osrmclient.OSRMClient;
 
 public class BatchCalculation extends BatchCalculationAbstract {
 
-	private static final String geomField = "geom";
+	private final String TABLENAME; // Address.TABLENAME;
+	private final String geomFieldName; // "geom";
+	private final String nameFieldName; // "name";
 	private PerformBatUpdate pbt;
 	
-	public BatchCalculation(Profile currentProfile) {
+	public BatchCalculation(Profile currentProfile, String pointTableName, String geomFieldName, String nameFieldName) {
 		super(currentProfile);
+		this.TABLENAME = pointTableName;
+		this.geomFieldName = geomFieldName;
+		this.nameFieldName = nameFieldName;
 	}
 
 	@Override
@@ -71,22 +76,22 @@ public class BatchCalculation extends BatchCalculationAbstract {
 	
 	@Override
 	protected QuadifyImpl initQuadify() {
-		return new QuadifyImpl(maxPerRect, Address.TABLENAME, geomField);
+		return new QuadifyImpl(maxPerRect, TABLENAME, geomFieldName);
 	}
 	
 	@Override
 	protected List<Address> addressesForQuadrant(Envelope envelope) {
 		
-		String sql = "select * from " + Address.TABLENAME
-				+ " WHERE " + geomField 
+		String sql = "select * from " + TABLENAME
+				+ " WHERE " + geomFieldName 
 				+ " && " + DBUtils.stMakeEnvelope(envelope);
 		IGenericDomain gd_ = LookupSessionBeans.genericDomain();
 
 		List<Address> addresses = new ArrayList<>();
-
 		
 		AbstractDbTableReader tableReader = new AbstractDbTableReader() {
 
+			@SuppressWarnings("unused")
 			DbTable table;
 			private DbGeometryField geomField;
 			private DbTextField nameField;
@@ -94,20 +99,27 @@ public class BatchCalculation extends BatchCalculationAbstract {
 			@Override
 			public void metadata(DbTable table) {
 				this.table = table;
-				geomField = table.geometryField("geom");
-				nameField = table.textField("name");
+				geomField = table.geometryField(geomFieldName);
+				if (nameFieldName != null && !nameFieldName.trim().isEmpty())
+				{
+					nameField = table.textField(nameFieldName);
+				}
 			}
 
 			@Override
 			public void record(DbRecord record) {
 
 				Geometry geom = geomField.get(record);
-				String name = nameField.get(record);
+			
 				//System.out.println(geom + " - " + name);
 
 				Address currentAddress = new Address();
 				currentAddress.geom = (Point)geom;
-				currentAddress.name = name;
+				
+				if (nameField != null) {
+					String name = nameField.get(record);
+					currentAddress.name = name;
+				}
 				addresses.add(currentAddress);
 			}
 

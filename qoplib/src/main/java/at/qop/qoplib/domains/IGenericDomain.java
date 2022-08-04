@@ -21,6 +21,7 @@
 package at.qop.qoplib.domains;
 
 import java.sql.SQLException;
+import java.util.concurrent.ThreadFactory;
 
 import at.qop.qoplib.dbconnector.AbstractDbTableReader;
 import at.qop.qoplib.dbconnector.DbBatch;
@@ -36,5 +37,7 @@ public interface IGenericDomain {
 	void batchUpdate(DbBatch batch) throws SQLException;
 
 	void readTable(String sql, AbstractDbTableReader tableReader) throws SQLException;
+
+	ThreadFactory getThreadFactory();
 
 }
