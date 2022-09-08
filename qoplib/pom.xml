@@ -146,7 +146,7 @@
 		<dependency>
 			<artifactId>postgresql</artifactId>
 			<groupId>org.postgresql</groupId>
-			<version>42.2.8</version>
+			<version>42.4.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
