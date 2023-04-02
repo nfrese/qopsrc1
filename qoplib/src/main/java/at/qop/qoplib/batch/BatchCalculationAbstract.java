@@ -61,7 +61,7 @@ import at.qop.qoplib.osrmclient.OSRMClient;
 public abstract class BatchCalculationAbstract implements Runnable {
 
 	private static final CreateTargetsMulti CREATE_TARGETS_MULTI = new CreateTargetsMulti();
-	protected static final int maxPerRect = 3000;
+	protected static final int maxPerRect = 100;
 	protected final Profile currentProfile;
 	private LayerSource source;
 	private IRouter router;
