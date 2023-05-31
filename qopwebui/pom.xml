@@ -19,6 +19,7 @@
 	</prerequisites>
 
 	<properties>
+		<myhibernate.version>5.6.15.Final</myhibernate.version>
 		<vaadin.version>8.14.3</vaadin.version>
 		<vaadin.plugin.version>8.14.3</vaadin.plugin.version>
 		<jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
@@ -82,10 +83,10 @@
 		</dependency>
 
 		
-				<dependency>
+		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-spatial</artifactId>
-			<version>5.4.2.Final</version>
+			<version>${myhibernate.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>postgresql</artifactId>
@@ -97,20 +98,20 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
-			<version>5.4.2.Final</version>
+			<version>${myhibernate.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
-			<version>5.4.2.Final</version>
+			<version>${myhibernate.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		
 		<dependency>
     		<groupId>org.hibernate</groupId>
     		<artifactId>hibernate-core</artifactId>
-    		<version>5.4.2.Final</version>
+    		<version>${myhibernate.version}</version>
 		</dependency>
 		
 		<dependency>

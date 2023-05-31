@@ -5,44 +5,53 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.apache.tomcat.util.scan.StandardJarScanner;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.vaadin.server.VaadinServlet;
 
+import at.qop.qoplib.Config;
 import at.qop.qopwebui.QopUI.QopUIServlet;
+import at.qop.qopwebui.admin.AdminUI;
 
 import org.apache.catalina.Context;
 
 @Configuration
 @EnableTransactionManagement
+//@EnableJpaRepositories(entityManagerFactoryRef = "someEntityManagerFactory", transactionManagerRef = "someTransactionManager", basePackages = {
+//"com.example.*" })
+@EntityScan(basePackages = "at.qop")
 public class DBConfigurationBean {
 
-    @Bean
-    public LocalSessionFactoryBean sessionFactory() {
-        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-        sessionFactory.setDataSource(dataSource());
-        sessionFactory.setPackagesToScan(new String[]
-          {"at.qop" });
-        sessionFactory.setHibernateProperties(hibernateProperties());
-
-        return sessionFactory;
-    }
+//    @Bean
+//    public LocalSessionFactoryBean sessionFactory() {
+//        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+//        sessionFactory.setDataSource(dataSource());
+//        sessionFactory.setPackagesToScan(new String[]
+//          {"at.qop" });
+//        sessionFactory.setHibernateProperties(hibernateProperties());
+//
+//        return sessionFactory;
+//    }
 
     @Bean
     public DataSource dataSource() {
     	
-    	String host = "localhost";
-    	String db = "qop";
-    	String user = "qopuser";
-    	String password = "qoppostgis";
-    	int port =5432;
+    	Config cfgFile = Config.read();
+    	
+    	String host = cfgFile.getDbHost();
+    	String db = cfgFile.getDb();
+    	String user = cfgFile.getDbUserName();
+    	String password = cfgFile.getDbPasswd();
+    	int port =cfgFile.getPort();
     	
     	DataSource dataSource = DataSourceBuilder.create().url("jdbc:postgresql://"+host+":"+port+"/"+db).username(user).password(password).build();
     	
@@ -97,5 +106,11 @@ public class DBConfigurationBean {
     public ServletRegistrationBean<?> servletRegistrationBean() {
 		VaadinServlet servlet = new QopUIServlet();
 		return new ServletRegistrationBean<>(servlet, "/qopwebui/*");
+    }
+	
+	@Bean(name="springBootServletRegistrationBean")
+    public ServletRegistrationBean<?> servletRegistrationBean2() {
+		VaadinServlet servlet = new AdminUI.AdminUIServlet();
+		return new ServletRegistrationBean<>(servlet, "/qopwebui/admin/*");
     }
 }

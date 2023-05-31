@@ -26,14 +26,17 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.hibernate.Criteria;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import at.qop.qoplib.entities.Config;
 
+@Repository
 @Transactional
 public class ConfigDomain extends AbstractDomain implements IConfigDomain {
 	
-	@PersistenceContext(unitName = "qopPU")
+	@PersistenceContext //(unitName = "qopPU")
 	EntityManager em_;
 
 	public EntityManager em()

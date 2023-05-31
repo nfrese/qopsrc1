@@ -28,6 +28,7 @@ import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.EventObject;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import javax.naming.InitialContext;
@@ -476,12 +477,7 @@ public class QopUI extends ProtectedUI {
 	}
 
 	protected ThreadFactory getThreadFactory() {
-		ThreadFactory threadFactory;
-		try {
-			threadFactory = InitialContext.doLookup("java:comp/DefaultManagedThreadFactory");
-		} catch (NamingException e) {
-			throw new RuntimeException(e);
-		}
+		ThreadFactory threadFactory = Executors.defaultThreadFactory();
 		return threadFactory;
 	}
 	private void calculationFinished(Calculation calculation) {

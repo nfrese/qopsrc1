@@ -42,6 +42,7 @@ public class AnalysisFunction implements Serializable {
 	@Column(columnDefinition="TEXT")
 	public String func;
 	
+	@Column(name="rvalunit")
 	public String rvalUnit;
 	
 	@Override

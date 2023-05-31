@@ -25,16 +25,19 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vividsolutions.jts.geom.Geometry;
 
 import at.qop.qoplib.entities.Address;
 
+@Repository
 @Transactional
 public class AddressDomain extends AbstractDomain implements IAddressDomain {
 	
-	@PersistenceContext(unitName = "qopPU")
+	@PersistenceContext //(unitName = "qopPU")
 	EntityManager em_;
 
 	public EntityManager em()

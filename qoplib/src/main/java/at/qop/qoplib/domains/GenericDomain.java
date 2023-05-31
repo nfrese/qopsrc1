@@ -28,11 +28,15 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import at.qop.qoplib.dbconnector.AbstractDbTableReader;
@@ -43,14 +47,15 @@ import at.qop.qoplib.dbconnector.metadata.QopDBColumn;
 import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 
+@Repository
 @Transactional
 public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	
-	@PersistenceContext(unitName = "qopPU")
+	@PersistenceContext //(unitName = "qopPU")
 	EntityManager em_;
 
-	@javax.annotation.Resource(lookup = "java:jboss/ee/concurrency/factory/default")
-	private ThreadFactory threadFactory;
+	//@javax.annotation.Resource(lookup = "java:jboss/ee/concurrency/factory/default")
+	private ThreadFactory threadFactory =  Executors.defaultThreadFactory();
 	
 	public EntityManager em()
 	{

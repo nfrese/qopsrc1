@@ -16,6 +16,7 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
+		<myhibernate.version>5.6.15.Final</myhibernate.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -56,7 +57,7 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-spatial</artifactId>
-			<version>5.4.2.Final</version>
+			<version>${myhibernate.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>postgresql</artifactId>
@@ -68,20 +69,20 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
-			<version>5.4.2.Final</version>
+			<version>${myhibernate.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
-			<version>5.4.2.Final</version>
+			<version>${myhibernate.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		
 		<dependency>
     		<groupId>org.hibernate</groupId>
     		<artifactId>hibernate-core</artifactId>
-    		<version>5.4.2.Final</version>
+    		<version>${myhibernate.version}</version>
 		</dependency>
 		
 		<dependency>
