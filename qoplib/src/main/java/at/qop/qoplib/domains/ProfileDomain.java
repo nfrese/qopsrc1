@@ -23,18 +23,17 @@ package at.qop.qoplib.domains;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Local;
-import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.AnalysisFunction;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
 
-@Stateless
-@Local (IProfileDomain.class)
+@Transactional
 public class ProfileDomain extends AbstractDomain implements IProfileDomain {
 	
 	@PersistenceContext(unitName = "qopPU")

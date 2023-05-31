@@ -25,19 +25,24 @@ import java.util.Properties;
 public class ConfigFile extends AbstractConfig {
 	
 	private final Properties props;
+
+	private String keyname(String key) {
+		return ("QOP_" + key).toUpperCase();
+	}
 	
 	public ConfigFile(Properties props) {
 		this.props = props;
 	}
 	
 	protected String getStrProp(String key, String defaultValue) {
-		if (props.containsKey(key)) return props.getProperty(key);
+		if (props.containsKey(keyname(key))) return props.getProperty(keyname(key));
 		else return defaultValue;
 	}
 
+
 	@Override
 	protected boolean containsKey(String key) {
-		return props.containsKey(key);
+		return props.containsKey(keyname(key));
 	}
 
 }

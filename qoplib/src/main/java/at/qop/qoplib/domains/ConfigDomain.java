@@ -22,17 +22,15 @@ package at.qop.qoplib.domains;
 
 import java.util.List;
 
-import javax.ejb.Local;
-import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.hibernate.Criteria;
+import org.springframework.transaction.annotation.Transactional;
 
 import at.qop.qoplib.entities.Config;
 
-@Stateless
-@Local (IConfigDomain.class)
+@Transactional
 public class ConfigDomain extends AbstractDomain implements IConfigDomain {
 	
 	@PersistenceContext(unitName = "qopPU")

@@ -22,21 +22,16 @@ package at.qop.qoplib.domains;
 
 import java.util.List;
 
-import javax.ejb.Local;
-import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.Restrictions;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vividsolutions.jts.geom.Geometry;
 
 import at.qop.qoplib.entities.Address;
 
-@Stateless
-@Local (IAddressDomain.class)
+@Transactional
 public class AddressDomain extends AbstractDomain implements IAddressDomain {
 	
 	@PersistenceContext(unitName = "qopPU")

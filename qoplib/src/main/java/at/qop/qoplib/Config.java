@@ -98,7 +98,7 @@ public interface Config {
 		String appName = Utils.getApplicationName();
 		
 		Properties props = new Properties();
-		String fileName = System.getProperty("jboss.server.config.dir") + "/" + appName + ".properties";
+		String fileName = System.getProperty("user.home") + "/." + appName + ".properties";
 		try(FileInputStream fis = new FileInputStream(fileName)) {
 		  props.load(new InputStreamReader(fis, "UTF-8"));
 		} catch (FileNotFoundException e) {

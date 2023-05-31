@@ -30,10 +30,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ThreadFactory;
 
-import javax.ejb.Local;
-import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import at.qop.qoplib.dbconnector.AbstractDbTableReader;
 import at.qop.qoplib.dbconnector.DbBatch;
@@ -43,8 +43,7 @@ import at.qop.qoplib.dbconnector.metadata.QopDBColumn;
 import at.qop.qoplib.dbconnector.metadata.QopDBMetadata;
 import at.qop.qoplib.dbconnector.metadata.QopDBTable;
 
-@Stateless
-@Local (IGenericDomain.class)
+@Transactional
 public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	
 	@PersistenceContext(unitName = "qopPU")

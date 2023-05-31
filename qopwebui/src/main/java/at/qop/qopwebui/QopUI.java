@@ -34,6 +34,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.annotation.WebServlet;
 
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.vaadin.addon.leaflet.LCircle;
 import org.vaadin.addon.leaflet.LFeatureGroup;
 import org.vaadin.addon.leaflet.LMap;
@@ -669,12 +671,19 @@ public class QopUI extends ProtectedUI {
 		return new DecimalFormat("#.##").format(d);
 	}
 
-	@WebServlet(urlPatterns = "/*", name = "QopUIServlet", asyncSupported = true)
+	//@WebServlet(urlPatterns = "/*", name = "QopUIServlet", asyncSupported = true)
 	@VaadinServletConfiguration(ui = QopUI.class, productionMode = false)
 	public static class QopUIServlet extends VaadinServlet {
 		private static final long serialVersionUID = 1L;
 	}
 
+	
+//	@Bean(name="springBootServletRegistrationBean")
+//    public ServletRegistrationBean<?> servletRegistrationBean() {
+//		VaadinServlet servlet = new QopUIServlet();
+//		return new ServletRegistrationBean<>(servlet, "/qopwebui/*");
+//    }
+	
 	@Override
 	protected boolean requiresAdminRole() {
 		return false;
