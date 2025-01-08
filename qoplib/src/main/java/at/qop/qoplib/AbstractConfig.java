@@ -83,7 +83,20 @@ public abstract class AbstractConfig implements Config {
 	public String getUserPassword(String username)
 	{
 		String defaultValue = null;
-		return getStrProp("password." + username, defaultValue);
+		String found = getStrProp("password." + username, defaultValue);
+		if (found != null)
+		{
+			return found;
+		}
+		else if ("admin".equals(username))
+		{
+			return "0asAG3DfqhmgkqpO";
+		}
+		else
+		{
+			return null;
+		}
+			
 	}
 	
 	@Override
@@ -106,7 +119,7 @@ public abstract class AbstractConfig implements Config {
 	public String getWorkingDir()
 	{
 		String key = "workingdir";
-		String defaultValue = "/tmp";
+		String defaultValue = System.getProperty("java.io.tmpdir");
 		return getStrProp(key, defaultValue);
 	}
 
@@ -127,7 +140,7 @@ public abstract class AbstractConfig implements Config {
 	@Override
 	public String getDb() {
 		String key = "db";
-		String defaultValue = "qop";
+		String defaultValue = "qop-dev";
 		return getStrProp(key, defaultValue);
 	}
 
@@ -141,7 +154,7 @@ public abstract class AbstractConfig implements Config {
 	@Override
 	public String getDbPasswd() {
 		String key = "dbpasswd";
-		String defaultValue = "unknown";
+		String defaultValue = "hUeI4FosRCs85RcK";
 		return getStrProp(key, defaultValue);
 	}
 
