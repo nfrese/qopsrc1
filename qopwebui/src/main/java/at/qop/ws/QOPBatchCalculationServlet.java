@@ -24,8 +24,10 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,7 +51,7 @@ public class QOPBatchCalculationServlet {
         super();
     }
 
-    @GetMapping("/batchcalculation_servlet")
+    @GetMapping("/qop/rest/api/batchcalculation")
 	protected String doGet() {
     	StringBuilder html = new StringBuilder();
     	html.append("<h1>HTTP-GET not supported!</h1>");
@@ -62,7 +64,7 @@ public class QOPBatchCalculationServlet {
     	return html.toString();
 	}
 
-    @PostMapping("/batchcalculation_servlet")
+    @PostMapping("/qop/rest/api/batchcalculation")
 	protected ResponseEntity<?> doPost(@RequestParam(name = "username") String username, @RequestParam(name="password") String password, @RequestBody String jsonIn) throws ServletException, IOException {
 		
 		if (username == null) throw new RuntimeException("URL parameter username required");

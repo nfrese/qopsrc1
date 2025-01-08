@@ -21,6 +21,7 @@
 package at.qop.qopwebui;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -33,7 +34,10 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -667,18 +671,17 @@ public class QopUI extends ProtectedUI {
 		return new DecimalFormat("#.##").format(d);
 	}
 
-	//@WebServlet(urlPatterns = "/*", name = "QopUIServlet", asyncSupported = true)
+	@WebServlet(urlPatterns = "/qop/ui/*", name = "QopUIServlet", asyncSupported = true)
 	@VaadinServletConfiguration(ui = QopUI.class, productionMode = false)
 	public static class QopUIServlet extends VaadinServlet {
 		private static final long serialVersionUID = 1L;
+		
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			super.doGet(req, resp);
+		}
+		
 	}
-
-	
-//	@Bean(name="springBootServletRegistrationBean")
-//    public ServletRegistrationBean<?> servletRegistrationBean() {
-//		VaadinServlet servlet = new QopUIServlet();
-//		return new ServletRegistrationBean<>(servlet, "/qopwebui/*");
-//    }
 	
 	@Override
 	protected boolean requiresAdminRole() {

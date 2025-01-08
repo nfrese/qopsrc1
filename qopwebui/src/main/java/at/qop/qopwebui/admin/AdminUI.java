@@ -20,7 +20,12 @@
 
 package at.qop.qopwebui.admin;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
@@ -85,10 +90,15 @@ public class AdminUI extends ProtectedUI {
         setContent(layout);
     }
 	
-    @WebServlet(urlPatterns = "/admin/*", name = "AdminUIServlet", asyncSupported = true)
+    @WebServlet(urlPatterns = "/qop/ui/admin/*", name = "AdminUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = AdminUI.class, productionMode = false)
     public static class AdminUIServlet extends VaadinServlet {
 		private static final long serialVersionUID = 1L;
+		
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			super.doGet(req, resp);
+		}
     }
 
 	@Override

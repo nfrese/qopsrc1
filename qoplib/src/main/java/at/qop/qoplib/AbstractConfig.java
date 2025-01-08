@@ -102,8 +102,14 @@ public abstract class AbstractConfig implements Config {
 	@Override
 	public boolean isAdmin(String username)
 	{
+		String propName = "isadmin." + username;
+		if (!containsKey(propName) && "admin".equals(username))
+		{
+			return true;
+		}
+		
 		String defaultValue = "false";
-		return "true".equalsIgnoreCase(getStrProp("isadmin." + username, defaultValue));
+		return "true".equalsIgnoreCase(getStrProp(propName, defaultValue));
 	}
 
 	@Override
