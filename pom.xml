@@ -18,7 +18,6 @@
 <modules>
     <module>qoplib</module>
     <module>qopwebui</module>
-    <module>qopear</module>
 </modules>
 
 </project>
