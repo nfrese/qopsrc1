@@ -50,9 +50,19 @@ public class QOPBatchCalculationServlet {
     public QOPBatchCalculationServlet() {
         super();
     }
+    
+    @GetMapping("/qop")
+    protected String info()
+    {
+    	StringBuilder html = new StringBuilder();
+    	html.append("<h1>QOP Service</h1>");
+    	html.append("<p><a href=\"ui\">Demo User Interface</a></p>");
+    	html.append("<p><a href=\"ui/admin\">Administration</a></p>");
+    	return html.toString();
+    }
 
     @GetMapping("/qop/rest/api/batchcalculation")
-	protected String doGet() {
+	protected String batchcalculationGet() {
     	StringBuilder html = new StringBuilder();
     	html.append("<h1>HTTP-GET not supported!</h1>");
     	html.append("<p>sample JSON for HTTP-POST:</p>");
@@ -65,7 +75,7 @@ public class QOPBatchCalculationServlet {
 	}
 
     @PostMapping("/qop/rest/api/batchcalculation")
-	protected ResponseEntity<?> doPost(@RequestParam(name = "username") String username, @RequestParam(name="password") String password, @RequestBody String jsonIn) throws ServletException, IOException {
+	protected ResponseEntity<?> batchcalculationPost(@RequestParam(name = "username") String username, @RequestParam(name="password") String password, @RequestBody String jsonIn) throws ServletException, IOException {
 		
 		if (username == null) throw new RuntimeException("URL parameter username required");
 		if (password == null) throw new RuntimeException("URL parameter password required");
