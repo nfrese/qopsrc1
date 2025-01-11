@@ -20,7 +20,7 @@
 
 package at.qop.qoplib.calculation;
 
-import com.vividsolutions.jts.geom.LineString;
+import org.locationtech.jts.geom.LineString;
 
 public class LayerTarget extends AbstractLayerTarget {
 	

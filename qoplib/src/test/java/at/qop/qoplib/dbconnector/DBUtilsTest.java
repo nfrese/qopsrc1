@@ -23,7 +23,7 @@ package at.qop.qoplib.dbconnector;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 public class DBUtilsTest {
 

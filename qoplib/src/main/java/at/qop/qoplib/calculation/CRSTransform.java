@@ -20,19 +20,16 @@
 
 package at.qop.qoplib.calculation;
 
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.operation.MathTransform;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineSegment;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineSegment;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.PrecisionModel;
 
 public class CRSTransform {
 
@@ -61,7 +58,7 @@ public class CRSTransform {
 			Geometry g0 = JTS.transform( sourceGeometry, transform4326to31256);
 			return gf31256.createGeometry(g0);
 			
-		} catch (MismatchedDimensionException | TransformException e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -71,7 +68,7 @@ public class CRSTransform {
 		try {
 			Geometry g0 = JTS.transform( sourceGeometry, transform31256to4326);
 			return gfWGS84.createGeometry(g0);
-		} catch (MismatchedDimensionException | TransformException e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}

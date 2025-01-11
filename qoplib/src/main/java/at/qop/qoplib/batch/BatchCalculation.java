@@ -24,9 +24,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 
 import at.qop.qoplib.Config;
 import at.qop.qoplib.Constants;

@@ -33,8 +33,8 @@ import java.util.regex.Pattern;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.DbLayerSource.RastTableSQL;

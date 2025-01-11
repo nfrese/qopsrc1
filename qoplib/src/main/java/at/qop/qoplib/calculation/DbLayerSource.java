@@ -24,8 +24,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.dbconnector.DbTableReader;

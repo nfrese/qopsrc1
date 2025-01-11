@@ -50,7 +50,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.VerticalLayout;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.PerformDelete;

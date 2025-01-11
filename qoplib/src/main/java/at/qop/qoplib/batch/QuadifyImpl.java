@@ -23,7 +23,7 @@ package at.qop.qoplib.batch;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.dbconnector.DBSingleResultTableReader;

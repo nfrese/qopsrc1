@@ -20,7 +20,7 @@
 
 package at.qop.qoplib.calculation;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import at.qop.qoplib.dbconnector.DbRecord;
 

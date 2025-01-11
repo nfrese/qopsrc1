@@ -32,8 +32,8 @@ import javax.script.ScriptContext;
 import javax.script.ScriptException;
 import javax.script.SimpleScriptContext;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 
 import at.qop.qoplib.GLO;
 import at.qop.qoplib.calculation.charts.QopBarChart;

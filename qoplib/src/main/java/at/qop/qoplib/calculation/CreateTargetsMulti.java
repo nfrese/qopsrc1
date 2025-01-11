@@ -22,8 +22,8 @@ package at.qop.qoplib.calculation;
 
 import java.util.List;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 
 import at.qop.qoplib.dbconnector.DbRecord;
 

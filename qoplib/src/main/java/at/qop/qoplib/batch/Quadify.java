@@ -22,7 +22,7 @@ package at.qop.qoplib.batch;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 public abstract class Quadify {
 	

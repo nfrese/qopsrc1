@@ -26,11 +26,11 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBWriter;
-import com.vividsolutions.jts.io.WKTReader;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBWriter;
+import org.locationtech.jts.io.WKTReader;
 
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.batch.WriteBatTable.BatRecord;

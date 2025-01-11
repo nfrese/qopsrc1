@@ -28,9 +28,9 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.GeometryFactory;
 
 public class QuadifyTest {
 

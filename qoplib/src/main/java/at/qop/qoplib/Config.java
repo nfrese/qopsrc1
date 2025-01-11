@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.GeometryFactory;
 
 import at.qop.qoplib.entities.ModeEnum;
 

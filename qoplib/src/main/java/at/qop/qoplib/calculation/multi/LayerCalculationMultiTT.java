@@ -22,7 +22,7 @@ package at.qop.qoplib.calculation.multi;
 
 import java.util.ArrayList;
 
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Point;
 
 import at.qop.qoplib.calculation.LayerCalculation;
 import at.qop.qoplib.calculation.LayerTarget;

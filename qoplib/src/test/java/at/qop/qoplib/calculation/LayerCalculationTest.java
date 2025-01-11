@@ -29,8 +29,8 @@ import java.util.StringJoiner;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;

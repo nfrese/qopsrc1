@@ -22,7 +22,7 @@ package at.qop.qoplib.domains;
 
 import java.util.List;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import at.qop.qoplib.entities.Address;
 

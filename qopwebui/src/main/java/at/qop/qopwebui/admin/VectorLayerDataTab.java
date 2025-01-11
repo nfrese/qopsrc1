@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.ui.ListSelect;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
 
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTable;

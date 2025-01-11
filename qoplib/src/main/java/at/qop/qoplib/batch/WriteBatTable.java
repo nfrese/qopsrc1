@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Point;
 
 import at.qop.qoplib.calculation.CalculationSection;
 import at.qop.qoplib.calculation.ILayerCalculation;

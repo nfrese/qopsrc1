@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Point;
 
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
