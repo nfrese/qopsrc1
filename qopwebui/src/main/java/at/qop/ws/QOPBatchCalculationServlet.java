@@ -23,9 +23,6 @@ package at.qop.ws;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +40,7 @@ import at.qop.qoplib.entities.Address;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.extinterfaces.batch.BatchHandler;
+import jakarta.servlet.ServletException;
 
 @RestController
 public class QOPBatchCalculationServlet {

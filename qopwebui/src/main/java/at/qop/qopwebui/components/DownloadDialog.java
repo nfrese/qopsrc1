@@ -20,11 +20,12 @@
 
 package at.qop.qopwebui.components;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.Resource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
+import org.vaadin.olli.FileDownloadWrapper;
+
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.server.StreamResource;
 
 public class DownloadDialog extends ConfirmationDialog {
 	
@@ -32,25 +33,25 @@ public class DownloadDialog extends ConfirmationDialog {
 	
 	Button downloadButton;
 	
-	public DownloadDialog(String title, String message, Resource myResource) {
+	public DownloadDialog(String title, String message, StreamResource myResource) {
 		super(title, message);
-		FileDownloader fileDownloader = new FileDownloader(myResource);
+		FileDownloadWrapper fileDownloader = new FileDownloadWrapper(myResource);
         
-        fileDownloader.extend(downloadButton);
+        fileDownloader.wrapComponent(downloadButton);
         
 	}
 
 	private static final long serialVersionUID = 1L;
 
-	public VaadinIcons icon() {
-		return VaadinIcons.INFO;
+	public VaadinIcon icon() {
+		return VaadinIcon.INFO;
 	}
 	
 	public HorizontalLayout buttons() {
 		
-		downloadButton = new Button("Herunterladen", VaadinIcons.DOWNLOAD);
+		downloadButton = new Button("Herunterladen", VaadinIcon.DOWNLOAD.create());
 		
-        Button cancelButton = new Button("Schliessen", VaadinIcons.CLOSE);
+        Button cancelButton = new Button("Schliessen", VaadinIcon.CLOSE.create());
 		cancelButton.addClickListener(e2 -> {
 			if (onCancel != null) onCancel.run();
 			this.close(); 

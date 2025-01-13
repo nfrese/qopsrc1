@@ -20,9 +20,9 @@
 
 package at.qop.qopwebui.components;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 public class InfoDialog extends ConfirmationDialog {
 	
@@ -32,12 +32,12 @@ public class InfoDialog extends ConfirmationDialog {
 
 	private static final long serialVersionUID = 1L;
 
-	public VaadinIcons icon() {
-		return VaadinIcons.INFO;
+	public VaadinIcon icon() {
+		return VaadinIcon.INFO;
 	}
 	
 	public HorizontalLayout buttons() {
-		Button okButton = new Button("OK", VaadinIcons.CHECK);
+		Button okButton = new Button("OK", VaadinIcon.CHECK.create());
 		okButton.addClickListener(e2 -> {
 			if (cl != null) cl.buttonClick(null);
 			this.close(); 

@@ -23,11 +23,12 @@ package at.qop.qopwebui.components;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 
 public class ExceptionDialog extends AbstractDialog {
 	
@@ -44,20 +45,20 @@ public class ExceptionDialog extends AbstractDialog {
 		this.text = message;
 		VerticalLayout subContent = new VerticalLayout();
 		subContent.setSizeFull();
-		this.setContent(subContent);
+		this.add(subContent);
 		
 		TextArea textArea = new TextArea();
 		textArea.setSizeFull();
 		textArea.setValue(text);
-		textArea.setIcon(VaadinIcons.EXCLAMATION_CIRCLE);
+		subContent.add(VaadinIcon.EXCLAMATION_CIRCLE.create());
 		
-		subContent.addComponent(textArea);
-		subContent.setExpandRatio(textArea, 10.0f);
-		Button cancelButton = new Button("OK", VaadinIcons.CHECK);
+		subContent.add(textArea);
+		//subContent.setExpandRatio(textArea, 10.0f); TODO
+		Button cancelButton = new Button("OK", VaadinIcon.CHECK.create());
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});
-		subContent.addComponent(new HorizontalLayout(cancelButton));
+		subContent.add(new HorizontalLayout(cancelButton));
 
 	}
 	

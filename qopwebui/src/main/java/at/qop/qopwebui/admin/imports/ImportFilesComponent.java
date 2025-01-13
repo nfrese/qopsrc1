@@ -38,14 +38,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.Upload;
-import com.vaadin.ui.Upload.ProgressListener;
-import com.vaadin.ui.Upload.Receiver;
-import com.vaadin.ui.Upload.SucceededEvent;
-import com.vaadin.ui.Upload.SucceededListener;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.upload.FinishedEvent;
+import com.vaadin.flow.component.upload.ProgressListener;
+import com.vaadin.flow.component.upload.Receiver;
+import com.vaadin.flow.component.upload.SucceededEvent;
+import com.vaadin.flow.component.upload.Upload;
 
 import at.qop.qoplib.Config;
 import at.qop.qoplib.LookupSessionBeans;
@@ -58,7 +58,7 @@ import at.qop.qopwebui.components.ExecDialog;
 import at.qop.qopwebui.components.ExecDialogNext;
 import at.qop.qopwebui.components.InfoDialog;
 
-public abstract class ImportFilesComponent extends Panel implements Receiver, SucceededListener, ProgressListener{
+public abstract class ImportFilesComponent extends Span implements Receiver {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -77,18 +77,18 @@ public abstract class ImportFilesComponent extends Panel implements Receiver, Su
 	{
 		vl = new VerticalLayout();
 		
-		Upload upload = new Upload("Gezippte " + what() + " importieren", this);
-		upload.addProgressListener(this);
-		upload.addSucceededListener(this);
-		vl.addComponent(upload);
+		Upload upload = new Upload(this);
+		// "Gezippte " + what() + " importieren"
+		upload.addProgressListener(e -> updateProgress(e.getReadBytes(), e.getContentLength()));
+		upload.addFinishedListener(e -> uploadSucceeded(e));
+		vl.add(upload);
 		
 		pgbar = new ProgressBar();
-		vl.addComponent(pgbar);
-		this.setContent(vl);
+		vl.add(pgbar);
+		this.add(vl);
 	}
 
-	@Override
-	public void uploadSucceeded(SucceededEvent event) {
+	public void uploadSucceeded(FinishedEvent e2) {
 		ExecDialog execUnzip = new ExecDialogNext("Entpacken");
 		execUnzip.show();
 		execUnzip.executeCommand("unzip " + zipFile.getName() , null, tmpDir.dir);
@@ -208,7 +208,6 @@ public abstract class ImportFilesComponent extends Panel implements Receiver, Su
 		}
 	}
 
-	@Override
 	public void updateProgress(long readBytes, long contentLength) {
 		if (contentLength > 0)
 			pgbar.setValue(readBytes/contentLength);

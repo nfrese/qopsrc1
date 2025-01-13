@@ -23,17 +23,14 @@ package at.qop.qopwebui.admin.forms;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.ValidationException;
-import com.vaadin.data.validator.BeanValidator;
-import com.vaadin.server.Page;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.entities.Analysis;
@@ -65,51 +62,51 @@ public class AnalysisForm extends AbstractForm {
 			TextField textField = new TextField("Name");
 			textField.setWidth(450, Unit.PIXELS);
 			textField.setEnabled(create);
-			vl.addComponent(textField);
+			vl.add(textField);
 			binder.bind(textField, o -> o.name, (o,v) -> o.name = v);
 		}	
 		{
 			TextField textField = new TextField("Beschreibung");
 			textField.setWidth(600, Unit.PIXELS);
-			vl.addComponent(textField);
+			vl.add(textField);
 			binder.bind(textField, o -> o.description, (o,v) -> o.description = v);
 		}	
 		{
 			TextField textField = new TextField("SQL");
 			textField.setWidth(600, Unit.PIXELS);
-			vl.addComponent(textField);
+			vl.add(textField);
 			binder.bind(textField, o -> o.query, (o,v) -> o.query = v);
 		}	
 		{
 			ComboBox<ModeEnum> modeCombo = new ComboBox<>("Routing Modus", Arrays.asList(ModeEnum.values()));
-			modeCombo.setTextInputAllowed(false);
-			vl.addComponent(modeCombo);
+			//modeCombo.setTextInputAllowed(false);
+			vl.add(modeCombo);
 			binder.bind(modeCombo, o -> o.mode, (o,v) -> o.mode = v);
 		}
 		{
 			TextField textField = new TextField("Geometrie-Feld");
-			vl.addComponent(textField);
+			vl.add(textField);
 			binder.bind(textField, o -> o.geomfield, (o,v) -> o.geomfield = v);
 		}
 		{
 			List<AnalysisFunction> funcs = LookupSessionBeans.profileDomain().listAnalysisFunctions();
 			ComboBox<AnalysisFunction> funcCombo = new ComboBox<>("Auswertungsfunktion", funcs);
-			funcCombo.setEmptySelectionAllowed(false);
-			funcCombo.setTextInputAllowed(false);
+			funcCombo.setRequired(true);
+			//funcCombo.setTextInputAllowed(false);
 			funcCombo.setWidth(500, Unit.PIXELS);
-			vl.addComponent(funcCombo);
+			vl.add(funcCombo);
 			binder.bind(funcCombo, o -> o.analysisfunction, (o,v) -> o.analysisfunction = v);
 		}	
 		{
 			TextArea textArea = new TextArea("Rating-Funktion (Javascript)");
 			textArea.setWidth(600, Unit.PIXELS);
 			textArea.setHeight(80, Unit.PIXELS);
-			vl.addComponent(textArea);
+			vl.add(textArea);
 			binder.forField(textArea).withValidator(new JsValidator()).bind(o -> o.ratingfunc, (o,v) -> o.ratingfunc = v);
 		}
 		{
 			TextField textField = new TextField("Radius Objektfilterung (0 bedeutet keine Einschränkung)");
-			vl.addComponent(textField);
+			vl.add(textField);
 			binder.bind(textField, o -> o.radius + "", (o,v) -> o.radius = Double.parseDouble(v));
 		}
 		
@@ -121,8 +118,6 @@ public class AnalysisForm extends AbstractForm {
 	@Override
 	protected void saveData() throws ValidationException {
 			binder.writeBean(analysis);
-
 	}
-	
 
 }

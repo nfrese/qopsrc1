@@ -3,7 +3,7 @@ package at.qop.qopwebui.admin;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.ListSelect;
+import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 
@@ -35,7 +35,7 @@ public class VectorLayerDataTab extends AbstractLayerDataTab {
 		return new ExportShapefiles(tableNames);
 	}
 	
-	protected void refreshList(IGenericDomain gd, ListSelect<QopDBTable> listSelect) {
+	protected void refreshList(IGenericDomain gd, MultiSelectListBox<QopDBTable> listSelect) {
 		QopDBMetadata meta = gd.getMetadata();
 		listSelect.setItems(meta.tables.stream().filter(t->t.isGeometric()).collect(Collectors.toList()));
 	}

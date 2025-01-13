@@ -16,10 +16,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.vaadin.server.VaadinServlet;
-
 import at.qop.qoplib.Config;
-import at.qop.qopwebui.QopUI.QopUIServlet;
 import at.qop.qopwebui.admin.AdminUI;
 
 import org.apache.catalina.Context;
@@ -81,7 +78,7 @@ public class DBConfigurationBean {
 //          "hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         //hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "update");
         hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.spatial.dialect.postgis.PostgisDialect" );
-        hibernateProperties.setProperty("javax.persistence.jdbc.driver", "org.postgresql.Driver" );
+        hibernateProperties.setProperty("jakarta.persistence.jdbc.driver", "org.postgresql.Driver" );
         hibernateProperties.setProperty("hibernate.show_sql", "true" );
         hibernateProperties.setProperty("hibernate.cache.default_cache_concurrency_strategy"
            , "nonstrict-read-write" );
@@ -102,15 +99,15 @@ public class DBConfigurationBean {
 //      };
 //    }
     
-	@Bean(name="springBootServletRegistrationBean")
-    public ServletRegistrationBean<?> servletRegistrationBean() {
-		VaadinServlet servlet = new QopUIServlet();
-		return new ServletRegistrationBean<>(servlet, "/qopwebui/*");
-    }
-	
-	@Bean(name="springBootServletRegistrationBean")
-    public ServletRegistrationBean<?> servletRegistrationBean2() {
-		VaadinServlet servlet = new AdminUI.AdminUIServlet();
-		return new ServletRegistrationBean<>(servlet, "/qopwebui/admin/*");
-    }
+//	@Bean(name="springBootServletRegistrationBean")
+//    public ServletRegistrationBean<?> servletRegistrationBean() {
+//		QopUIServlet servlet = new QopUIServlet();
+//		return new ServletRegistrationBean<>(servlet, "/qopwebui/*");
+//    }
+//	
+//	@Bean(name="springBootServletRegistrationBean2")
+//    public ServletRegistrationBean<?> servletRegistrationBean2() {
+//		AdminUIServlet servlet = new AdminUI.AdminUIServlet();
+//		return new ServletRegistrationBean<>(servlet, "/qopwebui/admin/*");
+//    }
 }

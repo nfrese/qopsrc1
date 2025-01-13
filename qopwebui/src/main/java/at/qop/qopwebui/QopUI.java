@@ -26,71 +26,56 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EventObject;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.stream.Stream;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.vaadin.addon.leaflet.LCircle;
-import org.vaadin.addon.leaflet.LFeatureGroup;
-import org.vaadin.addon.leaflet.LMap;
-import org.vaadin.addon.leaflet.LMarker;
-import org.vaadin.addon.leaflet.LPolyline;
-import org.vaadin.addon.leaflet.LTileLayer;
-import org.vaadin.addon.leaflet.LeafletLayer;
-import org.vaadin.addon.leaflet.util.JTSUtil;
-import org.vaadin.addons.autocomplete.AutocompleteExtension;
-import org.vaadin.addons.autocomplete.converter.SuggestionCaptionConverter;
-import org.vaadin.addons.autocomplete.converter.SuggestionValueConverter;
-import org.vaadin.addons.autocomplete.event.SuggestionSelectEvent;
-import org.vaadin.addons.autocomplete.event.SuggestionSelectListener;
-import org.vaadin.addons.autocomplete.generator.SuggestionGenerator;
+import org.vaadin.stefan.table.Table;
 
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.event.EventRouter;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.Page;
-import com.vaadin.server.Page.Styles;
-import com.vaadin.server.Resource;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.slider.SliderOrientation;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.Slider;
-import com.vaadin.ui.Slider.ValueOutOfBoundsException;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.RangeInput;
+import com.vaadin.flow.component.html.RangeInput.Orientation;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.InputStreamFactory;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinServlet;
+import com.vaadin.flow.theme.Theme;
+
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 
 import at.qop.qoplib.Config;
@@ -120,8 +105,23 @@ import at.qop.qopwebui.components.ChartDialog;
 import at.qop.qopwebui.components.DownloadDialog;
 import at.qop.qopwebui.components.ExceptionDialog;
 import at.qop.qopwebui.components.InfoDialog;
+import jakarta.servlet.annotation.WebInitParam;
+import jakarta.servlet.annotation.WebServlet;
+import software.xdev.vaadin.maps.leaflet.MapContainer;
+import software.xdev.vaadin.maps.leaflet.basictypes.LLatLng;
+import software.xdev.vaadin.maps.leaflet.layer.LLayer;
+import software.xdev.vaadin.maps.leaflet.layer.other.LFeatureGroup;
+import software.xdev.vaadin.maps.leaflet.layer.raster.LTileLayer;
+import software.xdev.vaadin.maps.leaflet.layer.ui.LMarker;
+import software.xdev.vaadin.maps.leaflet.layer.vector.LCircle;
+import software.xdev.vaadin.maps.leaflet.layer.vector.LPathOptions;
+import software.xdev.vaadin.maps.leaflet.layer.vector.LPolyline;
+import software.xdev.vaadin.maps.leaflet.map.LMap;
+import software.xdev.vaadin.maps.leaflet.registry.LComponentManagementRegistry;
+import software.xdev.vaadin.maps.leaflet.registry.LDefaultComponentManagementRegistry;
 
-@Theme("valo")
+//@Theme("valo")
+@Route("/qop/ui")
 public class QopUI extends ProtectedUI {
 
 	private static final long serialVersionUID = 1L;
@@ -133,86 +133,133 @@ public class QopUI extends ProtectedUI {
 	private ProgressBar progress;
 	private LMap leafletMap;
 	private LFeatureGroup lfgResults;
-	private GridLayout grid;
-	private Label overallRatingLabel;
+	private Table grid;
+	private Span overallRatingLabel;
 
+	public QopUI() {
+		ainit(null);
+	}
+	
+	private Stream<String> simulateBackendQuery(Optional<String> filter, long limit, long offset) {
+		AddressLookup addressService = new HTTPAddressClient(Config.read().getAddressLookupURL());
+
+		List<String> r = new ArrayList<String>();
+		
+		if (!filter.isPresent())
+		{
+			List<Address> addresses = addressService.fetchAddresses(
+					(int)offset,
+					(int)limit,
+					filter.get());
+			for (Address addr : addresses) {
+				r.add(addr.name);
+			}
+		}
+		
+		return r.stream();
+		
+//		return  countries.stream()
+//	            .filter(item -> !filter.isPresent() || item.contains(filter.get())).skip(offset).limit(limit);
+	}
+	
 	@Override
 	protected void ainit(VaadinRequest vaadinRequest) {
 
 
-		final Label title  = new Label("<big><b>QOP Standortbewertung</b></big>", ContentMode.HTML);
+		final Span title  = new Span("<big><b>QOP Standortbewertung</b></big>");
 
 		List<Profile> profiles = profilesForUser();
 		ComboBox<Profile> profileCombo = new ComboBox<>("Profilauswahl", profiles);
 		if (profiles.size() > 0)
 		{
-			profileCombo.setSelectedItem(profiles.get(0));
+			profileCombo.setValue(profiles.get(0));
 			currentProfile = profiles.get(0);
 		}
-		profileCombo.setEmptySelectionAllowed(false);
+		profileCombo.setRequired(true);
 		
-		profileCombo.addSelectionListener(event -> {
-			currentProfile = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
+		profileCombo.addValueChangeListener(event -> {
+			currentProfile = event.getValue();
 			startCalculationWCatch();
 		});
-		AddressLookup addressService = new HTTPAddressClient(Config.read().getAddressLookupURL());
 		
-		TextField addressSearchField = new TextField();
-		addressSearchField.setWidth(100, Unit.PERCENTAGE);
+//		TextField addressSearchField = new TextField();
+//		addressSearchField.setWidth(100, Unit.PERCENTAGE);
+//		addressSearchField.focus();
+		
+		ComboBox<String> addressSearchField = new ComboBox<>("Select a country");
 		addressSearchField.focus();
 		
-		SuggestionGenerator<Address> generator = new SuggestionGenerator<Address>() {
-
-			@Override
-			public List<Address> apply(String query, Integer limit) {
-				List<Address> addresses = addressService.fetchAddresses(
-						0,
-						limit,
-						query);
-				System.out.println(addresses);
-				return addresses;
-			}};
-			
-			
-		SuggestionValueConverter<Address> valueConverter = new SuggestionValueConverter<Address>() {
-
-			@Override
-			public String apply(Address suggestion) {
-				return suggestion.name;
-			}
-			
-		};
-		SuggestionCaptionConverter<Address> captionConverter = new SuggestionCaptionConverter<Address>() {
-
-			@Override
-			public String apply(Address suggestion, String query) {
-			    return "<div class='suggestion-container'>"
-			            //+ "<img src='" + user.getPicture() + "' class='userimage'>"
-			            + "<span class='username'>"
-			            + suggestion.name.replaceAll("(?i)(" + query + ")", "<b>$1</b>")
-			            + "</span>"
-			            + "</div>";
-			}
-			
-		};
-		AutocompleteExtension<Address> ace = new AutocompleteExtension<Address>(addressSearchField);
-		ace.setSuggestionGenerator(generator, valueConverter, captionConverter);
-		ace.showSuggestions();
-		ace.setSuggestionDelay(350);
+		addressSearchField.setItems(query->{
+            Optional<String> filter = query.getFilter();
+            int limit = query.getLimit();
+            int offset = query.getOffset();
+            return simulateBackendQuery(filter,limit,offset);
+        });
+		
+//		SuggestionGenerator<Address> generator = new SuggestionGenerator<Address>() {
+//
+//			@Override
+//			public List<Address> apply(String query, Integer limit) {
+//				List<Address> addresses = addressService.fetchAddresses(
+//						0,
+//						limit,
+//						query);
+//				System.out.println(addresses);
+//				return addresses;
+//			}};
+//			
+//			
+//		SuggestionValueConverter<Address> valueConverter = new SuggestionValueConverter<Address>() {
+//
+//			@Override
+//			public String apply(Address suggestion) {
+//				return suggestion.name;
+//			}
+//			
+//		};
+//		SuggestionCaptionConverter<Address> captionConverter = new SuggestionCaptionConverter<Address>() {
+//
+//			@Override
+//			public String apply(Address suggestion, String query) {
+//			    return "<div class='suggestion-container'>"
+//			            //+ "<img src='" + user.getPicture() + "' class='userimage'>"
+//			            + "<span class='username'>"
+//			            + suggestion.name.replaceAll("(?i)(" + query + ")", "<b>$1</b>")
+//			            + "</span>"
+//			            + "</div>";
+//			}
+//			
+//		};
+//		AutocompleteExtension<Address> ace = new AutocompleteExtension<Address>(addressSearchField);
+//		ace.setSuggestionGenerator(generator, valueConverter, captionConverter);
+//		ace.showSuggestions();
+//		ace.setSuggestionDelay(350);
 
 		lonLatTf = new TextField();
 		lonLatTf.setWidth(300, Unit.PIXELS);
 		Button toLonLatButton = new Button("Los");
 		
-		leafletMap = new LMap();
-		leafletMap.setWidth(100, Unit.PERCENTAGE);
-		leafletMap.setHeight(100, Unit.PERCENTAGE);
-		LTileLayer baseLayerOsm = new LTileLayer();
-		baseLayerOsm.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+		final LDefaultComponentManagementRegistry reg = new LDefaultComponentManagementRegistry(this);
+		
+		// Create and add the MapContainer (which contains the map) to the UI
+		final MapContainer mapContainer = new MapContainer(reg);
+		//mapContainer.setSizeFull();
+		mapContainer.setWidth("600px");
+		mapContainer.setHeight("400px");
+		
+		LMap leafletMap = mapContainer.getlMap();
+		LTileLayer baseLayerOsm = LTileLayer.createDefaultForOpenStreetMapTileServer(reg);
+//		baseLayerOsm.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+		leafletMap.addLayer(baseLayerOsm);
+        //leafletMap = new LMap();
+		//leafletMap.setWidth(100, Unit.PERCENTAGE);
+		//leafletMap.setHeight(100, Unit.PERCENTAGE);
+		//LTileLayer baseLayerOsm = new LTileLayer();
+		//baseLayerOsm.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
 		baseLayerOsm.setOpacity(0.9);
-		leafletMap.addBaseLayer(baseLayerOsm, "OSM");
+		//leafletMap.addBaseLayer(baseLayerOsm, "OSM");
 
-		LFeatureGroup lfg = new LFeatureGroup();
+		LFeatureGroup lfg = new LFeatureGroup(reg);
 		leafletMap.addLayer(lfg);
 
 		toLonLatButton.addClickListener(l -> {
@@ -223,12 +270,13 @@ public class QopUI extends ProtectedUI {
 				resetResults(lfg);
 				resetAddressSearch(addressSearchField);
 				
-				LMarker lm = new LMarker(start);
-				lm.setCaption("<b>Lon, Lat Eingabe:</b><br>" +lonLatStr);
-				lfg.addComponent(lm);
+				LLatLng latLon = latLng(reg, start);
+				LMarker lm = new LMarker(reg, latLon);
+				lm.bindPopup("<b>Lon, Lat Eingabe:</b><br>" +lonLatStr);
+				lfg.addLayer(lm);
 				
 				startCalculation(start);
-				leafletMap.zoomToContent();
+				leafletMap.flyTo(latLon);
 				
 			} catch (IllegalArgumentException ex)
 			{
@@ -236,60 +284,61 @@ public class QopUI extends ProtectedUI {
 			}
 		});
 		
-		ace.addSuggestionSelectListener(new SuggestionSelectListener<Address>() {
-			
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void suggestionSelect(SuggestionSelectEvent<Address> event) {
-				resetResults(lfg);
-
-				currentAddress = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
-				if (currentAddress != null) {
-					LMarker lm = new LMarker(currentAddress.geom);
-					lm.setCaption("<b>Aktuelle Adresse:</b><br>" + currentAddress.name);
-					lfg.addComponent(lm);
-					startCalculationWCatch();
-					leafletMap.zoomToContent();
-				}
-				
-			}
-		});
+//		ace.addSuggestionSelectListener(new SuggestionSelectListener<Address>() {
+//			
+//			private static final long serialVersionUID = 1L;
+//
+//			@Override
+//			public void suggestionSelect(SuggestionSelectEvent<Address> event) {
+//				resetResults(lfg);
+//
+//				currentAddress = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
+//				if (currentAddress != null) {
+//					var latLon = latLng(reg, currentAddress.geom);
+//					LMarker lm = new LMarker(reg, latLon);
+//					lm.bindTooltip("<b>Aktuelle Adresse:</b><br>" + currentAddress.name);
+//					lfg.addLayer(lm);
+//					startCalculationWCatch();
+//					leafletMap.flyTo(latLon);
+//				}
+//				
+//			}
+//		});
 		
-		lfgResults = new LFeatureGroup();
+		lfgResults = new LFeatureGroup(reg);
 		leafletMap.addLayer(lfgResults);
 
-		leafletMap.addClickListener(l -> {
-			org.vaadin.addon.leaflet.shared.Point start = l.getPoint();
-			Point startJts = CRSTransform.gfWGS84.createPoint(new Coordinate(start.getLon(), start.getLat()));
-			setLonLat(startJts, true);
-			
-			resetResults(lfg);
-			resetAddressSearch(addressSearchField);
-
-			LMarker lm = new LMarker(startJts);
-			lm.setCaption("<b>Aktuelle Position:</b><br>" +startJts);
-			lfg.addComponent(lm);
-			startCalculation(startJts);
-			leafletMap.zoomToContent();
-			
-		});
+//		leafletMap. .addClickListener(l -> {
+//			org.vaadin.addon.leaflet.shared.Point start = l.getPoint();
+//			Point startJts = CRSTransform.gfWGS84.createPoint(new Coordinate(start.getLon(), start.getLat()));
+//			setLonLat(startJts, true);
+//			
+//			resetResults(lfg);
+//			resetAddressSearch(addressSearchField);
+//
+//			LMarker lm = new LMarker(startJts);
+//			lm.setCaption("<b>Aktuelle Position:</b><br>" +startJts);
+//			lfg.addComponent(lm);
+//			startCalculation(startJts);
+//			leafletMap.zoomToContent();
+//			
+//		});
 		
-		grid = new GridLayout(6, 1);
-		grid.setSpacing(true);
+		grid = new Table(); //new Grid(6, 1);
+		// grid.setSpacing(true); TODO
 
-		overallRatingLabel = new Label("",  ContentMode.HTML);
+		overallRatingLabel = new Span("");
 		
 		locTabs = new TabSheet();
 		{
 			HorizontalLayout t = new HorizontalLayout(addressSearchField);
 			t.setHeight(50, Unit.PIXELS);
 			t.setWidth(100, Unit.PERCENTAGE);
-			locTabs.addTab(t, "Adresse");
-			Alignment alignment = Alignment.TOP_LEFT;
-			t.setComponentAlignment(addressSearchField, alignment);
+			locTabs.add("Adresse", t);
+			Alignment alignment = Alignment.START;//     TOP_LEFT;
+			t.setVerticalComponentAlignment(alignment, addressSearchField);
 		}
-		locTabs.addTab(new HorizontalLayout(lonLatTf, toLonLatButton), "Lon, Lat");
+		locTabs.add("Lon, Lat", new HorizontalLayout(lonLatTf, toLonLatButton));
 		
 		
 		progress = new ProgressBar();
@@ -302,28 +351,33 @@ public class QopUI extends ProtectedUI {
 		if (isAdmin)
 		{
 			Button exportJSONButton = new Button("JSON");
-			exportJSONButton.addStyleName(ValoTheme.BUTTON_LINK);
+			//exportJSONButton.addStyleName(ValoTheme.BUTTON_LINK); // TODO
 			exportJSONButton.addClickListener(l -> {
 				exportCurrentAsJSON();
 			});
 			
-			topHl.addComponent(exportJSONButton);
+			topHl.add(exportJSONButton);
 		}
 		
 		VerticalLayout vl = new VerticalLayout(topHl, profileCombo, locTabs, new Label(""), grid, overallRatingLabel);
 		vl.setSizeUndefined();
-		Panel panel = new Panel();
-		panel.setContent(vl);
-		panel.setSizeFull();
-		HorizontalSplitPanel hl = new HorizontalSplitPanel(panel, leafletMap);
-		hl.setSplitPosition(60, Unit.PERCENTAGE);
+//		Panel panel = new Panel();
+//		panel.setContent(vl);
+//		panel.setSizeFull();
+		SplitLayout hl = new SplitLayout(vl, mapContainer);
+		//hl.setSplitPosition(60, Unit.PERCENTAGE);
+		hl.setSplitterPosition(60);
 		hl.setSizeFull();
-		setContent(hl);
-		Styles styles = Page.getCurrent().getStyles();
-		styles.add(".autocomplete-suggestion-list-wrapper{\n" + 
-				"position: fixed;\n" + 
-				"}");
+		add(hl);
+//		Styles styles = Page.getCurrent().getStyles(); TODO
+//		styles.add(".autocomplete-suggestion-list-wrapper{\n" + 
+//				"position: fixed;\n" + 
+//				"}");
 
+	}
+
+	private LLatLng latLng(LComponentManagementRegistry reg, Point start) {
+		return new LLatLng(reg, start.getY(), start.getX());
 	}
 
 	private void exportCurrentAsJSON() {
@@ -360,11 +414,11 @@ public class QopUI extends ProtectedUI {
 			bashScript.append("curl -X POST -H \"Content-Type: application/json\" -d @topost.json \"http://SERVER:PORT/qopwebui/batchcalculation_servlet?username=USERNAME&password=PASSWORD\"\n");
 			
 			
-			StreamSource source = new StreamSource() {
+			InputStreamFactory isf = new InputStreamFactory() {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				public InputStream getStream() {
+				public InputStream createInputStream() {
 					try {
 						return new ByteArrayInputStream(bashScript.toString().getBytes("UTF-8"));
 					} catch (UnsupportedEncodingException e) {
@@ -373,7 +427,7 @@ public class QopUI extends ProtectedUI {
 				}
 			};
 			
-    		Resource resource = new StreamResource(source, "export_" + this.currentProfile + "_at_" + this.currentAddress + ".sh");
+			StreamResource resource = new StreamResource("export_" + this.currentProfile + "_at_" + this.currentAddress + ".sh", isf);
 			DownloadDialog dd = new DownloadDialog("Downlaod JSON", "CurrentRequestAsScript", resource);
 			dd.show();
 		}
@@ -383,13 +437,13 @@ public class QopUI extends ProtectedUI {
 		}
 	}
 
-	protected void resetAddressSearch(TextField filtercombo) {
-		filtercombo.setValue("");
+	protected void resetAddressSearch(ComboBox<String> addressSearchField) {
+		addressSearchField.clear();
 	}
 
 	protected void resetResults(LFeatureGroup lfg) {
-		lfg.removeAllComponents();
-		lfgResults.removeAllComponents();
+//		lfg.removeAllComponents(); TODO
+//		lfgResults.removeAllComponents();
 	}
 
 	private void setLonLat(Point point, boolean switchTab)
@@ -397,7 +451,7 @@ public class QopUI extends ProtectedUI {
 		lonLatTf.setValue(point.getCoordinate().x + ", " + point.getCoordinate().y);
 		if (switchTab)
 		{
-			locTabs.setSelectedTab(1);
+			locTabs.setSelectedIndex(1);
 		}
 	}
 	
@@ -411,7 +465,7 @@ public class QopUI extends ProtectedUI {
 	}
 
 
-	EventRouter evr = new EventRouter();
+	//EventRouter evr = new EventRouter();
 
 	public static class SliderChangedEvent extends EventObject {
 
@@ -429,11 +483,12 @@ public class QopUI extends ProtectedUI {
 
 	public void addSliderChangedListener(SliderChangedListener l)
 	{
-		try {
-			evr.addListener(SliderChangedEvent.class, l, SliderChangedListener.class.getMethod("sliderChanged", SliderChangedEvent.class));
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e);
-		}
+		// TODO
+//		try {
+//			evr.addListener(SliderChangedEvent.class, l, SliderChangedListener.class.getMethod("sliderChanged", SliderChangedEvent.class));
+//		} catch (NoSuchMethodException | SecurityException e) {
+//			throw new RuntimeException(e);
+//		}
 	}
 	
 	private void startCalculation() {
@@ -494,12 +549,13 @@ public class QopUI extends ProtectedUI {
 				String title = section.getTitle();
 				if (title != null && !title.isEmpty())
 				{
-					grid.addComponent(new Label("<b><u>" + title + "</u></b>",  ContentMode.HTML));
-					grid.addComponent(new Label("",  ContentMode.HTML));
-					grid.addComponent(new Label("",  ContentMode.HTML));
-					grid.addComponent(new Label("",  ContentMode.HTML));
-					grid.addComponent(new Label("",  ContentMode.HTML));
-					grid.addComponent(new Label("",  ContentMode.HTML));
+					var row = grid.addRow();
+					row.addCells(new Span("<b><u>" + title + "</u></b>"),
+					new Span(""),
+					new Span(""),
+					new Span(""),
+					new Span(""),
+					new Span(""));
 				}
 				gridAddHeaders();
 
@@ -507,70 +563,74 @@ public class QopUI extends ProtectedUI {
 				{
 					LayerCalculation lc = (LayerCalculation)ilc; 
 					
-					grid.addComponent(new Label(lc.analysis().description,  ContentMode.HTML));
+					var row = grid.addRow();
+					
+					row.addCells(new Span(lc.analysis().description));
 
 					if (lc.charts != null && lc.charts.size() > 0)
 					{
 						HorizontalLayout hl = new HorizontalLayout();
 
 						for (QopChart chart : lc.charts) {
-							VaadinIcons icon = VaadinIcons.CHART;
+							VaadinIcon icon = VaadinIcon.CHART;
 
 							if (chart instanceof QopPieChart)
 							{
-								icon = VaadinIcons.PIE_CHART;
+								icon = VaadinIcon.PIE_CHART;
 							}
 							else if (chart instanceof QopPieChart)
 							{
-								icon = VaadinIcons.BAR_CHART;
+								icon = VaadinIcon.BAR_CHART;
 							}
 
-							Button chartButton = new Button("", icon);
+							Button chartButton = new Button("", icon.create());
 							chartButton.addClickListener(e -> {
 								new ChartDialog(lc.analysis().description, "", chart.createChart()).show();
 							});
-							hl.addComponent(chartButton);
+							hl.add(chartButton);
 						}
 
-						grid.addComponent(hl);
+						row.addCells(hl);
 					}
 					else
 					{
-						grid.addComponent(new Label(""));
+						row.addCells(new Span(""));
 					}
 
 					if (lc.params.ratingvisible)
 					{
-						grid.addComponent(new Label(formatDouble2Decimal(lc.result),  ContentMode.HTML));
-						grid.addComponent(new Label(formatDouble2Decimal(lc.rating),  ContentMode.HTML));
+						row.addCells(new Span(formatDouble2Decimal(lc.result)));
+						row.addCells(new Span(formatDouble2Decimal(lc.rating)));
 					}
 					else
 					{
-						grid.addComponent(new Label("",  ContentMode.HTML));
-						grid.addComponent(new Label("",  ContentMode.HTML));
+						row.addCells(new Span(""));
+						row.addCells(new Span(""));
 					}
-					Slider slider = new Slider(0, 2);
-					slider.setResolution(1);
+					RangeInput slider = new RangeInput();
+					slider.setMin(0.);
+					slider.setMax(2.);
+					slider.setStep(1.);
 					slider.setWidth(150, Unit.PIXELS);
-					slider.setOrientation(SliderOrientation.HORIZONTAL);
+					slider.setOrientation(Orientation.HORIZONTAL);
 					try {
 						slider.setValue(lc.weight);
 						slider.addValueChangeListener(l -> {
 							lc.weight = slider.getValue();
 							refreshOverallRating(calculation);
 						});
-						grid.addComponent(slider);
-					} catch (ValueOutOfBoundsException e) {
-						grid.addComponent(new Label("Bad Value " + lc.weight,  ContentMode.HTML));
+						row.addCells(slider);
+					} catch (Exception e) {
+						row.addCells(new Span("Bad Value " + lc.weight));
 					}				
 
 					Button button = new Button("Karte >");
-					button.setStyleName(ValoTheme.BUTTON_LINK);
+					//button.setStyleName(ValoTheme.BUTTON_LINK); // TODO
 					button.addClickListener(e -> {
 
 						if (lfgResults != null)
 						{
-							lfgResults.removeAllComponents();
+							removeAllComponents(lfgResults);
 
 							lc.keptTargets.stream().filter(lt -> lt instanceof LayerTargetDissolved).map(lt -> {
 
@@ -579,8 +639,8 @@ public class QopUI extends ProtectedUI {
 							}).distinct().forEach( parent -> {
 								if (parent != null)
 								{
-									Collection<LeafletLayer> lPoly = JTSUtil.toLayers(parent.geom);
-									lfgResults.addComponent(lPoly);
+									LLayer layer = layer(parent.geom);
+									lfgResults.addLayer(layer);
 								}
 							});
 
@@ -588,9 +648,10 @@ public class QopUI extends ProtectedUI {
 							lc.keptTargets.stream().forEach(lt -> {
 								if (lt.route != null)
 								{
-									LPolyline lp = new LPolyline(lt.route);
-									lp.setColor("#ff6020");
-									lfgResults.addComponent(lp);
+									LPolyline lp = layerPoly(lt.route);
+									//lp.setStyle(LPathOptions<LPathOptions<S>>)
+									//lp.setColor("#ff6020");
+									lfgResults.addLayer(lp);
 								}
 							});
 
@@ -598,71 +659,93 @@ public class QopUI extends ProtectedUI {
 
 								if (lt.geom instanceof Point)
 								{
-									LMarker lm = new LMarker((Point)lt.geom);
-									lm.addStyleName("specialstyle");
-									lm.setIcon(new ExternalResource("https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png"));
-									lm.setIconAnchor(new org.vaadin.addon.leaflet.shared.Point(12, 41));
+									LMarker lm = layerMarker((Point)lt.geom);
+//									lm.addStyleName("specialstyle");
+//									lm.setIcon(new ExternalResource("https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png"));
+//									lm.setIconAnchor(new org.vaadin.addon.leaflet.shared.Point(12, 41));
 									if (lt.caption != null)
 									{
-										lm.setPopup(lt.caption);
+										lm.bindPopup(lt.caption);
 									}
 
-									lfgResults.addComponent(lm);
+									lfgResults.addLayer(lm);
 								}
 								
 							});
 
-
-							if (lc.analysis().hasRadius()) {
-								LCircle circle = new LCircle(lc.start, lc.analysis().radius);
-								lfgResults.addComponent(circle);
-							}
-							leafletMap.zoomToContent();
+// TODO:
+//							if (lc.analysis().hasRadius()) {
+//								LCircle circle = new LCircle(lc.start, lc.analysis().radius);
+//								lfgResults.addComponent(circle);
+//							}
+//							leafletMap.zoomToContent();
 						}
 					});
-					grid.addComponent(button);
+					row.addCells(button);
 
 				};
-
-				grid.addComponent(new Label("<b>Summe</b>",  ContentMode.HTML));
-				grid.addComponent(new Label("",  ContentMode.HTML));
-				grid.addComponent(new Label("",  ContentMode.HTML));
+				{
+					var row = grid.addRow();
+					row.addCells(new Span("<b>Summe</b>"));
+					row.addCells(new Span(""));
+					row.addCells(new Span(""));
 				
-				Label sectionRatingLabel = new Label("",  ContentMode.HTML);
+				Span sectionRatingLabel = new Span("");
 				
-				grid.addComponent(sectionRatingLabel);
-				grid.addComponent(new Label("",  ContentMode.HTML));
-				grid.addComponent(new Label("",  ContentMode.HTML));
-				
+				row.addCells(sectionRatingLabel);
+				row.addCells(new Span(""));
+				row.addCells(new Span(""));
 				addSliderChangedListener(e -> {
-					sectionRatingLabel.setValue("<big><b>" + formatDouble2Decimal(section.rating) + "</b></big>");
+					sectionRatingLabel.setText("<big><b>" + formatDouble2Decimal(section.rating) + "</b></big>");
 				});
+				}
 			}
 			
 			addSliderChangedListener(e -> {
-				overallRatingLabel.setValue("<big><big><b>Gesamtindex: " + formatDouble2Decimal(calculation.getOverallRating()) + "</b></big></big>");
+				overallRatingLabel.setText("<big><big><b>Gesamtindex: " + formatDouble2Decimal(calculation.getOverallRating()) + "</b></big></big>");
 			});
 			refreshOverallRating(calculation);
 		}
 
+	private LMarker layerMarker(Point geom) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private LPolyline layerPoly(LineString route) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private LLayer layer(Geometry geom) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private void removeAllComponents(LFeatureGroup lfgResults2) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	protected void clearResults() {
-		grid.removeAllComponents();
-		overallRatingLabel.setValue("");
+		grid.removeAllRows();
+		overallRatingLabel.setText("");
 	}
 	
 
 	public void gridAddHeaders() {
-		grid.addComponent(new Label("<u>Berechnung</u>",  ContentMode.HTML));
-		grid.addComponent(new Label("",  ContentMode.HTML));
-		grid.addComponent(new Label("<u>Resultat</u>",  ContentMode.HTML));
-		grid.addComponent(new Label("<u>Bewertung</u>",  ContentMode.HTML));
-		grid.addComponent(new Label("<u>Gewicht</u>",  ContentMode.HTML));
-		grid.addComponent(new Label("",  ContentMode.HTML));
+		var head = grid.getHead().addRow();
+		head.addCells(new Span("<u>Berechnung</u>")
+				,new Span("")
+				,new Span("<u>Resultat</u>")
+				,new Span("<u>Bewertung</u>")
+				,new Span("<u>Gewicht</u>")
+				,new Span(""));
 	}
 
 	private void refreshOverallRating(Calculation calculation) {
 		calculation.runRating();
-		evr.fireEvent(new SliderChangedEvent(this));
+		// TODO evr.fireEvent(new SliderChangedEvent(this));
 	}
 
 	private String formatDouble2Decimal(double d) {
@@ -671,17 +754,13 @@ public class QopUI extends ProtectedUI {
 		return new DecimalFormat("#.##").format(d);
 	}
 
-	@WebServlet(urlPatterns = "/qop/ui/*", name = "QopUIServlet", asyncSupported = true)
-	@VaadinServletConfiguration(ui = QopUI.class, productionMode = false)
-	public static class QopUIServlet extends VaadinServlet {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			super.doGet(req, resp);
-		}
-		
-	}
+//	@WebServlet(urlPatterns = "/qop/ui/*", name = "QopUIServlet", asyncSupported = true)
+//	//@VaadinServletConfiguration(ui = QopUI.class, productionMode = false)
+//	@WebInitParam(name = "UI", value = "at.qop.qopwebui.QopUI")
+//	public static class QopUIServlet extends VaadinServlet {
+//		private static final long serialVersionUID = 1L;
+//		
+//	}
 	
 	@Override
 	protected boolean requiresAdminRole() {

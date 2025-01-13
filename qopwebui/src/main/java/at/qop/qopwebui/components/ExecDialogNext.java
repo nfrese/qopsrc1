@@ -20,7 +20,7 @@
 
 package at.qop.qopwebui.components;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 public class ExecDialogNext extends ExecDialog {
 
@@ -31,8 +31,8 @@ public class ExecDialogNext extends ExecDialog {
 	}
 
 	@Override
-	protected VaadinIcons okButtonSymbol() {
-		return VaadinIcons.ARROW_RIGHT;
+	protected VaadinIcon okButtonSymbol() {
+		return VaadinIcon.ARROW_RIGHT;
 	}
 
 	@Override

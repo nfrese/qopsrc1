@@ -23,30 +23,25 @@ package at.qop.qopwebui;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.server.Page;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.WrappedSession;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.LoginForm;
-import com.vaadin.ui.LoginForm.LoginEvent;
-import com.vaadin.ui.LoginForm.LoginListener;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.login.AbstractLogin.LoginEvent;
+import com.vaadin.flow.component.login.LoginForm;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.WrappedSession;
 
 import at.qop.qoplib.Config;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.QopLibManifest;
 import at.qop.qoplib.entities.Profile;
 
-public abstract class ProtectedUI extends UI {
+public abstract class ProtectedUI extends VerticalLayout {
 
 	private static final String AUTHENTICATED_AS = "authenticated_as";
 
@@ -70,7 +65,7 @@ public abstract class ProtectedUI extends UI {
 		}
 	}
 	
-	@Override
+	//@Override
 	protected void init(VaadinRequest vaadinRequest) {
 
 		Config cfg = Config.read();
@@ -96,7 +91,7 @@ public abstract class ProtectedUI extends UI {
 			}
 			else
 			{
-				setContent(new VerticalLayout(new Label("keine Admin Rechte!"), logoutButton()));
+				add(new VerticalLayout(new Label("keine Admin Rechte!"), logoutButton()));
 			}
 		}
 		else
@@ -119,49 +114,50 @@ public abstract class ProtectedUI extends UI {
 	{
 		Label version = new Label();
 		QopLibManifest manifest = new QopLibManifest();
-		version.setValue(manifest.getShortInfo());
+		version.add(manifest.getShortInfo());
 		
 		LoginForm loginForm = new LoginForm();
 		Label message = new Label();		
 		
-		loginForm.addLoginListener(new LoginListener() {
+		loginForm.addLoginListener(new ComponentEventListener<LoginEvent>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public void onLogin(LoginEvent event) {
-				String userName = event.getLoginParameter("username");
+			public void onComponentEvent(LoginEvent event) {
+				String userName = event.getUsername();
 				String passwd = cfg.getUserPassword(userName);
-				if (passwd != null && passwd.equals(event.getLoginParameter("password")))
+				if (passwd != null && passwd.equals(event.getPassword()))
 				{
-					message.setValue("");
+					message.setText("");
 					httpSess().setAttribute(AUTHENTICATED_AS, userName);
 					start(vaadinRequest, cfg, currentUserName());
 				}
 				else
 				{
-					message.setValue("Falscher Benutzername/Passwort");
+					message.setText("Falscher Benutzername/Passwort");
 				}
 			}
+
 		});
 		
 		VerticalLayout vl = new VerticalLayout(loginForm, message);
 		vl.setSizeFull();
 		VerticalLayout vl2 = new VerticalLayout(vl, version);
-		vl2.setComponentAlignment(vl, Alignment.TOP_CENTER);
-		vl2.setComponentAlignment(version, Alignment.TOP_CENTER);
+		vl2.setHorizontalComponentAlignment(Alignment.CENTER, vl);
+		vl2.setHorizontalComponentAlignment(Alignment.CENTER, version);
 		vl2.setSizeFull();
-		setContent(vl2);
-		setSizeFull();
+		add(vl2);
+		//setSizeFull();
 	}
 	
 	protected Button logoutButton()
 	{
 		Button logout = new Button("> " + currentUserName() + " abmelden");
-		logout.addStyleName(ValoTheme.BUTTON_LINK);
+		//logout.addStyleName(ValoTheme.BUTTON_LINK);
 		logout.addClickListener(e -> {
 			httpSess().removeAttribute(AUTHENTICATED_AS);
-			Page.getCurrent().reload();
+			// TODO Page.reload();
 		});
 		return logout;
 	}

@@ -23,16 +23,16 @@ package at.qop.qopwebui.admin;
 import java.io.IOException;
 import java.util.Set;
 
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.ListDataProvider;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.Utils;
@@ -49,7 +49,7 @@ public class AnalysisFunctionTab extends AbstractTab {
         grid.setWidth(100.0f, Unit.PERCENTAGE);
         grid.setHeight(100.0f, Unit.PERCENTAGE);
 
-        Button addanalysisButton = new Button("Auswertungs-Funktion hinzufügen...", VaadinIcons.PLUS);
+        Button addanalysisButton = new Button("Auswertungs-Funktion hinzufügen...", VaadinIcon.PLUS.create());
         addanalysisButton.addClickListener(e -> {
         	
         	AnalysisFunction analysis = new AnalysisFunction();
@@ -61,7 +61,7 @@ public class AnalysisFunctionTab extends AbstractTab {
 
         });
         
-        Button editanalysisButton = new Button("Auswertungs-Funktion bearbeiten...", VaadinIcons.EDIT);
+        Button editanalysisButton = new Button("Auswertungs-Funktion bearbeiten...", VaadinIcon.EDIT.create());
         editanalysisButton.setEnabled(false);
         editanalysisButton.addClickListener(e -> {
         	if (grid.getSelectedItems().size() == 1) {
@@ -76,7 +76,7 @@ public class AnalysisFunctionTab extends AbstractTab {
 		} );
 
         
-        Button cloneButton = new Button("Auswertungs-Funktion klonen...", VaadinIcons.QUOTE_RIGHT);
+        Button cloneButton = new Button("Auswertungs-Funktion klonen...", VaadinIcon.QUOTE_RIGHT.create());
         cloneButton.setEnabled(false);
         cloneButton.addClickListener(e -> {
         	if (grid.getSelectedItems().size() == 1) {
@@ -97,7 +97,7 @@ public class AnalysisFunctionTab extends AbstractTab {
         	}
         } );
         
-        Button deleteanalysisButton = new Button("Auswertungs-Funktion loeschen...", VaadinIcons.TRASH);
+        Button deleteanalysisButton = new Button("Auswertungs-Funktion loeschen...", VaadinIcon.TRASH.create());
         deleteanalysisButton.setEnabled(false);
         deleteanalysisButton.addClickListener(e -> {
         	if (grid.getSelectedItems().size() == 1) {
@@ -121,7 +121,7 @@ public class AnalysisFunctionTab extends AbstractTab {
 		});
 		
     	final VerticalLayout vl = new VerticalLayout(grid, new HorizontalLayout(addanalysisButton,  editanalysisButton, cloneButton, deleteanalysisButton));
-    	vl.setExpandRatio(grid, 3.0f);
+    	//vl.setExpandRatio(grid, 3.0f);
     	vl.setMargin(true);
     	vl.setSizeFull();
     	
@@ -132,10 +132,10 @@ public class AnalysisFunctionTab extends AbstractTab {
 
 	private void refreshGrid(Grid<AnalysisFunction> grid) {
 		grid.removeAllColumns();
-		grid.addColumn(item -> item.name).setCaption("Name");
-		grid.addColumn(item -> item.description).setCaption("Beschreibung");
-		grid.addColumn(item -> item.func).setCaption("Bewertungs-Funktion (Javascript)").setMaximumWidth(300);
-		grid.addColumn(item -> item.rvalUnit).setCaption("Einheit Resultat");
+		grid.addColumn(item -> item.name).setHeader("Name");
+		grid.addColumn(item -> item.description).setHeader("Beschreibung");
+		grid.addColumn(item -> item.func).setHeader("Bewertungs-Funktion (Javascript)").setWidth("300px");
+		grid.addColumn(item -> item.rvalUnit).setHeader("Einheit Resultat");
 
 		DataProvider<AnalysisFunction, ?> dataProvider = new ListDataProvider<AnalysisFunction>(LookupSessionBeans.profileDomain().listAnalysisFunctions());
 		grid.setDataProvider(dataProvider);

@@ -20,18 +20,19 @@
 
 package at.qop.qopwebui.admin.forms;
 
-import com.vaadin.data.ValidationException;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.binder.ValidationException;
 
-public abstract class AbstractForm extends Window {
+import at.qop.qopwebui.components.ClickListener;
+
+public abstract class AbstractForm extends Dialog {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -43,17 +44,17 @@ public abstract class AbstractForm extends Window {
 		this.setModal(true);
 		Component c = initComponents(create);
 		VerticalLayout subContent = new VerticalLayout();
-		subContent.addComponent(c);
-		this.setContent(subContent);
+		subContent.add(c);
+		this.add(subContent);
 		
 		Label validationMessage=new Label();
 		
-		Button okButton = new Button("Speichern", VaadinIcons.CHECK);
+		Button okButton = new Button("Speichern", VaadinIcon.CHECK.create());
 		okButton.addClickListener(e2 -> {
 			try {
 				saveData();
 			} catch (Exception e) {
-				validationMessage.setCaption(e.getMessage());
+				validationMessage.setText(e.getMessage());
 				e.printStackTrace();
 				return;
 			}
@@ -61,17 +62,17 @@ public abstract class AbstractForm extends Window {
 			this.close();
 		});
 		
-		Button cancelButton = new Button("Abbruch", VaadinIcons.CLOSE);
+		Button cancelButton = new Button("Abbruch", VaadinIcon.CLOSE.create());
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});
-		subContent.addComponent(new HorizontalLayout(okButton, cancelButton, validationMessage));
+		subContent.add(new HorizontalLayout(okButton, cancelButton, validationMessage));
 	}
 
 	public void show()
 	{
-		this.center();
-		UI.getCurrent().addWindow(this);
+		//this.center();
+		UI.getCurrent().add(this);
 	}
 	
 	public AbstractForm ok(ClickListener cl)

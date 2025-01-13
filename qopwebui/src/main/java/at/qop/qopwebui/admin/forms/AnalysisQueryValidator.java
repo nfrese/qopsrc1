@@ -22,9 +22,9 @@ package at.qop.qopwebui.admin.forms;
 
 import java.sql.SQLException;
 
-import com.vaadin.data.ValidationResult;
-import com.vaadin.data.Validator;
-import com.vaadin.data.ValueContext;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.binder.ValueContext;
 
 import at.qop.qoplib.entities.Analysis;
 public class AnalysisQueryValidator implements Validator<Analysis> {

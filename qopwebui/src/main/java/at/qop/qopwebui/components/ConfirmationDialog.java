@@ -20,12 +20,11 @@
 
 package at.qop.qopwebui.components;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class ConfirmationDialog extends AbstractDialog {
 	
@@ -41,28 +40,27 @@ public class ConfirmationDialog extends AbstractDialog {
 		this.setModal(true);
 		this.text = message;
 		VerticalLayout subContent = new VerticalLayout();
-		this.setContent(subContent);
+		this.add(subContent);
 		
-		Label msgLabel = new Label(text);
-		msgLabel.setIcon(icon());
+		Span msgLabel = new Span(new Span(text), icon().create());
 		
-		subContent.addComponent(msgLabel);
+		subContent. add(msgLabel);
 		HorizontalLayout buttons = buttons();
-		subContent.addComponent(buttons);
+		subContent.add(buttons);
 
 	}
 
-	public VaadinIcons icon() {
-		return VaadinIcons.QUESTION;
+	public VaadinIcon icon() {
+		return VaadinIcon.QUESTION;
 	}
 
 	public HorizontalLayout buttons() {
-		Button okButton = new Button("OK", VaadinIcons.CHECK);
+		Button okButton = new Button("OK", VaadinIcon.CHECK.create());
 		okButton.addClickListener(e2 -> {
 			if (cl != null) cl.buttonClick(null);
 			this.close(); 
 		});
-		Button cancelButton = new Button("Abbruch", VaadinIcons.CLOSE);
+		Button cancelButton = new Button("Abbruch", VaadinIcon.CLOSE.create());
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});

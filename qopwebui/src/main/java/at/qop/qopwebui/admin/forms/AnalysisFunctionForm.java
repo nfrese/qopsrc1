@@ -20,14 +20,14 @@
 
 package at.qop.qopwebui.admin.forms;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.ValidationException;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
 
 import at.qop.qoplib.entities.AnalysisFunction;
 import at.qop.qopwebui.components.JsValidator;
@@ -55,25 +55,25 @@ public class AnalysisFunctionForm extends AbstractForm {
 			TextField textField = new TextField("Name");
 			textField.setWidth(450, Unit.PIXELS);
 			textField.setEnabled(create);
-			vl.addComponent(textField);
+			vl.add(textField);
 			binder.bind(textField, o -> o.name, (o,v) -> o.name = v);
 		}	
 		{
 			TextField textField = new TextField("Beschreibung");
 			textField.setWidth(600, Unit.PIXELS);
-			vl.addComponent(textField);
+			vl.add(textField);
 			binder.bind(textField, o -> o.description, (o,v) -> o.description = v);
 		}	
 		{
 			TextArea textArea = new TextArea("Auswertungs-Funktion (Javascript)");
 			textArea.setWidth(640, Unit.PIXELS);
 			textArea.setHeight(200, Unit.PIXELS);
-			vl.addComponent(textArea);
+			vl.add(textArea);
 			binder.forField(textArea).withValidator(new JsValidator()).bind(o -> o.func, (o,v) -> o.func = v);
 		}
 		{
 			TextField textField = new TextField("Einheit Resultat (zb Minuten, Meter,...)");
-			vl.addComponent(textField);
+			vl.add(textField);
 			binder.bind(textField, o -> o.rvalUnit, (o,v) -> o.rvalUnit = v);
 		}
 		
@@ -86,7 +86,7 @@ public class AnalysisFunctionForm extends AbstractForm {
 			binder.writeBean(analysisFunction);
 		} catch (ValidationException e) {
 			new Notification("Validation error count: "
-					+ e.getValidationErrors().size()).show((Page)this.getParent());
+					+ e.getValidationErrors().size()).open();
 		}
 	}
 	

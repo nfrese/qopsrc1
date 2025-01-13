@@ -35,8 +35,8 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.StreamResource.StreamSource;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.InputStreamFactory;
 
 import at.qop.qoplib.Config;
 import at.qop.qoplib.TmpWorkingDir;
@@ -99,7 +99,7 @@ public class DumpDatabase {
 			execZip.onOK = (exit) -> {
 
 				StreamResource streamResource = createResource();
-				ConfirmationDialog dod = new DownloadDialog("Download", streamResource.getFilename(), streamResource)
+				ConfirmationDialog dod = new DownloadDialog("Download", streamResource.getName(), streamResource)
 						.cancel(() -> { cleanup(); })
 						.ok((e) -> { cleanup(); });
 				dod.show();
@@ -134,18 +134,18 @@ public class DumpDatabase {
 			downloadFilename = "qop_dump_all.zip";
 		}
 		
-		return new StreamResource(new StreamSource() {
+		return new StreamResource(downloadFilename, new InputStreamFactory() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public InputStream getStream() {
+			public InputStream createInputStream() {
 				try {
 					return new FileInputStream(zipFile);
 				} catch (FileNotFoundException e) {
 					throw new RuntimeException(e);
 				}
 			}
-		}, downloadFilename);
+		});
 	}
 
 }

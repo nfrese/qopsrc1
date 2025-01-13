@@ -20,12 +20,11 @@
 
 package at.qop.qopwebui.admin;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.dbconnector.metadata.QopDBColumn;
@@ -54,7 +53,7 @@ public class LayersTab extends AbstractTab {
 			}
 		}
     	
-		final Label label = new Label(html.toString(), ContentMode.HTML);
+		final Span label = new Span(html.toString());
         label.setWidth(100.0f, Unit.PERCENTAGE);
 
         final VerticalLayout vl = new VerticalLayout(label);

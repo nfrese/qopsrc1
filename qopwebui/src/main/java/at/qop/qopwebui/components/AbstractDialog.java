@@ -20,11 +20,11 @@
 
 package at.qop.qopwebui.components;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
-public class AbstractDialog extends Window {
+public class AbstractDialog extends Dialog {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -42,7 +42,7 @@ public class AbstractDialog extends Window {
 
 	public void show()
 	{
-		this.center();
-		UI.getCurrent().addWindow(this);
+		//this.center();
+		UI.getCurrent().add(this);
 	}
 }

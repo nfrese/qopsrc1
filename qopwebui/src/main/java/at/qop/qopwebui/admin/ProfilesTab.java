@@ -33,25 +33,26 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.vaadin.tatu.TwinColSelect;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.ListDataProvider;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Page;
-import com.vaadin.server.Resource;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.TwinColSelect;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.listbox.ListBox;
+import com.vaadin.flow.component.listbox.MultiSelectListBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.server.InputStreamFactory;
+import com.vaadin.flow.server.StreamResource;
 
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
@@ -74,11 +75,11 @@ public class ProfilesTab extends AbstractTab {
 	@Override
 	public Component initialize(Page page) {
 		
-		ListSelect<Profile> listSelect = new ListSelect<Profile>("Profil auswählen...");
-        listSelect.setRows(15);
+		MultiSelectListBox<Profile> listSelect = new MultiSelectListBox<Profile>(); // TODO "Profil auswählen..."
+        //listSelect.setRows(15);
         refreshProfileList(listSelect);
         
-        Button addProfileButton = new Button("Profil hinzufügen...", VaadinIcons.PLUS);
+        Button addProfileButton = new Button("Profil hinzufügen...", VaadinIcon.PLUS.create());
         addProfileButton.addClickListener(e -> {
 
         	Profile profile = new Profile();
@@ -90,7 +91,7 @@ public class ProfilesTab extends AbstractTab {
 
         });
         
-        Button editProfileButton = new Button("Profil bearbeiten..." , VaadinIcons.EDIT);
+        Button editProfileButton = new Button("Profil bearbeiten..." , VaadinIcon.EDIT.create());
         editProfileButton.setEnabled(false);
         editProfileButton.addClickListener(e -> {
 
@@ -107,7 +108,7 @@ public class ProfilesTab extends AbstractTab {
 
         });
         
-        Button cloneProfileButton = new Button("Profil klonen...", VaadinIcons.QUOTE_RIGHT);
+        Button cloneProfileButton = new Button("Profil klonen...", VaadinIcon.QUOTE_RIGHT.create());
         cloneProfileButton.setEnabled(false);
         cloneProfileButton.addClickListener(e -> {
 
@@ -136,7 +137,7 @@ public class ProfilesTab extends AbstractTab {
         	}
         });
         
-        Button removeProfileButton = new Button("Profil löschen...", VaadinIcons.TRASH);
+        Button removeProfileButton = new Button("Profil löschen...", VaadinIcon.TRASH.create());
         removeProfileButton.setEnabled(false);
         removeProfileButton.addClickListener(e -> {
         	Set<Profile> sel = listSelect.getSelectedItems();
@@ -151,7 +152,7 @@ public class ProfilesTab extends AbstractTab {
         	}
         });
  
-        Button profileAsJsonButton = new Button("Profile as JSON", VaadinIcons.DOWNLOAD);
+        Button profileAsJsonButton = new Button("Profile as JSON", VaadinIcon.DOWNLOAD.create());
         profileAsJsonButton.setEnabled(false);
         profileAsJsonButton.addClickListener(e -> {
         	Set<Profile> sel = listSelect.getSelectedItems();
@@ -163,11 +164,11 @@ public class ProfilesTab extends AbstractTab {
 					final String json = new ExportProfile().asJson(profile);
 					System.out.println(json);
 					
-					StreamSource source = new StreamSource() {
+					InputStreamFactory source = new InputStreamFactory() {
 						private static final long serialVersionUID = 1L;
 
 						@Override
-						public InputStream getStream() {
+						public InputStream createInputStream() {
 							try {
 								return new ByteArrayInputStream(json.getBytes("UTF-8"));
 							} catch (UnsupportedEncodingException e) {
@@ -176,7 +177,7 @@ public class ProfilesTab extends AbstractTab {
 						}
 					};
 					
-	        		Resource resource = new StreamResource(source, "export_profile_" + profile.name + ".json");
+					StreamResource resource = new StreamResource("export_profile_" + profile.name + ".json", source);
 					DownloadDialog dd = new DownloadDialog("Downlaod JSON", "Profiles", resource);
 					dd.show();
 
@@ -187,7 +188,7 @@ public class ProfilesTab extends AbstractTab {
         	}
         });
         
-        Button profileExportButton = new Button("Export Database for selected Profiles", VaadinIcons.INFO);
+        Button profileExportButton = new Button("Export Database for selected Profiles", VaadinIcon.INFO.create());
         profileExportButton.setEnabled(false);
         profileExportButton.addClickListener(e -> {
         	
@@ -253,42 +254,51 @@ public class ProfilesTab extends AbstractTab {
         });
         
         TwinColSelect<ProfileAnalysis> twinSelect =
-        	    new TwinColSelect<>("Auswertungen hinzufügen");
+        	    new TwinColSelect<>(); // TODO "Auswertungen hinzufügen"
 
-      	twinSelect.setRows(15);
+      	twinSelect.setHeight(80, Unit.PERCENTAGE);
         
-    	Grid<ProfileAnalysis> grid = new Grid<ProfileAnalysis>("Kategorien festlegen");
-    	grid.getEditor().setEnabled(true);
+    	Grid<ProfileAnalysis> grid = new Grid<ProfileAnalysis>(); // "Kategorien festlegen" TOdo
+    	//grid.getEditor().setEnabled(true);
         grid.setWidth(100.0f, Unit.PERCENTAGE);
         grid.setHeight(100.0f, Unit.PERCENTAGE);
-        grid.addColumn(item -> item.analysis.name).setCaption("Name");
-		grid.addColumn(item -> item.analysis.description).setCaption("Beschreibung");
-		grid.addColumn(item -> item.weight  +"").setCaption("Gewicht").setEditorComponent(new TextField(), 
-				(item,v)  -> { 
-					item.weight = Double.valueOf(v); 
+        grid.addColumn(item -> item.analysis.name).setHeader("Name");
+		grid.addColumn(item -> item.analysis.description).setHeader("Beschreibung");
+		grid.addColumn(item -> item.weight  +"").setHeader("Gewicht").setEditorComponent((item)  -> { 
+			return new TextField((v)  -> { 
+					item.weight = Double.valueOf(v.getValue()); 
 					LookupSessionBeans.profileDomain().updateProfileAnalysis(item);
 				});
-		grid.addColumn(item -> item.category).setCaption("Kategorie/Sortierung (zb 1.01)")
-			.setEditorComponent(new TextField(), 
-				(item,v)  -> { 
-					item.category = v; 
-					LookupSessionBeans.profileDomain().updateProfileAnalysis(item);
+		});
+		grid.addColumn(item -> item.category).setHeader("Kategorie/Sortierung (zb 1.01)")
+			.setEditorComponent( 
+				(item)  -> { 
+					return new TextField(item.category,
+							v -> { 
+								item.category = v.getValue(); 
+								LookupSessionBeans.profileDomain().updateProfileAnalysis(item);
+							}
+							);
 				});
 		
-		grid.addColumn(item -> item.categorytitle).setCaption("Kategorie-Titel (zb Ambience)")
-		.setMinimumWidth(190)
-		.setEditorComponent(new TextField(), 
-			(item,v)  -> { 
-				item.categorytitle = v; 
+		grid.addColumn(item -> item.categorytitle).setHeader("Kategorie-Titel (zb Ambience)")
+		.setWidth("190px")
+		.setEditorComponent((item)  -> { 
+			return new TextField(item.categorytitle,
+					v -> { 
+				item.categorytitle = v.getValue(); 
 				LookupSessionBeans.profileDomain().updateProfileAnalysis(item);
 			});
+			
+	});
 
-		grid.addColumn(item -> item.ratingvisible).setCaption("Einzel-Bewertung sichtbar")
-		.setEditorComponent(new CheckBox(), 
-			(item,v)  -> { 
-				item.ratingvisible = v; 
+		grid.addColumn(item -> item.ratingvisible).setHeader("Einzel-Bewertung sichtbar")
+		.setEditorComponent((item)  -> {return new Checkbox(item.ratingvisible, 
+			(v)  -> { 
+				item.ratingvisible = v.getValue(); 
 				LookupSessionBeans.profileDomain().updateProfileAnalysis(item);
 			});
+		});
 		
     	twinSelect.addSelectionListener(event -> {
     		if (!twinSelectSilent)
@@ -335,19 +345,19 @@ public class ProfilesTab extends AbstractTab {
 				removeProfileButton,
 				profileExportButton,
 				profileAsJsonButton);
-		vl.setExpandRatio(listSelect, 5.0f);
+		//vl.setExpandRatio(listSelect, 5.0f); // TODO
 		vl.setMargin(false);
 		vl.setHeight(100, Unit.PERCENTAGE);
 		vl.setWidth(240, Unit.PIXELS);
 		final HorizontalLayout hl = new HorizontalLayout( 
 				vl, twinSelect, grid);
 //		hl.setExpandRatio(grid, 1.7f);
-		hl.setExpandRatio(twinSelect, 1f);
+		//hl.setExpandRatio(twinSelect, 1f); TODO
 		hl.setMargin(true);
 		hl.setSizeFull();
 		
-		HorizontalSplitPanel hsp = new HorizontalSplitPanel(hl, grid);
-		hsp.setSplitPosition(50, Unit.PERCENTAGE);
+		SplitLayout hsp = new SplitLayout(hl, grid);
+		//hsp.setSplitPosition(50, Unit.PERCENTAGE); TODO
 		hsp.setSizeFull();
 		return hsp;
 	}
@@ -378,11 +388,11 @@ public class ProfilesTab extends AbstractTab {
 		twinSelect.updateSelection(currentProfile.profileAnalysis.stream().collect(Collectors.toSet())
 				, Collections.emptySet());
 
-		twinSelect.setItemCaptionGenerator(item -> item.analysis.name);
+		twinSelect.setItemLabelGenerator(item -> item.analysis.name);
 		twinSelectSilent = false;
 	}
 
-	private void refreshProfileList(ListSelect<Profile> listSelect) {
+	private void refreshProfileList(MultiSelectListBox<Profile> listSelect) {
 		listSelect.setItems(LookupSessionBeans.profileDomain().listProfiles());
 	}
 

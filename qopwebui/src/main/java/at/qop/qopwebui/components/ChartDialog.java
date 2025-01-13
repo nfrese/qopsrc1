@@ -32,13 +32,15 @@ import javax.imageio.ImageIO;
 
 import org.jfree.chart.JFreeChart;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.InputStreamFactory;
+import com.vaadin.flow.server.StreamResource;
+
 
 public class ChartDialog extends AbstractDialog {
 	
@@ -52,8 +54,8 @@ public class ChartDialog extends AbstractDialog {
 		super(title);
 		this.setModal(true);
 		this.text = message;
-		VerticalLayout subContent = new VerticalLayout();
-		this.setContent(subContent);
+		VerticalLayout subContent = new com.vaadin.flow.component.orderedlayout.VerticalLayout();
+		this.add(subContent);
 
 		BufferedImage image = chart.createBufferedImage(500, 500);
 		ByteArrayOutputStream imagebuffer = new ByteArrayOutputStream();
@@ -66,30 +68,30 @@ public class ChartDialog extends AbstractDialog {
 		ByteArrayInputStream bain = new ByteArrayInputStream(
 				imagebuffer.toByteArray());
 
-		StreamSource imagesource = new StreamSource() {
+		InputStreamFactory imagesource = new InputStreamFactory() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public InputStream getStream() {
+			public InputStream createInputStream() {
 				return bain;
 			}
 
 		};
 
 		StreamResource resource =
-				new StreamResource(imagesource, "chart.png");
+				new StreamResource( "chart.png", imagesource);
 
-		Image chartImage = new Image("Chart", resource);
+		Image chartImage = new Image(resource, "Chart");
 		chartImage.setWidth(480, Unit.PIXELS);
 		chartImage.setHeight(480, Unit.PIXELS);
-		subContent.addComponent(chartImage);
-		subContent.setExpandRatio(chartImage, 10.0f);
-		Button cancelButton = new Button("OK", VaadinIcons.CHECK);
+		subContent.add(chartImage);
+		//subContent.setExpandRatio(chartImage, 10.0f);
+		Button cancelButton = new Button("OK", VaadinIcon.CHECK.create());
 		cancelButton.addClickListener(e2 -> {
 			this.close(); 
 		});
-		subContent.addComponent(new HorizontalLayout(cancelButton));
+		subContent.add(new HorizontalLayout(cancelButton));
 
 	}
 

@@ -20,8 +20,8 @@
 
 package at.qop.qopwebui.admin;
 
-import com.vaadin.server.Page;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.page.Page;
 
 public abstract class AbstractTab {
 	

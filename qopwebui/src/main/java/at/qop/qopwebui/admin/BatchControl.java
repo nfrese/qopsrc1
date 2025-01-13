@@ -24,16 +24,16 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.server.Command;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.BatchCalculation;
@@ -75,8 +75,8 @@ public class BatchControl {
 		nameColumnTextField = new TextField("Caption column");
 		nameColumnTextField.setValue("name");
 		
-		progressLabel = new Label("", ContentMode.HTML);
-		batchInfoLabel = new Label("", ContentMode.HTML);
+		progressLabel = new Label(""); //, ContentMode.HTML);
+		batchInfoLabel = new Label(""); //, ContentMode.HTML);
 
 		batchButton = new Button("Batch Calculation");
 		batchButton.addClickListener(e -> {
@@ -85,7 +85,7 @@ public class BatchControl {
 			{
 				if (bc != null) throw new RuntimeException("dont!");
 
-				String pointTableName = pointsTableCombo.getSelectedItem().get();
+				String pointTableName = pointsTableCombo.getValue(); //  getSelectedItem().get();
 				String geomFieldName = "geom";
 				String nameFieldName = nameColumnTextField.getValue();
 				
@@ -93,30 +93,30 @@ public class BatchControl {
 					@Override
 					protected void progress(int overall_, int count_) {
 						super.progress(overall_, count_);
-						currentUI.access( new Runnable() {
-							public void run() {
+						currentUI.access( new Command() {
+							public void execute() {
 								progressBar.setValue((float)count_/(float)overall_);
 								
 								int percent = (100* count)/overall_;
 								String s = "Progress: " + count_ + "/" + overall_ + " = " + percent + "%";
-								progressLabel.setValue(s);
+								progressLabel.setText(s);
 							}}
 						);
 					}
 
 					protected void failed(Throwable t)
 					{
-						currentUI.access( new Runnable() {
-							public void run() {
+						currentUI.access( new Command() {
+							public void execute() {
 								if (t instanceof CancellationException)
 								{
 									new InfoDialog("Info", "Batch abgebrochen").show();
-									batchInfoLabel.setValue(batchInfoLabel.getValue() + "<br><b>Abgebrochen!</b>");
+									batchInfoLabel.setText(batchInfoLabel.getText() + "<br><b>Abgebrochen!</b>");
 								}
 								else
 								{
 									new ExceptionDialog("Batch fehlgeschlagen", t).show();
-									batchInfoLabel.setValue(batchInfoLabel.getValue() + "<br><b>Fehlgeschlagen!</b>");
+									batchInfoLabel.setText(batchInfoLabel.getText() + "<br><b>Fehlgeschlagen!</b>");
 								}
 								updateButtons();
 								currentUI.setPollInterval(-1);
@@ -128,10 +128,10 @@ public class BatchControl {
 
 					protected void success()
 					{
-						currentUI.access( new Runnable() {
-							public void run() {
+						currentUI.access( new Command() {
+							public void execute() {
 
-								batchInfoLabel.setValue(batchInfoLabel.getValue() + "<br><b>Erfolgreich!</b>");
+								batchInfoLabel.setText(batchInfoLabel.getText() + "<br><b>Erfolgreich!</b>");
 								updateButtons();
 								currentUI.setPollInterval(-1);
 							}
@@ -144,7 +144,7 @@ public class BatchControl {
 				t.start();
 				updateButtons();
 				currentUI.setPollInterval(500);
-				batchInfoLabel.setValue("Batch Verarbeitung Profil " + currentProfile.name + "<br>Tabelle batch_" + currentProfile.name + " wird geschrieben!");
+				batchInfoLabel.setText("Batch Verarbeitung Profil " + currentProfile.name + "<br>Tabelle batch_" + currentProfile.name + " wird geschrieben!");
 			}
 		});
 
@@ -161,14 +161,15 @@ public class BatchControl {
 		profileCombo = new ComboBox<>("Profilauswahl", profiles);
 		if (profiles.size() > 0)
 		{
-			profileCombo.setSelectedItem(profiles.get(0));
+			//profileCombo.setSelectedItem(profiles.get(0)); // TODO
 			currentProfile = profiles.get(0);
 		}
-		profileCombo.setEmptySelectionAllowed(false);
-		profileCombo.setTextInputAllowed(false);
+		profileCombo.setRequired(true); // setEmptySelectionAllowed(false);
+		//profileCombo.setTextInputAllowed(false);
 
-		profileCombo.addSelectionListener(event -> {
-			currentProfile = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
+		profileCombo.addValueChangeListener(event -> {
+			//currentProfile = event.getSelectedItem().isPresent() ? event.getSelectedItem().get() : null;
+			currentProfile = event.getValue();
 		});
 
 		updateButtons();
@@ -183,7 +184,7 @@ public class BatchControl {
 		this.profileCombo.setEnabled(bc == null);
 		this.cancelButton.setEnabled(bc != null);
 		this.batchInfoLabel.setEnabled(bc != null);
-		this.progressBar.setEnabled(bc != null);
+		//this.progressBar.setEnabled(bc != null); TOOD
 	}
 
 }

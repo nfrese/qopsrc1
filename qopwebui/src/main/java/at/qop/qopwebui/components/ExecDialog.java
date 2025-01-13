@@ -30,14 +30,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.IntConsumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class ExecDialog extends AbstractDialog {
 	
@@ -88,43 +88,44 @@ public class ExecDialog extends AbstractDialog {
 		this.setHeight(480, Unit.PIXELS);
 		VerticalLayout subContent = new VerticalLayout();
 		subContent.setSizeFull();
-		this.setContent(subContent);
+		this.add(subContent);
 		
-		Panel panel = new Panel();
+		Dialog panel = new Dialog();
 		console = new VerticalLayout();
 		panel.setSizeFull();
 		
-		panel.setContent(console);
+		panel.add(console);
 		
-		subContent.addComponent(panel);
-		subContent.setExpandRatio(panel, 10.0f);
-		closeButton = new Button("Schließen", VaadinIcons.CLOSE);
+		subContent.add(panel);
+		//subContent.setExpandRatio(panel, 10.0f); TODO
+		closeButton = new Button("Schließen", VaadinIcon.CLOSE.create());
 		closeButton.setEnabled(false);
 		closeButton.addClickListener(e2 -> {
 			onExit.run();
 			close();
 		});
 		
-		cancelButton = new Button("Abbruch", VaadinIcons.STOP);
+		cancelButton = new Button("Abbruch", VaadinIcon.STOP.create());
 		cancelButton.addClickListener(e2 -> {
 			cancel();
 		});
-		okButton = new Button(okButtonText(), okButtonSymbol());
+		okButton = new Button(okButtonText(), okButtonSymbol().create());
 		okButton.setEnabled(false);
 		okButton.addClickListener(e2 -> {
 			onOK.accept(exit);
 			close(); 
 		});
 
-		this.setClosable(false);
+		this.setCloseOnEsc(false);
+		this.setCloseOnOutsideClick(false);
 		UI.getCurrent().setPollInterval(1000);
 		hlButtons = new HorizontalLayout(cancelButton, closeButton, okButton);
-		subContent.addComponent(hlButtons);
+		subContent.add(hlButtons);
 
 	}
 
-	protected VaadinIcons okButtonSymbol() {
-		return VaadinIcons.CHECK;
+	protected VaadinIcon okButtonSymbol() {
+		return VaadinIcon.CHECK;
 	}
 
 	protected String okButtonText() {
@@ -158,7 +159,7 @@ public class ExecDialog extends AbstractDialog {
 						
 						if (exit == 0 || keepOn)
 						{
-							getUI().access(() -> {
+							getUI().get().access(() -> {
 								_executeCommands(cmdIt, addEnv, dir, keepOn, lastFailedExitCode);
 							});
 						}
@@ -193,7 +194,7 @@ public class ExecDialog extends AbstractDialog {
 	
 	public void executeCommand(String command, Map<String, String> addEnv, File dir, IntConsumer singleDone) {
 
-		console.addComponent(new Label("<b>" + command + "</b>", ContentMode.HTML));
+		console.add(new Span("<b>" + command + "</b>"));
 		
 		try {
 			String[] carr = new String[] {"bash", "-c", command};
@@ -207,15 +208,15 @@ public class ExecDialog extends AbstractDialog {
 					{
 						if (duplicateCount > 1)
 						{
-							getUI().access(() -> {
-								console.addComponent(new Label(lastLine + " repeated " + duplicateCount + " times"));
+							getUI().get().access(() -> {
+								console.add(new Span(lastLine + " repeated " + duplicateCount + " times"));
 							});
 						}
 						
 						lastLine = line;
 						duplicateCount = 1;
-						getUI().access(() -> {
-							console.addComponent(new Label(line));
+						getUI().get().access(() -> {
+							console.add(new Span(line));
 						});
 					}
 					else
@@ -231,9 +232,9 @@ public class ExecDialog extends AbstractDialog {
 
 				@Override
 				protected void print(String line) {
-					getUI().access(() -> {
-						Label label = new Label("<div style=\"color:red;\">" + line + "</div>", ContentMode.HTML);
-						console.addComponent(label);
+					getUI().get().access(() -> {
+						Span label = new Span("<div style=\"color:red;\">" + line + "</div>");
+						console.add(label);
 					});
 				}
 				
@@ -260,11 +261,11 @@ public class ExecDialog extends AbstractDialog {
 	}
 
 	protected void done(int exit) {
-		getUI().access(() -> {
+		getUI().get().access(() -> {
 			okButton.setEnabled(exit == 0);
 			cancelButton.setEnabled(false);
 			closeButton.setEnabled(true);
-			getUI().setPollInterval(-1);
+			getUI().get().setPollInterval(-1);
 			this.exit = exit;
 			onDone.accept(exit);
 		});

@@ -23,14 +23,14 @@ package at.qop.qopwebui.admin;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.server.Page;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.component.textfield.TextField;
 
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.TmpWorkingDir;
@@ -47,27 +47,25 @@ public class MiscTab extends AbstractTab {
 		final VerticalLayout vl = new VerticalLayout();
 		
 		{
-			Panel p = new Panel();
+			Span p = new Span();
 			TextField tfBezirkFilter = new TextField("Bezirkfilter (zb: 01)");
 			Button button = new Button("Adressen aktualisieren");
 			button.addClickListener(e -> {
-				new Notification("Lade die Adressen herunter",
-						"Moment",
-						Notification.Type.HUMANIZED_MESSAGE).show(page);
+				new Notification("Lade die Adressen herunter").open();
 				new PerformAddressUpdate().updateAddresses(tfBezirkFilter.getValue());
 			});
 			HorizontalLayout hl = new HorizontalLayout(button, tfBezirkFilter);
 			hl.setMargin(true);
-			p.setContent(hl);
-			vl.addComponent(p);
+			p.add(hl);
+			vl.add(p);
 		}
 		{
-			Panel p = new Panel();
-			p.setContent(new BatchControl().init());
-			vl.addComponent(p);
+			Span p = new Span();
+			p.add(new BatchControl().init());
+			vl.add(p);
 		}
 		{
-			Panel p = new Panel();
+			Span p = new Span();
 			Button dumpConfigButton = new Button("Konfigurationstabellen sichern");
 			dumpConfigButton.addClickListener(e -> {
 				DumpDatabase dd = new DumpDatabase(Constants.CONFIG_TABLES);
@@ -103,8 +101,8 @@ public class MiscTab extends AbstractTab {
 			
 			HorizontalLayout hl = new HorizontalLayout(dumpConfigButton, dumpAllButton, systemInfoButton);
 			hl.setMargin(true);
-			p.setContent(hl);
-			vl.addComponent(p);
+			p.add(hl);
+			vl.add(p);
 		}
 		vl.setMargin(true);
 		return vl;

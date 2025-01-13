@@ -23,16 +23,17 @@ package at.qop.qopwebui.admin.imports;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.ListDataProvider;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 
 import at.qop.qopwebui.components.AbstractDialog;
 
@@ -59,62 +60,63 @@ public class ImportShapefilesDialog extends AbstractDialog {
 		this.setHeight(480, Unit.PIXELS);
 		VerticalLayout subContent = new VerticalLayout();
 		subContent.setSizeFull();
-		this.setContent(subContent);
+		this.add(subContent);
 		
 		Grid<ImportFileCMD> grid = new Grid<ImportFileCMD>();
 		grid.setSizeFull();
 		
-		grid.addColumn(item -> item.importFlag).setCaption("Wird importiert")
-		.setEditorComponent(new CheckBox(), 
-				(item,v)  -> { 
-					item.importFlag = v; 
-				});
+		grid.addColumn(item -> item.importFlag).setHeader("Wird importiert")
+		.setEditorComponent(item -> { return new Checkbox(item.importFlag, 
+				(v)  -> { 
+					item.importFlag = v.getValue(); 
+				});});
 		
-		grid.addColumn(item -> item.getFilename()).setCaption("Shape");
-		grid.addColumn(item -> item.tableName).setCaption("als Tabelle")
-		.setEditorComponent(new TextField(), 
-			(item,v)  -> { 
-				item.tableName = v; 
-			});
+		grid.addColumn(item -> item.getFilename()).setHeader("Shape");
+		grid.addColumn(item -> item.tableName).setHeader("als Tabelle")
+		.setEditorComponent(item -> { return new TextField( 
+			(v)  -> { 
+				item.tableName = v.getValue(); 
+			});});
 		
-		grid.addColumn(item -> item.srid + "").setCaption("SRID"); /*.setEditorComponent(new TextField(), 
+		grid.addColumn(item -> item.srid + "").setHeader("SRID"); /*.setEditorComponent(new TextField(), 
 				(item,v)  -> { 
 					item.srid = Integer.valueOf(v); 
 				});*/
 		
-		grid.addColumn(item -> item.encoding).setCaption("Encoding (siehe CPG oder CST-Datei)")
-		.setEditorComponent(new TextField(), 
-				(item,v)  -> { 
-					item.encoding = v; 
-				});		
+		grid.addColumn(item -> item.encoding).setHeader("Encoding (siehe CPG oder CST-Datei)")
+		.setEditorComponent(item -> { return new TextField( 
+				(v)  -> { 
+					item.encoding = v.getValue(); 
+				});	});	
 		
-		grid.addColumn(item -> item.warnings.stream().collect(Collectors.joining(";"))).setCaption("Warning");
-		grid.addColumn(item -> item.error).setCaption("Error");
+		grid.addColumn(item -> item.warnings.stream().collect(Collectors.joining(";"))).setHeader("Warning");
+		grid.addColumn(item -> item.error).setHeader("Error");
 		
 		DataProvider<ImportFileCMD, ?> dataProvider = new ListDataProvider<ImportFileCMD>(
 				shapeFiles);
 		
 		grid.setDataProvider(dataProvider);
-		grid.getEditor().setEnabled(true);
+		//grid.getEditor().setEnabled(true); TODO
 		
-		subContent.addComponent(grid);
-		subContent.setExpandRatio(grid, 10.0f);
-		cancelButton = new Button("Schließen", VaadinIcons.CLOSE);
+		subContent.add(grid);
+		//subContent.setExpandRatio(grid, 10.0f); TODO
+		cancelButton = new Button("Schließen", VaadinIcon.CLOSE.create());
 		cancelButton.addClickListener(e2 -> {
 			onExit.run();
 			this.close();
 		});
-		okButton = new Button("Weiter", VaadinIcons.ARROW_RIGHT);
+		okButton = new Button("Weiter", VaadinIcon.ARROW_RIGHT.create());
 		okButton.setEnabled(shapeFiles.stream().allMatch(item -> item.isValid()));
 		okButton.addClickListener(e2 -> {
 			onDone.run();
 			this.close(); 
 		});
 
-		this.setClosable(false);
+		this.setCloseOnEsc(false);
+		this.setCloseOnOutsideClick(false);
 		UI.getCurrent().setPollInterval(1000);
 		hlButtons = new HorizontalLayout(cancelButton, okButton);
-		subContent.addComponent(hlButtons);
+		subContent.add(hlButtons);
 
 	}
 }

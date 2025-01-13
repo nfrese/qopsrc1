@@ -30,27 +30,24 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.vaadin.addon.leaflet.LFeatureGroup;
-import org.vaadin.addon.leaflet.LMap;
-import org.vaadin.addon.leaflet.LTileLayer;
-import org.vaadin.addon.leaflet.LeafletLayer;
-import org.vaadin.addon.leaflet.util.JTSUtil;
-
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.ListDataProvider;
-import com.vaadin.data.provider.SortOrder;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.shared.data.sort.SortDirection;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.VerticalLayout;
 import org.locationtech.jts.geom.Geometry;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.listbox.ListBox;
+import com.vaadin.flow.component.listbox.MultiSelectListBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.data.provider.SortOrder;
 
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.batch.PerformDelete;
@@ -64,6 +61,13 @@ import at.qop.qoplib.domains.IGenericDomain;
 import at.qop.qopwebui.admin.forms.exports.ExportFiles;
 import at.qop.qopwebui.admin.imports.ImportFilesComponent;
 import at.qop.qopwebui.components.ConfirmationDialog;
+import software.xdev.vaadin.maps.leaflet.MapContainer;
+import software.xdev.vaadin.maps.leaflet.basictypes.LLatLng;
+import software.xdev.vaadin.maps.leaflet.layer.LLayer;
+import software.xdev.vaadin.maps.leaflet.layer.other.LFeatureGroup;
+import software.xdev.vaadin.maps.leaflet.layer.raster.LTileLayer;
+import software.xdev.vaadin.maps.leaflet.map.LMap;
+import software.xdev.vaadin.maps.leaflet.registry.LDefaultComponentManagementRegistry;
 
 public abstract class AbstractLayerDataTab extends AbstractTab {
 
@@ -75,7 +79,7 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
 	
 	protected abstract ImportFilesComponent importFilesComponent();
 
-	protected abstract void refreshList(IGenericDomain gd, ListSelect<QopDBTable> listSelect);
+	protected abstract void refreshList(IGenericDomain gd, MultiSelectListBox<QopDBTable> listSelect);
 
 	protected abstract String baseSql(QopDBTable table);
 
@@ -88,11 +92,11 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
     	IGenericDomain gd = LookupSessionBeans.genericDomain();
 
 		
-		ListSelect<QopDBTable> listSelect = new ListSelect<QopDBTable>("Tabelle auswählen...");
+    	MultiSelectListBox<QopDBTable> listSelect = new MultiSelectListBox<QopDBTable>(); //"Tabelle auswählen...");
 		
 		refreshList(gd, listSelect);
 		
-        listSelect.setRows(6);
+        //listSelect.setRows(6);
         listSelect.setHeight(100.0f, Unit.PERCENTAGE);
  
         Grid<DbRecord> grid = new Grid<DbRecord>();
@@ -113,19 +117,28 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
 					}
 				} );
     	
-		LMap leafletMap = new LMap();
-		leafletMap.setWidth("600px");
-		leafletMap.setHeight("400px");
-		LTileLayer baseLayerOsm = new LTileLayer();
-		baseLayerOsm.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
-		leafletMap.addBaseLayer(baseLayerOsm, "OSM");
+    	final HorizontalLayout hl = new HorizontalLayout(listSelect, grid);
+
 		
-		LFeatureGroup lfg = new LFeatureGroup();
+		final LDefaultComponentManagementRegistry reg = new LDefaultComponentManagementRegistry(hl);
+		
+		// Create and add the MapContainer (which contains the map) to the UI
+		final MapContainer mapContainer = new MapContainer(reg);
+		//mapContainer.setSizeFull();
+		mapContainer.setWidth("600px");
+		mapContainer.setHeight("400px");
+		
+		LMap leafletMap = mapContainer.getlMap();
+		LTileLayer baseLayerOsm = LTileLayer.createDefaultForOpenStreetMapTileServer(reg);
+//		baseLayerOsm.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+		leafletMap.addLayer(baseLayerOsm);
+		
+		LFeatureGroup lfg = new LFeatureGroup(reg, new LLayer[] {}) ;
 		leafletMap.addLayer(lfg);
 		
 		grid.addSelectionListener(event -> {
 			
-			lfg.removeAllComponents();
+			lfg.clearLayers();
 			
 			Set<DbRecord> selectedItems = event.getAllSelectedItems();
 			for (DbRecord selectedItem : selectedItems){
@@ -133,24 +146,24 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
 				Collection<Geometry> geoms = selectedItem.getGeometries(currentTable);
 				for (Geometry geom : geoms)
 				{
-					Collection<LeafletLayer> lPoly = JTSUtil.toLayers(geom);
-					lfg.addComponent(lPoly);
+					LLayer lPoly = layerPoly(reg, geom);
+					lfg.addLayer(lPoly);
 				}
 			}
-			leafletMap.zoomToContent();
+			leafletMap.fitWorld();
 		});
-		leafletMap.setSizeFull();
+		mapContainer.setSizeFull();
 		grid.setSizeFull();
-    	final HorizontalLayout hl = new HorizontalLayout(listSelect, grid, leafletMap);
-    	hl.setExpandRatio(grid, 3.0f);
-    	hl.setExpandRatio(leafletMap, 1.5f);
+//    	final HorizontalLayout hl = new HorizontalLayout(listSelect, grid, mapContainer);
+//    	hl.setExpandRatio(grid, 3.0f);
+//    	hl.setExpandRatio(mapContainer, 1.5f);
     	hl.setSizeFull();
     	hl.setMargin(true);
     	
 		ImportFilesComponent importComponent = importFilesComponent();
 		importComponent.init();
 
-    	Button deleteLayerButton = new Button("Tabellen loeschen...", VaadinIcons.TRASH);
+    	Button deleteLayerButton = new Button("Tabellen loeschen...", VaadinIcon.TRASH.create());
         deleteLayerButton.setEnabled(false);
         deleteLayerButton.addClickListener(e -> {
         	if (listSelect.getSelectedItems().size() > 0) {
@@ -166,7 +179,7 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
         	}
         });
         
-    	Button exportLayerButton = new Button("Tabellen exportieren...", VaadinIcons.DOWNLOAD);
+    	Button exportLayerButton = new Button("Tabellen exportieren...", VaadinIcon.DOWNLOAD.create());
     	exportLayerButton.setEnabled(false);
     	exportLayerButton.addClickListener(e -> {
         	if (listSelect.getSelectedItems().size() > 0) {
@@ -183,11 +196,11 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
         
         tableLines = new Label("");
         
-    	Button showAllGeomsButton = new Button("Alle in der Karte zeigen...", VaadinIcons.PIN);
+    	Button showAllGeomsButton = new Button("Alle in der Karte zeigen...", VaadinIcon.PIN.create());
     	showAllGeomsButton.setEnabled(false);
     	showAllGeomsButton.addClickListener(e -> {
 
-    		lfg.removeAllComponents();
+    		lfg.clearLayers();
 
     		Optional<QopDBTable> table = listSelect.getSelectedItems().stream().findFirst();
     		if (table.isPresent() && currentTable != null)
@@ -209,26 +222,26 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
     				Collection<Geometry> geoms = selectedItem.getGeometries(currentTable);
     				for (Geometry geom : geoms)
     				{
-    					Collection<LeafletLayer> lPoly = JTSUtil.toLayers(geom);
-    					lfg.addComponent(lPoly);
+    					LLayer lPoly = layerPoly(reg, geom);
+    					lfg.addLayer(lPoly);
     				}
     			}
     		}
-    		leafletMap.zoomToContent();
+    		leafletMap.fitWorld();
     	});
         
         final HorizontalLayout hlButtons = new HorizontalLayout();
-        hlButtons.addComponent(importComponent);
-        hlButtons.addComponent(deleteLayerButton);
-        hlButtons.addComponent(exportLayerButton);
+        hlButtons.add(importComponent);
+        hlButtons.add(deleteLayerButton);
+        hlButtons.add(exportLayerButton);
 
-        hlButtons.addComponent(tableLines);
-        hlButtons.addComponent(showAllGeomsButton);
+        hlButtons.add(tableLines);
+        hlButtons.add(showAllGeomsButton);
 
     	
     	VerticalLayout vl = new VerticalLayout(hl, hlButtons); 
     	vl.setSizeFull();
-    	vl.setExpandRatio(hl, 5.0f);
+    	//vl.setExpandRatio(hl, 5.0f); TODO
     	
     	listSelect.addValueChangeListener(
     			event -> { 
@@ -238,6 +251,10 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
     			} );
 
     	return vl;
+	}
+
+	protected LLayer layerPoly(LDefaultComponentManagementRegistry reg, Geometry geom) {
+		return null;
 	}
 
 	protected abstract ExportFiles exportTables(List<String> tableNames);
@@ -266,7 +283,7 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
 						gd_.readTable(countSQL(table), tableReader);
 						int lines = (int)tableReader.longResult();
 						currentLines = lines;
-						tableLines.setValue("Records: " + currentLines);
+						tableLines.setText("Records: " + currentLines);
 						return lines;
 					} catch (SQLException e) {
 						throw new RuntimeException(e);
@@ -361,7 +378,7 @@ public abstract class AbstractLayerDataTab extends AbstractTab {
 
 			
 			final int i_ = i;
-			grid.addColumn(item -> stringRepresentation(tableReader.table, i_, item)).setCaption(colName);
+			grid.addColumn(item -> stringRepresentation(tableReader.table, i_, item)).setHeader(colName);
 			
 		}
 	}
