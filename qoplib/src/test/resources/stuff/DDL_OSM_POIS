@@ -1,0 +1,15 @@
+
+DROP TABLE public.osm_pois;
+
+CREATE TABLE public.osm_pois (
+	gid serial4 NOT NULL,
+	nodeid serial8,
+	"mainkey" text,
+	"mainval" text,
+	"name" text NULL,
+	"tags" text NULL,
+
+	geom public.geometry(point, 4326),
+	CONSTRAINT aerzte_pkey PRIMARY KEY (gid)
+);
+CREATE INDEX osm_pois_geom_gist ON public.osm_pois USING gist (geom);
