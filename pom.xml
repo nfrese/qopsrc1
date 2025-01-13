@@ -12,7 +12,12 @@
 
 <properties>
    <qop.version>1.0.3-SNAPSHOT</qop.version>
-   <geotools.version>17.4</geotools.version>
+   <myhibernate.version>5.6.15.Final</myhibernate.version>
+   
+   <geotools.version>19.4</geotools.version>
+   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+   <maven.compiler.source>1.8</maven.compiler.source>
+   <maven.compiler.target>1.8</maven.compiler.target>
 </properties>
 
 <modules>
