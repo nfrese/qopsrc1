@@ -201,6 +201,12 @@
         <artifactId>osmosis-osm-binary</artifactId>
         <version>0.47.3</version>
     </dependency>
+    
+<dependency>
+        <groupId>org.openstreetmap.osmosis</groupId>
+        <artifactId>osmosis-pgsimple</artifactId>
+        <version>0.47.3</version>
+    </dependency>
 <dependency>
     <groupId>com.google.protobuf</groupId>
     <artifactId>protobuf-java</artifactId>

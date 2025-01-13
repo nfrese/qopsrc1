@@ -7,7 +7,7 @@ public class TestConvert {
 	
 	@Test
 	public void test() {
-		Osmosis.main(new String[]{"--read-pbf", "/Users/norbert/Downloads/wien.pbf", "--node-key", "keyList=\"amenity\"", "--wx", "OUTPUT.osm"});
+		Osmosis.main(new String[]{"--read-pbf", "/Users/norbert/Downloads/austria-latest.osm.pbf", "--node-key", "keyList=amenity", "--write-pgsimp-dump", "directory=/Users/norbert/Downloads/"});
 	}
 
 }
