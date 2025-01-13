@@ -31,8 +31,8 @@ import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
@@ -67,8 +67,7 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	{
 		QopDBMetadata metaOut = new QopDBMetadata(); 
 		try {
-			DatabaseMetaData metadata = hibSessImplementor().connection().getMetaData();
-			
+			DatabaseMetaData metadata = conn().getMetaData();
 			
 			ResultSet tableTypes = metadata.getTableTypes();
 			while (tableTypes.next())
@@ -106,7 +105,7 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	public QopDBTable tableMetadata(String tname)
 	{
 		try {
-			DatabaseMetaData metadata = hibSessImplementor().connection().getMetaData();
+			DatabaseMetaData metadata = conn().getMetaData();
 			return tableMetadata(metadata, tname);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
@@ -139,7 +138,7 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	@Override
 	public void batchUpdate(DbBatch batch) throws SQLException {
 		
-		Connection connection = hibSessImplementor().connection();
+		Connection connection = conn();
 		
 		try (PreparedStatement ps = connection.prepareStatement(batch.sql)) {
 
@@ -160,7 +159,7 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 	{
 		long t_start = System.currentTimeMillis();
 		
-		Connection connection = hibSessImplementor().connection();
+		Connection connection = conn();
 		try (PreparedStatement ps = connection.prepareStatement(sql)) {
 			try (ResultSet rs = ps.executeQuery()) {
 
@@ -208,6 +207,10 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 		}
 		tableReader.done();
 		System.out.println((System.currentTimeMillis() - t_start) + " ms readTable: " + sql);
+	}
+
+	private Connection conn() throws SQLException {
+		return hibSessImplementor().getJdbcConnectionAccess().obtainConnection();
 	}
 
 	@Override

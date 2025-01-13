@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-   		<groupId>at.qop</groupId>
-   		<artifactId>qopparent</artifactId>
-   		<version>${qop.version}</version>
-   		<relativePath>..</relativePath>    
+		<groupId>at.qop</groupId>
+		<artifactId>qopparent</artifactId>
+		<version>1.0.3-SNAPSHOT</version>
+		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>qopwebui</artifactId>
@@ -17,18 +18,6 @@
 	<prerequisites>
 		<maven>3</maven>
 	</prerequisites>
-
-	<properties>
-		<myhibernate.version>5.6.15.Final</myhibernate.version>
-		<vaadin.version>8.14.3</vaadin.version>
-		<vaadin.plugin.version>8.14.3</vaadin.plugin.version>
-		<jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<!-- If there are no local customizations, this can also be "fetch" or "cdn" -->
-		<vaadin.widgetset.mode>local</vaadin.widgetset.mode>
-	</properties>
 
 	<repositories>
 		<repository>
@@ -46,17 +35,25 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<!-- Import dependency management from Spring Boot -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>3.4.1</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<dependencies>
-		
-		<dependency>
+
+		<!--		<dependency>
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-web</artifactId>
     		<version>2.7.9</version>
 			<exclusions>
-				<!-- Exclude the Tomcat dependency -->
+				 Exclude the Tomcat dependency 
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-jetty</artifactId>
@@ -68,9 +65,9 @@
   			<groupId>org.springframework.boot</groupId>
   			<artifactId>spring-boot-starter-validation</artifactId>
   			<version>2.7.9</version>
-		</dependency>
-		
-		<dependency>
+		</dependency-->
+
+		<!--		<dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-spring-boot-starter-jaxrs</artifactId>
             <version>3.3.1</version>
@@ -80,9 +77,14 @@
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-data-jpa</artifactId>
     		<version>2.7.9</version>
+		</dependency>-->
+
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<!-- Replace artifactId with vaadin-core to use only free components -->
+			<artifactId>vaadin-core</artifactId>
 		</dependency>
 
-		
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-spatial</artifactId>
@@ -95,45 +97,67 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
+		<!--		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>${myhibernate.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
 			<version>${myhibernate.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
-    		<groupId>org.hibernate</groupId>
-    		<artifactId>hibernate-core</artifactId>
-    		<version>${myhibernate.version}</version>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${myhibernate.version}</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-jpamodelgen</artifactId>
+		</dependency>
+
 		<dependency>
 			<artifactId>postgresql</artifactId>
 			<groupId>org.postgresql</groupId>
 			<version>42.6.0</version>
 		</dependency>
-		
-		<dependency>
+
+		<!--<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
 			<scope>provided</scope>
+		</dependency>-->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.1.0</version>
+			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
-        	<groupId>com.vaadin</groupId>
-        	<artifactId>vaadin-spring-boot-starter</artifactId>
-        	<version>3.2.1</version>
-    	</dependency>
-    	
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+		</dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-bom</artifactId>
+            <version>${vaadin.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+
 		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-spring-boot-starter</artifactId>
+		</dependency>
+
+		<!--		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-server</artifactId>
 			<version>${vaadin.version}</version>
@@ -152,130 +176,89 @@
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-themes</artifactId>
 			<version>${vaadin.version}</version>
-		</dependency>
-		     <!-- Needed when using the widgetset optimizer (custom ConnectorBundleLoaderFactory).       
+		</dependency>-->
+		<!-- Needed when using the widgetset optimizer (custom
+		ConnectorBundleLoaderFactory).       
 		     For widgetset compilation, vaadin-client-compiler is automatically added       
 		     on the compilation classpath by vaadin-maven-plugin so normally there is       
-		     no need for an explicit dependency. In Java 8 enable it -->     
+		     no need for an explicit dependency. In Java 8 enable it -->
 		<!--<dependency> 
 			<groupId>com.vaadin</groupId> 
 			<artifactId>vaadin-client-compiler</artifactId>       
 			<version>${vaadin.version}</version> 
 			<scope>provided</scope> 
 		</dependency>-->
+
 		<dependency>
-    		<groupId>org.vaadin.addon</groupId>
-    		<artifactId>v-leaflet</artifactId>
-    		<version>2.0.1</version>
-    		<exclusions>
-    			<exclusion>
-    				<groupId>com.fasterxml.jackson.core</groupId>
-    				<artifactId>jackson-databind</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>software.xdev</groupId>
+			<artifactId>vaadin-maps-leaflet-flow</artifactId>
+			<version>4.4.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.vaadin.olli</groupId>
+			<artifactId>file-download-wrapper</artifactId>
+			<version>7.1.0</version>
+		</dependency>
+		<!--		<dependency>
     		<groupId>org.vaadin.addons</groupId>
     		<artifactId>searchbox</artifactId>
     		<version>0.1.3</version>
-		</dependency>		
+		</dependency>	-->
 		<dependency>
 			<groupId>at.qop</groupId>
 			<artifactId>qoplib</artifactId>
 			<version>${qop.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.vaadin.stefan</groupId>
+			<artifactId>html-table</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.vaadin.tatu</groupId>
+			<artifactId>twincolselect</artifactId>
+			<version>3.2.0</version>
+		</dependency>
 	</dependencies>
+
 
 	<build>
 		<plugins>
-			<plugin>
+			<!--			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>3.0.0</version>
 				<configuration>
 					<failOnMissingWebXml>false</failOnMissingWebXml>
-					<!-- Exclude an unnecessary file generated by the GWT compiler. -->
-					<packagingExcludes>WEB-INF/classes/VAADIN/widgetsets/WEB-INF/**</packagingExcludes>
+					 Exclude an unnecessary file generated by the GWT compiler.
+			<packagingExcludes>WEB-INF/classes/VAADIN/widgetsets/WEB-INF/**</packagingExcludes>
 				</configuration>
+			</plugin>-->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
 			<plugin>
 				<groupId>com.vaadin</groupId>
 				<artifactId>vaadin-maven-plugin</artifactId>
-				<version>${vaadin.plugin.version}</version>
+				<version>${vaadin.version}</version>
 				<executions>
 					<execution>
 						<goals>
-							<goal>update-theme</goal>
-							<goal>update-widgetset</goal>
-							<goal>compile</goal>
-							<!-- Comment out compile-theme goal to use on-the-fly theme compilation -->
-							<goal>compile-theme</goal>
+							<goal>prepare-frontend</goal>
+							<goal>build-frontend</goal>
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.0.0</version>
-				<!-- Clean up also any pre-compiled themes -->
 				<configuration>
-					<filesets>
-						<fileset>
-							<directory>src/main/webapp/VAADIN/themes</directory>
-							<includes>
-								<include>**/styles.css</include>
-								<include>**/styles.scss.cache</include>
-							</includes>
-						</fileset>
-					</filesets>
+					<nodeAutoUpdate>true</nodeAutoUpdate>
 				</configuration>
 			</plugin>
+
 		</plugins>
 	</build>
 
-	<profiles>
-		<profile>
-			<!-- Vaadin pre-release repositories -->
-			<id>vaadin-prerelease</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-
-			<repositories>
-				<repository>
-					<id>vaadin-prereleases</id>
-					<url>http://maven.vaadin.com/vaadin-prereleases</url>
-				</repository>
-				<repository>
-					<id>vaadin-snapshots</id>
-					<url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-					<releases>
-						<enabled>false</enabled>
-					</releases>
-					<snapshots>
-						<enabled>true</enabled>
-					</snapshots>
-				</repository>
-			</repositories>
-			<pluginRepositories>
-				<pluginRepository>
-					<id>vaadin-prereleases</id>
-					<url>http://maven.vaadin.com/vaadin-prereleases</url>
-				</pluginRepository>
-				<pluginRepository>
-					<id>vaadin-snapshots</id>
-					<url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-					<releases>
-						<enabled>false</enabled>
-					</releases>
-					<snapshots>
-						<enabled>true</enabled>
-					</snapshots>
-				</pluginRepository>
-			</pluginRepositories>
-		</profile>
-	</profiles>
 
 </project>

@@ -22,8 +22,8 @@ package at.qop.qoplib.domains;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -47,14 +47,14 @@ public class AddressDomain extends AbstractDomain implements IAddressDomain {
 	
 	@Override
 	public List<Address> findAddresses(Geometry filter) {
-		org.hibernate.Query qry = hibSess().createQuery("from Address where geom intersects :filtergeom");
+		org.hibernate.query.Query qry = hibSess().createQuery("from Address where geom intersects :filtergeom");
 		qry.setParameter("filtergeom", filter);
 		return qry.list();
 	}
 
 	@Override
 	public List<Address> findAddresses(String searchTxt) {
-		org.hibernate.Query qry = hibSess().createQuery("from Address where lower(name) like lower(:searchTxt)");
+		org.hibernate.query.Query qry = hibSess().createQuery("from Address where lower(name) like lower(:searchTxt)");
 		qry.setParameter("searchTxt", searchTxt);
 		return qry.list();
 	}
@@ -62,7 +62,7 @@ public class AddressDomain extends AbstractDomain implements IAddressDomain {
 	@Override
 	public List<Address> findAddresses(int offset, int limit, String namePrefix) {
 		System.out.println(offset + " " + limit + " " + namePrefix);
-		org.hibernate.Query qry = hibSess().createQuery("from Address where lower(name) like lower(:searchTxt) order by name");
+		org.hibernate.query.Query qry = hibSess().createQuery("from Address where lower(name) like lower(:searchTxt) order by name");
 		qry.setParameter("searchTxt", namePrefix + "%");
 		qry.setFetchSize(limit);
 		return qry.list();
@@ -70,7 +70,7 @@ public class AddressDomain extends AbstractDomain implements IAddressDomain {
 
 	@Override
 	public int countAddresses(String namePrefix) {
-		org.hibernate.Query qry = hibSess().createQuery("from Address where lower(name) like lower(:searchTxt)");
+		org.hibernate.query.Query qry = hibSess().createQuery("from Address where lower(name) like lower(:searchTxt)");
 		qry.setParameter("searchTxt", namePrefix + "%");
 		return qry.list().size();
 	}

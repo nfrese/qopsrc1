@@ -23,8 +23,9 @@ package at.qop.qoplib.domains;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.Root;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.AnalysisFunction;
+import at.qop.qoplib.entities.Config;
 import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.entities.ProfileAnalysis;
 
@@ -49,14 +51,20 @@ public class ProfileDomain extends AbstractDomain implements IProfileDomain {
 
 	@Override
 	public List<Profile> listProfiles() {
-		org.hibernate.Query qry = hibSess().createQuery("from " + Profile.class.getSimpleName());
-		return qry.list();
+		
+		var cr = hibSess().getCriteriaBuilder().createQuery(Profile.class);
+	    Root<Profile> variableRoot = cr.from(Profile.class);
+	    cr.select(variableRoot);
+		return hibSess().createQuery(cr).getResultList();
+
 	}
 
 	@Override
 	public List<Analysis> listAnalyses() {
-		org.hibernate.Query qry = hibSess().createQuery("from " + Analysis.class.getSimpleName());
-		return qry.list();
+		var cr = hibSess().getCriteriaBuilder().createQuery(Analysis.class);
+	    Root<Analysis> variableRoot = cr.from(Analysis.class);
+	    cr.select(variableRoot);
+		return hibSess().createQuery(cr).getResultList();
 	}
 	
 	@Override
@@ -117,8 +125,10 @@ public class ProfileDomain extends AbstractDomain implements IProfileDomain {
 
 	@Override
 	public List<AnalysisFunction> listAnalysisFunctions() {
-		org.hibernate.Query qry = hibSess().createQuery("from " + AnalysisFunction.class.getSimpleName());
-		return qry.list();
+		var cr = hibSess().getCriteriaBuilder().createQuery(AnalysisFunction.class);
+	    Root<AnalysisFunction> variableRoot = cr.from(AnalysisFunction.class);
+	    cr.select(variableRoot);
+		return hibSess().createQuery(cr).getResultList();
 
 	}
 	

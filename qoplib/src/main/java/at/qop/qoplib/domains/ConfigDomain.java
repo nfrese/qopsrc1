@@ -22,10 +22,9 @@ package at.qop.qoplib.domains;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
-import org.hibernate.Criteria;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +47,8 @@ public class ConfigDomain extends AbstractDomain implements IConfigDomain {
 	
 	@Override
 	public List<Config> readConfiguration() {
-		Criteria crit = hibSess().createCriteria(Config.class);
-		return crit.list();
+		var cr = hibSess().getCriteriaBuilder().createQuery(Config.class);
+		return hibSess().createQuery(cr).getResultList();
 	}
 
 	@Override
