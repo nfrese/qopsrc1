@@ -49,18 +49,13 @@ public class DBConfigurationBean {
     	
     	String host = cfgFile.getDbHost();
     	String db = cfgFile.getDb();
+    	String schema = cfgFile.getDbSchema();
     	String user = cfgFile.getDbUserName();
     	String password = cfgFile.getDbPasswd();
+    	
     	int port =cfgFile.getPort();
     	
-    	DataSource dataSource = DataSourceBuilder.create().url("jdbc:postgresql://"+host+":"+port+"/"+db).username(user).password(password).build();
-    	
-    	//SingleConnectionDataSource dataSource = new SingleConnectionDataSource(, user, password, false);
-//    	BasicDataSource dataSource = new BasicDataSource();
-//        dataSource.setDriverClassName("org.h2.Driver");
-//        dataSource.setUrl("jdbc:h2:mem:db;DB_CLOSE_DELAY=-1");
-//        dataSource.setUsername("sa");
-//        dataSource.setPassword("sa");
+    	DataSource dataSource = DataSourceBuilder.create().url("jdbc:postgresql://"+host+":"+port+"/"+db+"?currentSchema="+schema).username(user).password(password).build();
 
         return dataSource;
     }

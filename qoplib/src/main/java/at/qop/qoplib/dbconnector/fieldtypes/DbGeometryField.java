@@ -31,7 +31,7 @@ public class DbGeometryField extends DbFieldAbstract {
 	private static WKBReader wkbReader = new WKBReader();
 	
 	public String[] expectedTypeName() {
-		return new String[] {"geometry"};
+		return new String[] {"geometry","\"public\".\"geometry\""};
 	}
 	
 	public Geometry get(DbRecord rec)

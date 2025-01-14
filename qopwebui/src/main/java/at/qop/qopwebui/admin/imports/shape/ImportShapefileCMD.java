@@ -42,13 +42,15 @@ public class ImportShapefileCMD extends ImportFileCMD {
 	}
 
 	public String cmd(Config cfgFile) {
+		String schema = cfgFile.getDbSchema();
+		
 		String cmd = "shp2pgsql -d -w -I -s %SRID% -W \"%ENCODING%\" %SHAPEFILE% %TABLENAME%";
 		cmd += " | psql -h %HOST% -U %USER_NAME% -d %DB% -p %PORT%";
 		
 		cmd = cmd.replace("%SRID%", this.srid+"");
 		cmd = cmd.replace("%ENCODING%", Utils.uxCmdStringEscape(this.encoding));
 		cmd = cmd.replace("%SHAPEFILE%", Utils.uxCmdStringEscape(this.path +""));
-		cmd = cmd.replace("%TABLENAME%", Utils.uxCmdStringEscape("public." + this.tableName));
+		cmd = cmd.replace("%TABLENAME%", Utils.uxCmdStringEscape(schema + "." + this.tableName));
 		
 		cmd = cmd.replace("%HOST%", Utils.uxCmdStringEscape(cfgFile.getDbHost()));
 		cmd = cmd.replace("%USER_NAME%", Utils.uxCmdStringEscape(cfgFile.getDbUserName()));

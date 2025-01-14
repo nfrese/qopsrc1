@@ -85,6 +85,8 @@ public class ImportRasterfileCMD extends ImportFileCMD {
 	}
 	
 	public String cmd(Config cfgFile) {
+		String schema = cfgFile.getDbSchema();
+		
 		String cmd = "raster2pgsql -s %SRID% -I -C -M %SHAPEFILE% -F -t 500x500 %TABLENAME% ";
 		cmd += " | psql -h %HOST% -U %USER_NAME% -d %DB% -p %PORT%";
 		
@@ -98,7 +100,7 @@ public class ImportRasterfileCMD extends ImportFileCMD {
 		{
 			cmd = cmd.replace("%SHAPEFILE%", Utils.uxCmdStringEscape(this.path +""));
 		}
-		cmd = cmd.replace("%TABLENAME%", Utils.uxCmdStringEscape("public." + this.tableName));
+		cmd = cmd.replace("%TABLENAME%", Utils.uxCmdStringEscape(schema + "." + this.tableName));
 		
 		cmd = cmd.replace("%HOST%", Utils.uxCmdStringEscape(cfgFile.getDbHost()));
 		cmd = cmd.replace("%USER_NAME%", Utils.uxCmdStringEscape(cfgFile.getDbUserName()));

@@ -34,7 +34,8 @@ public class ExportRasterCMD extends ExportFileCMD {
 
 	@Override
 	public String cmd(Config cfgFile) {
-		String cmd = "gdal_translate -of GTiff PG:\"host=%HOST% port=%PORT% dbname=%DB% user=%USER_NAME% password=%PASSWORD% schema=public table=%TABLE% column='rast' mode=2\" %TIFFILE%";
+		String schema = cfgFile.getDbSchema();
+		String cmd = "gdal_translate -of GTiff PG:\"host=%HOST% port=%PORT% dbname=%DB% user=%USER_NAME% password=%PASSWORD% schema="+schema+" table=%TABLE% column='rast' mode=2\" %TIFFILE%";
 		cmd = cmd.replace("%TIFFILE%", Utils.uxCmdStringEscape(this.path + "/" + this.tableName + ".tif"));
 		cmd = cmd.replace("%TABLE%", Utils.uxCmdStringEscape(this.tableName));
 		

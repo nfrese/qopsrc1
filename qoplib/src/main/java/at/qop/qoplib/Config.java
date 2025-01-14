@@ -70,6 +70,8 @@ public interface Config {
 
 	String getDb();
 
+	String getDbSchema();
+
 	int getPort();
 
 	String getDbPasswd();
@@ -113,4 +115,5 @@ public interface Config {
 	static Config readFromEnvir() {
 		return new ConfigEnvir();
 	}
+
 }

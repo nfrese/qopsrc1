@@ -31,7 +31,7 @@ public class QopDBTable {
 	
 	public boolean isGeometric()
 	{
-		return columns.stream().filter(c -> "geometry".equals(c.typename )).count() > 0;
+		return columns.stream().filter(c -> "geometry".equals(c.typename ) || "\"public\".\"geometry\"".equals(c.typename )).count() > 0;
 	}
 	
 	public boolean isRaster()

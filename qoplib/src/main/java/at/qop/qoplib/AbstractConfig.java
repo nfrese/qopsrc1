@@ -149,14 +149,21 @@ public abstract class AbstractConfig implements Config {
 		String defaultValue = "qop-dev";
 		return getStrProp(key, defaultValue);
 	}
-
+	
+	@Override
+	public String getDbSchema() {
+		String key = "dbschema";
+		String defaultValue = "qop";
+		return getStrProp(key, defaultValue);
+	}
+	
 	@Override
 	public int getPort() {
 		String key = "dbport";
 		String defaultValue = "5432";
 		return Integer.valueOf(getStrProp(key, defaultValue));
 	}
-
+	
 	@Override
 	public String getDbPasswd() {
 		String key = "dbpasswd";
