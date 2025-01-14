@@ -4,30 +4,30 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import org.apache.commons.io.output.DeferredFileOutputStream;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.NodeContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.RelationContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.WayContainer;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
-import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
- 
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import crosby.binary.osmosis.OsmosisReader;
  
-/**
- * Receives data from the Osmosis pipeline and prints ways which have the
- * 'highway key.
- * 
- * @author pa5cal
- */
 public class Mysink implements Sink {
  
+	private ObjectMapper om = new ObjectMapper();
 	public final String outputFilename;
 	private PrintWriter ow;
 	
@@ -35,8 +35,8 @@ public class Mysink implements Sink {
 		super();
 		this.outputFilename = outputFilename;
 		try {
-			this.ow = new PrintWriter(new FileOutputStream(outputFilename));
-		} catch (FileNotFoundException e) {
+			this.ow = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outputFilename), "UTF-8"));
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -48,31 +48,33 @@ public class Mysink implements Sink {
     @Override
     public void process(EntityContainer entityContainer) {
         if (entityContainer instanceof NodeContainer) {
-          Node myWay = ((NodeContainer) entityContainer).getEntity();
-          boolean write = false;
-          for (Tag myTag : myWay.getTags()) {
+          Node n = ((NodeContainer) entityContainer).getEntity();
+          String mainKey = null;
+          for (Tag myTag : n.getTags()) {
               if ("amenity".equalsIgnoreCase(myTag.getKey())) {
-            	  write = true;
+            	  mainKey = "amenity";
+                  break;
+              } else  if ("office".equalsIgnoreCase(myTag.getKey())) {
+            	  mainKey = "office";
                   break;
               }
           }
           
-          Map<String,String> tagsMap = tagsMap(myWay.getTags());
+          Map<String,String> tagsMap = tagsMap(n.getTags());
           
-          if (write) {
-        	  String mainKey = "amenity";
+          if (mainKey != null) {
         	  String mainValue = tagsMap.get("amenity");
         	  String json = tagsToJson(tagsMap);
-        	  ow.print("INSERT INTO osm_pois ");
+        	  ow.print("INSERT INTO qop.osm_pois ");
         	  ow.print("(nodeid, mainkey, mainval, \"name\", tags, geom)");
         	  ow.print(" VALUES (");
-        	  ow.print(myWay.getId() + ", ");
-        	  ow.print(writeStr(tagsMap.get(mainKey)));
-        	  ow.print(writeStr(tagsMap.get(mainValue)));
-        	  ow.print(writeStr(tagsMap.get("name")));
-        	  ow.print(writeStr(json));
-        	  ow.print("ST_FromText(" + geom(myWay) + ")");
-        	  ow.println(")");
+        	  ow.print(n.getId() + ", ");
+        	  ow.print(writeStr(mainKey)+ ", ");
+        	  ow.print(writeStr(mainValue)+ ", ");
+        	  ow.print(writeStr(tagsMap.get("name"))+ ", ");
+        	  ow.print(writeStrS(json )+ "::jsonb, ");
+        	  ow.print("ST_GeomFromText('" + geom(n) + "')");
+        	  ow.println(");");
           }
         } else if (entityContainer instanceof WayContainer) {
         } else if (entityContainer instanceof RelationContainer) {
@@ -82,23 +84,35 @@ public class Mysink implements Sink {
     }
  
     private Map<String, String> tagsMap(Collection<Tag> tags) {
-		// TODO Auto-generated method stub
-		return null;
+    	Map<String, String> m = new LinkedHashMap<>();
+    	for (Tag tag:tags)
+    	{
+    		m.put(tag.getKey(), tag.getValue());
+    	}
+		return m;
 	}
 
-	private String geom(Node myWay) {
-		// TODO Auto-generated method stub
-		return null;
+	private String geom(Node n) {
+		return "POINT(" + n.getLongitude() + " " + n.getLatitude() + ")";
 	}
 
-	private char[] writeStr(String string) {
-		// TODO Auto-generated method stub
-		return null;
+	private String writeStr(String s) {
+		if (s == null) return null;
+		return "'" + s.replace("'", "''").replace("\n", "\\n") + "'";
+	}
+	
+	private String writeStrS(String s) {
+		if (s == null) return null;
+		return "'" + s.replace("'", "''").replace("\n", "\\n") + "'";
 	}
 
 	private String tagsToJson(Map<String, String> tagsMap) {
-		// TODO Auto-generated method stub
-		return null;
+		ObjectNode on = om.createObjectNode();
+		for (Entry<String, String> e : tagsMap.entrySet())
+		{
+			on.put(e.getKey(), e.getValue());
+		}
+		return on.toString();
 	}
 
 	@Override
@@ -107,6 +121,7 @@ public class Mysink implements Sink {
  
     @Override
     public void close() {
+    	ow.flush();
     }
  
     public static void importAmenitys(String filename, String outputfilename) throws FileNotFoundException {
