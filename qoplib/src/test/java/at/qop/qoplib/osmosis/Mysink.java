@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.io.output.DeferredFileOutputStream;
@@ -48,32 +49,59 @@ public class Mysink implements Sink {
     public void process(EntityContainer entityContainer) {
         if (entityContainer instanceof NodeContainer) {
           Node myWay = ((NodeContainer) entityContainer).getEntity();
+          boolean write = false;
           for (Tag myTag : myWay.getTags()) {
               if ("amenity".equalsIgnoreCase(myTag.getKey())) {
-            	  
-            	  ow.print("INSERT INTO osm_pois ");
-            	  
-            	  
-                  System.out.println(" Woha, it's a amenity: " + myWay.getId());
+            	  write = true;
                   break;
               }
           }
+          
+          Map<String,String> tagsMap = tagsMap(myWay.getTags());
+          
+          if (write) {
+        	  String mainKey = "amenity";
+        	  String mainValue = tagsMap.get("amenity");
+        	  String json = tagsToJson(tagsMap);
+        	  ow.print("INSERT INTO osm_pois ");
+        	  ow.print("(nodeid, mainkey, mainval, \"name\", tags, geom)");
+        	  ow.print(" VALUES (");
+        	  ow.print(myWay.getId() + ", ");
+        	  ow.print(writeStr(tagsMap.get(mainKey)));
+        	  ow.print(writeStr(tagsMap.get(mainValue)));
+        	  ow.print(writeStr(tagsMap.get("name")));
+        	  ow.print(writeStr(json));
+        	  ow.print("ST_FromText(" + geom(myWay) + ")");
+        	  ow.println(")");
+          }
         } else if (entityContainer instanceof WayContainer) {
-//            Way myWay = ((WayContainer) entityContainer).getEntity();
-//            for (Tag myTag : myWay.getTags()) {
-//                if ("highway".equalsIgnoreCase(myTag.getKey())) {
-//                    System.out.println(" Woha, it's a highway: " + myWay.getId());
-//                    break;
-//                }
-//            }
         } else if (entityContainer instanceof RelationContainer) {
-            // Nothing to do here
         } else {
             System.out.println("Unknown Entity!");
         }
     }
  
-    @Override
+    private Map<String, String> tagsMap(Collection<Tag> tags) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private String geom(Node myWay) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private char[] writeStr(String string) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private String tagsToJson(Map<String, String> tagsMap) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
     public void complete() {
     }
  
