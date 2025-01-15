@@ -21,6 +21,8 @@
 package at.qop.qoplib.dbconnector.fieldtypes;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKTReader;
@@ -30,7 +32,7 @@ import at.qop.qoplib.dbconnector.DbRecord;
 public class DbGeometryField extends DbFieldAbstract {
 
 	private static WKBReader wkbReader = new WKBReader();
-	private static WKTReader wktReader = new WKTReader();
+	
 	
 	public String[] expectedTypeName() {
 		return new String[] {"geometry","\"public\".\"geometry\""};
@@ -44,7 +46,10 @@ public class DbGeometryField extends DbFieldAbstract {
 		if (str.startsWith("SRID")) {
 			try {
 				
-				return wktReader.read(str.split(";")[1]);
+				String[] split = str.replaceAll("^SRID=", "").split(";");
+				WKTReader wktReader = new WKTReader(new GeometryFactory(new PrecisionModel(),Integer.valueOf( split[0])));
+				
+				return wktReader.read(split[1]);
 			} catch (ParseException e) {
 				throw new RuntimeException(e);
 			}

@@ -24,10 +24,8 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,20 +43,10 @@ import at.qop.qoplib.entities.Profile;
 import at.qop.qoplib.extinterfaces.batch.BatchHandler;
 
 @RestController
-public class QOPBatchCalculationServlet {
+public class QOPRestApiBatchCalculation extends QOPRestApiBase {
        
-    public QOPBatchCalculationServlet() {
+    public QOPRestApiBatchCalculation() {
         super();
-    }
-    
-    @GetMapping("/qop")
-    protected String info()
-    {
-    	StringBuilder html = new StringBuilder();
-    	html.append("<h1>QOP Service</h1>");
-    	html.append("<p><a href=\"ui\">Demo User Interface</a></p>");
-    	html.append("<p><a href=\"ui/admin\">Administration</a></p>");
-    	return html.toString();
     }
 
     @GetMapping("/qop/rest/api/batchcalculation")
@@ -75,16 +63,12 @@ public class QOPBatchCalculationServlet {
 	}
 
     @PostMapping("/qop/rest/api/batchcalculation")
-	protected ResponseEntity<?> batchcalculationPost(@RequestParam(name = "username") String username, @RequestParam(name="password") String password, @RequestBody String jsonIn) throws ServletException, IOException {
+	protected ResponseEntity<?> batchcalculationPost(@RequestParam(name = "username") String username, 
+			@RequestParam(name="password") String password, 
+			@RequestBody String jsonIn) throws ServletException, IOException {
 		
-		if (username == null) throw new RuntimeException("URL parameter username required");
-		if (password == null) throw new RuntimeException("URL parameter password required");
 		
-		Config cfg = Config.read();
-		if (!password.equals(cfg.getUserPassword(username)))
-		{
-			throw new RuntimeException("Invalid username/password!");
-		}
+		Config cfg = checkAuth(username, password);
 		
 		BatchHandler bh = new BatchHandler() {
 

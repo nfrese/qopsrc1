@@ -25,7 +25,7 @@ import at.qop.qoplib.dbconnector.DbRecord;
 public class DbInt4Field extends DbFieldAbstract {
 
 	public String[] expectedTypeName() {
-		return new String[] {"int4"};
+		return new String[] {"int4", "serial"};
 	}
 	
 	public Integer get(DbRecord rec)

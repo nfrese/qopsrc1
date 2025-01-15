@@ -18,32 +18,26 @@
  *
 */
 
-package at.qop.qoplib.dbconnector.fieldtypes;
+package at.qop.ws;
 
-import java.util.Arrays;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import at.qop.qoplib.dbconnector.DbTable;
+@RestController
+public class QOPRestApiIndex extends QOPRestApiBase {
+       
+    public QOPRestApiIndex() {
+        super();
+    }
+    
+    @GetMapping("/qop")
+    protected String info()
+    {
+    	StringBuilder html = new StringBuilder();
+    	html.append("<h1>QOP Service</h1>");
+    	html.append("<p><a href=\"ui\">Demo User Interface</a></p>");
+    	html.append("<p><a href=\"ui/admin\">Administration</a></p>");
+    	return html.toString();
+    }
 
-/**
- * see https://www.postgresql.org/message-id/AANLkTikkkxN%2B-UUiGVTzj8jdfS4PdpB8_tDONMFHNqHk%40mail.gmail.com
- */
-public abstract class DbFieldAbstract {
-	
-	public DbTable table;
-	public int ix;
-	public String name;
-	
-	public void checkFieldType(String typeName) {
-		boolean found = false;
-		String[] exps = expectedTypeName();
-		for (String exp : exps) {
-			if (exp.equalsIgnoreCase(typeName)) found=true;
-		}
-		if (!found) {
-			throw new IllegalArgumentException("field " + name + " expected types:" + Arrays.toString(exps) + " but got " + typeName);
-		}
-	}
-
-	protected abstract String[] expectedTypeName();
-	
 }
