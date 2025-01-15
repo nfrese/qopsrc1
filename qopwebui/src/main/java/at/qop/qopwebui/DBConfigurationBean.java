@@ -55,7 +55,9 @@ public class DBConfigurationBean {
     	
     	int port =cfgFile.getPort();
     	
-    	DataSource dataSource = DataSourceBuilder.create().url("jdbc:postgresql://"+host+":"+port+"/"+db+"?currentSchema="+schema).username(user).password(password).build();
+    	DataSource dataSource = DataSourceBuilder.create()
+    			.url("jdbc:postgresql://"+host+":"+port+"/"+db+"")
+    			.username(user).password(password).build();
 
         return dataSource;
     }

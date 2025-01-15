@@ -82,11 +82,10 @@
 		</dependency>
 		
 		<dependency>
-			<artifactId>postgresql</artifactId>
-			<groupId>org.postgresql</groupId>
-			<version>42.2.8</version>
-			<scope>test</scope>
-		</dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <version>42.7.4</version>
+</dependency>
 		
 		<dependency>
     		<groupId>org.springframework.boot</groupId>
