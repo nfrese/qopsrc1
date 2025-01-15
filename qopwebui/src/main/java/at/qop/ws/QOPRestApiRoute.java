@@ -46,11 +46,9 @@ import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTableReader;
-import at.qop.qoplib.dbconnector.fieldtypes.DbFieldAbstract;
-import at.qop.qoplib.dbconnector.fieldtypes.DbGeometryField;
 import at.qop.qoplib.dbconnector.fieldtypes.DbInt4Field;
 
-// http://localhost:8080/qop/rest/api/traveltime_to_pois?poi_table=qop.qop_pois&lon=48.4526522&lat=16.6000785&radius_meters=500&username=test&password=ttt
+// http://localhost:8080/qop/rest/api/traveltime_to_pois?poi_table=qop.osm_pois&lon=48.4526522&lat=16.6000785&radius_meters=500&username=api&password=3243628746982
 
 @RestController
 public class QOPRestApiRoute extends QOPRestApiBase {
