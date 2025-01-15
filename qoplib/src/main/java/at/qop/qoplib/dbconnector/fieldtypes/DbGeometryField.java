@@ -44,7 +44,7 @@ public class DbGeometryField extends DbFieldAbstract {
 		if (str.startsWith("SRID")) {
 			try {
 				
-				return wktReader .read(str.split(";")[1]);
+				return wktReader.read(str.split(";")[1]);
 			} catch (ParseException e) {
 				throw new RuntimeException(e);
 			}
