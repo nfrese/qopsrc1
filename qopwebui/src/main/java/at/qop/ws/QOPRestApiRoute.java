@@ -106,13 +106,16 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				destinations[i] = new LonLat(targetPoint.getX(), targetPoint.getY());
 			}
 
-			double[] time = new double[n];
+			ModeEnum[] modes = new  ModeEnum[] {ModeEnum.foot, ModeEnum.bike, ModeEnum.car};
+			double[][] time = new double[n][4];
 			
 			try {
-				double[][] r = router.table(ModeEnum.foot, sources, destinations);
-				for (int i = 0; i < n; i++) {
-					double timeMinutes = r[0][i] / 60;  // minutes
-					time[i] = ((double)Math.round(timeMinutes * 100)) / 100;  // round 2 decimal places 
+				for (int j = 0; j < modes.length; j++) {
+					double[][] r = router.table(modes[j], sources, destinations);
+					for (int i = 0; i < n; i++) {
+						double timeMinutes = r[0][i] / 60;  // minutes
+						time[i][j] = ((double)Math.round(timeMinutes * 100)) / 100;  // round 2 decimal places 
+					}
 				}
 			} catch (IOException e) {
 				throw new RuntimeException(e); 
@@ -136,11 +139,11 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						JsonNode jo = om.readTree(json);
 						if (geomField.equals(colName))
 						{
-							outProperties.put(colName, jo);
+							outFeature.put("geometry", jo);
 						}
 						else
 						{
-							outFeature.put("geometry", jo);
+							outProperties.put(colName, jo);
 						}
 					}
 					else if (reader.table.typeNames[i].equals("jsonb"))
@@ -156,7 +159,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				}
 				
 				Map<String,Object> outRouting = new LinkedHashMap<>();
-				outRouting.put("walkMinutes", time[cnt]);
+				outRouting.put("walkMinutes", time[cnt][0]);
+				outRouting.put("bikeMinutes", time[cnt][1]);
+				outRouting.put("carMinutes", time[cnt][2]);
 				outProperties.put("routingResults", outRouting);
 				
 				outFeatures.add(outFeature);
