@@ -12,16 +12,3 @@ ARG JAR_FILE=qopwebui/target/*.jar
 COPY --from=build /build/${JAR_FILE} app.jar
 # COPY ${JAR_FILE} app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
-
-#USER root
-#
-#RUN yum -y install epel-release
-#RUN yum -y install https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-centos11-11-2.noarch.rpm
-#RUN yum -y install postgis25_11
-#RUN yum -y install postgis25_11-client
-#RUN yum -y install postgis25_11-utils
-#RUN yum -y install zip
-#RUN yum -y install gdal
-#RUN psql -V
-#
-#ENV PATH="/usr/pgsql-11/bin:${PATH}"
