@@ -62,6 +62,45 @@ public class QOPRestApiRoute extends QOPRestApiBase {
         super();
     }
 
+    public static class Feature {
+    	public String id;
+    	public Map<String,Object> properties = new LinkedHashMap<>();
+    	public RoutingResults routingResults = new RoutingResults();
+		public JsonNode geometry;
+    }
+    
+    public static class RoutingResults {
+		private static final double THRES = 15.;
+
+		public TT walk = new TT();
+
+		public TT bike = new TT();
+
+		public TT eBike = new TT();
+		
+		public TT publicTransport = new TT();
+		
+		public TT car = new TT();
+
+		public void set() {
+			
+			eBike.minutes  = bike.minutes / 1.5;
+			publicTransport.minutes = car.minutes * 2;
+			publicTransport.minutes = publicTransport.minutes > 7 ? publicTransport.minutes : Double.NaN;
+
+			walk.display = walk.minutes <= THRES;
+			bike.display = bike.minutes <= THRES;
+			eBike.display = eBike.minutes <= THRES;
+			publicTransport.display = publicTransport.minutes <= THRES;
+		}
+    	
+    }
+    
+    public static class TT {
+		public double minutes;
+		public boolean display;    	
+    }
+    
     @GetMapping("/qop/rest/api/traveltime_to_pois")
 	protected ResponseEntity<?> traveltime(
 			@RequestParam(name="username") String username, 
@@ -81,9 +120,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 
 		IRouter router = new OSRMClient(cfg.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
 		
-		Map<String,Object> outRoot = new LinkedHashMap<>();
+		
 		List<Object> outFeatures = new ArrayList<>();
-		outRoot.put("features", outFeatures);
 		
 		for (String poiTable : poiTables) {
 			
@@ -122,11 +160,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			int cnt =0;
 			for (DbRecord record : reader.records)
 			{
-				Map<String,Object> outFeature = new LinkedHashMap<>();
+				Feature outFeature = new Feature();
 				
-				Map<String,Object> outProperties = new LinkedHashMap<>();
-				outFeature.put("id", poiTable + ":" + gid.get(record));
-				outFeature.put("properties", outProperties);
+				outFeature.id = poiTable + ":" + gid.get(record);
 				for (int i = 0; i < reader.table.colNames.length;i++) {
 					String colName = reader.table.colNames[i];
 					if (reader.table.typeNames[i].equals("geometry"))
@@ -137,37 +173,37 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						JsonNode jo = om.readTree(json);
 						if (geomField.equals(colName))
 						{
-							outFeature.put("geometry", jo);
+							outFeature.geometry= jo;
 						}
 						else
 						{
-							outProperties.put(colName, jo);
+							outFeature.properties.put(colName, jo);
 						}
 					}
 					else if (reader.table.typeNames[i].equals("jsonb"))
 					{
 						String json = String.valueOf(record.values[i]);
-						outProperties.put(colName, om.readTree(json));
+						outFeature.properties.put(colName, om.readTree(json));
 					}
 					else
 					{
 						Object value = record.values[i];
-						outProperties.put(colName, value);
+						outFeature.properties.put(colName, value);
 					}
 				}
 				
-				Map<String,Object> outRouting = new LinkedHashMap<>();
-				outRouting.put("walkMinutes", time[cnt][0]);
-				outRouting.put("bikeMinutes", time[cnt][1]);
-				outRouting.put("carMinutes", time[cnt][2]);
-				outProperties.put("routingResults", outRouting);
+				outFeature.routingResults.walk.minutes = time[cnt][0];
+				outFeature.routingResults.bike.minutes = time[cnt][1];
+				outFeature.routingResults.car.minutes = time[cnt][2];
+				outFeature.routingResults.set();
 				
 				outFeatures.add(outFeature);
 				cnt++;
 			}
 		}
 		
-		
+		Map<String,Object> outRoot = new LinkedHashMap<>();
+		outRoot.put("features", outFeatures);
 		String jsonOut = om.writeValueAsString(outRoot);
 
 
