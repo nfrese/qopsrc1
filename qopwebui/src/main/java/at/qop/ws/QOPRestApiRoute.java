@@ -53,8 +53,6 @@ import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.osrmclient.LonLat;
 import at.qop.qoplib.osrmclient.OSRMClient;
 
-// http://localhost:8080/qop/rest/api/traveltime_to_pois?poi_table=qop.osm_pois&lon=48.4526522&lat=16.6000785&radius_meters=500&username=api&password=3243628746982
-
 @RestController
 public class QOPRestApiRoute extends QOPRestApiBase {
        

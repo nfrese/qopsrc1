@@ -1,0 +1,22 @@
+version: "2"
+
+services:
+  qop-app:
+    image: qop-service:1.2.0
+    ports: ["4380:8080"]
+    environment:
+      - QOP_PASSWORD.ADMIN=xxxxxx
+      - QOP_ISADMIN.ADMIN=true
+      - QOP_PASSWORD.DEMO=xxxxxx
+      - QOP_PASSWORD.API=xxxxxx
+      - QOP_DBHOST=xxxxxxx
+      - QOP_DBPORT=5432
+      - QOP_DB=wvs
+      - QOP_DBUSER=xxxxxxx
+      - QOP_DBPASSWD=xxxxxxx
+      - QOP_OSRMHOST_BICYCLE=xxxxx
+      - QOP_OSRMHOST_CAR=xxxxx
+      - QOP_OSRMHOST_FOOT=xxxxxx
+      - QOP_OSRMPORT_BICYCLE=5301
+      - QOP_OSRMPORT_CAR=5300
+      - QOP_OSRMPORT_FOOT=5302
