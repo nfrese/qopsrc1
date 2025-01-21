@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 
@@ -93,6 +94,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			eBike.display = eBike.minutes <= THRES;
 			publicTransport.display = publicTransport.minutes <= THRES;
 		}
+
+		public boolean disp() {
+			return walk.display || bike.display  || eBike.display || publicTransport.display || car.display;
+		}
     	
     }
     
@@ -121,7 +126,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		IRouter router = new OSRMClient(cfg.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
 		
 		
-		List<Object> outFeatures = new ArrayList<>();
+		List<Feature> outFeatures = new ArrayList<>();
 		
 		for (String poiTable : poiTables) {
 			
@@ -202,8 +207,13 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			}
 		}
 		
+		List<Object> sorted = outFeatures.stream()
+				.filter(f -> f.routingResults.disp())
+				.sorted((f,g) -> new Double(f.routingResults.bike.minutes).compareTo(g.routingResults.bike.minutes))
+				.collect(Collectors.toList());
+		
 		Map<String,Object> outRoot = new LinkedHashMap<>();
-		outRoot.put("features", outFeatures);
+		outRoot.put("features", sorted);
 		String jsonOut = om.writeValueAsString(outRoot);
 
 
