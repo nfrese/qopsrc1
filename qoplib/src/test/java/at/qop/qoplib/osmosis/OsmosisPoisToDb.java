@@ -31,14 +31,37 @@ public class OsmosisPoisToDb implements Sink {
 	public final String outputFilename;
 	private PrintWriter ow;
 	
-    public OsmosisPoisToDb(String outputFilename) {
+    public OsmosisPoisToDb(String outputFilename, boolean createTable) {
 		super();
 		this.outputFilename = outputFilename;
 		try {
 			this.ow = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outputFilename), "UTF-8"));
+			
+			if (createTable) {
+				writeDDL();
+			}
+			this.ow.println("DELETE FROM qop.osm_pois;");
+			
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private void writeDDL() {
+		String sql = "CREATE TABLE qop.osm_pois (\n"
+				+ "	gid serial4 NOT NULL,\n"
+				+ "	nodeid bigserial NOT NULL,\n"
+				+ "	mainkey text NULL,\n"
+				+ "	mainval text NULL,\n"
+				+ "	\"name\" text NULL,\n"
+				+ "	tags jsonb NULL,\n"
+				+ "	geom public.geometry(point, 4326) NULL,\n"
+				+ "	CONSTRAINT aerzte_pkey PRIMARY KEY (gid)\n"
+				+ ");\n"
+				+ "CREATE INDEX osm_pois_geom_gist ON qop.osm_pois USING gist (geom);";
+		
+		ow.println(sql);
+		
 	}
 
 	@Override
@@ -124,10 +147,10 @@ public class OsmosisPoisToDb implements Sink {
     	ow.flush();
     }
  
-    public static void importAmenitys(String filename, String outputfilename) throws FileNotFoundException {
+    public static void importAmenitys(String filename, String outputfilename, boolean createTable ) throws FileNotFoundException {
         InputStream inputStream = new FileInputStream(filename);
         OsmosisReader reader = new OsmosisReader(inputStream);
-        reader.setSink(new OsmosisPoisToDb(outputfilename));
+        reader.setSink(new OsmosisPoisToDb(outputfilename, createTable));
         reader.run();
     }
 

@@ -18,7 +18,7 @@ public class TestConvert {
 
 	@Test
 	public void testWriteSql() throws FileNotFoundException {
-		OsmosisPoisToDb.importAmenitys(userDir() + "/Downloads/austria-latest.osm.pbf", userDir() + "/Downloads/pois.sql");
+		OsmosisPoisToDb.importAmenitys(userDir() + "/Downloads/austria-latest.osm.pbf", userDir() + "/Downloads/pois.sql", true);
 	}
 
 	private String userDir() {
