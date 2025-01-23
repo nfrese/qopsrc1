@@ -25,13 +25,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import crosby.binary.osmosis.OsmosisReader;
  
-public class Mysink implements Sink {
+public class OsmosisPoisToDb implements Sink {
  
 	private ObjectMapper om = new ObjectMapper();
 	public final String outputFilename;
 	private PrintWriter ow;
 	
-    public Mysink(String outputFilename) {
+    public OsmosisPoisToDb(String outputFilename) {
 		super();
 		this.outputFilename = outputFilename;
 		try {
@@ -127,7 +127,7 @@ public class Mysink implements Sink {
     public static void importAmenitys(String filename, String outputfilename) throws FileNotFoundException {
         InputStream inputStream = new FileInputStream(filename);
         OsmosisReader reader = new OsmosisReader(inputStream);
-        reader.setSink(new Mysink(outputfilename));
+        reader.setSink(new OsmosisPoisToDb(outputfilename));
         reader.run();
     }
 
