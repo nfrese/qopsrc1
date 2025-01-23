@@ -9,7 +9,7 @@ import org.openstreetmap.osmosis.core.Osmosis;
 
 import at.qop.qoplib.dbconnector.DBUtils;
 
-public class TestConvert {
+public class ImportOsmPoisTest {
 
 	@Test
 	public void test() {

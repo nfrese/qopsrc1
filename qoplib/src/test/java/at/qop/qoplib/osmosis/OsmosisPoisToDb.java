@@ -56,7 +56,7 @@ public class OsmosisPoisToDb implements Sink {
 				+ "	\"name\" text NULL,\n"
 				+ "	tags jsonb NULL,\n"
 				+ "	geom public.geometry(point, 4326) NULL,\n"
-				+ "	CONSTRAINT aerzte_pkey PRIMARY KEY (gid)\n"
+				+ "	CONSTRAINT osm_pois_pkey PRIMARY KEY (gid)\n"
 				+ ");\n"
 				+ "CREATE INDEX osm_pois_geom_gist ON qop.osm_pois USING gist (geom);";
 		
