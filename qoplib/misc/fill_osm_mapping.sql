@@ -1,0 +1,56 @@
+delete from qop.osm_pois_category;
+
+INSERT INTO qop.osm_pois_category
+VALUES
+('amenity', 'doctors', 'health', 'base'),
+('amenity', 'pharmacy','health', 'base'),
+('amenity', 'dentist','health','base'),
+('amenity', 'kindergarten','edusoc','base'),
+('amenity', 'childcare','edusoc', 'base'),
+('amenity', 'school','edusoc', 'base'),
+('shop', 'supermarket','nv','base'),
+('shop', 'bakery','nv','base'),
+('shop', 'pastry','nv','base'),
+('shop', 'bakery;pastry','nv','base'),
+('shop', 'butcher','nv','base'),
+('amenity', 'restaurant','nv','base'),
+('amenity', 'cafe','nv','base'),
+('amenity', 'pub','nv','base'),
+('shop', 'kiosk','nv','base'),
+('amenity', 'post_office','infra','base'),
+('amenity', 'atm','infra','base'),
+('amenity', 'bank','infra','base'),
+('public_transport', 'stop_position','mob','base'),
+('public_transport', 'platform','mob','base'),
+('tourism', 'museum','leisure','base'),
+('building', 'civic','leisure','base'),
+('amenity', 'theatre','leisure','base'),
+('amenity', 'townhall','infra','base'),
+('leisure', 'playground','leisure','base'),
+('leisure', 'ice_rink','leisure','base'),
+('leisure', 'water_park','leisure','base'),
+('leisure', 'sports_centre','edusoc','base'),
+('leisure', 'pitch','leisure','base'),
+('leisure', 'fitness_station','leisure','base'),
+('amenity', 'library','edusoc','base'),
+('healthcare', 'centre','health','base'),
+('amenity','college','edusoc','base'),
+('shop','convenience','nv','base');
+
+INSERT INTO qop.osm_pois_category
+VALUES
+('office', 'parish', 'infra', 'extended'),
+('office','religion', 'infra', 'extended'),	
+('amenity','parcel_locker','infra', 'extended'),	
+--('amenity','restaurant', 'leisure', 'extended'),
+('cuisine', 'buschenschank', 'leisure','extended'),
+--('amenity', 'cafe', 'leisure','extended'),	
+('shop', 'farm', 'nv', 'extended'),
+('amenity', 'marketplace', 'nv', 'extended'),
+('shop', 'greengrocer', 'nv', 'extended'),
+--('amenity', 'library','edusoc','extended'),
+--('healthcare', 'centre','health','extended'),
+--('amenity','college','edusoc','extended'),
+--('shop','convenience','nv','extended'),
+('healthcare', 'nurse', 'health', 'extended');
+
