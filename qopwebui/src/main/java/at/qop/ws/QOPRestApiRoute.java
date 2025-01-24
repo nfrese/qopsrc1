@@ -113,7 +113,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="lat") double start_lat, 
 			@RequestParam(name="lon") double start_lon,
 			@RequestParam(name="radius_meters") double radius,
-			@RequestParam(name="poi_table") String[] poiTables
+			@RequestParam(name="poi_table") String[] poiTables,
+			@RequestParam(name="cat_id", required = false) String cat
 		) throws ServletException, IOException, SQLException {
 		
 		Config cfg = checkAuth(username, password);
@@ -125,13 +126,22 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 
 		IRouter router = new OSRMClient(cfg.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
 		
-		
 		List<Feature> outFeatures = new ArrayList<>();
 		
 		for (String poiTable : poiTables) {
 			
 			DbTableReader reader = new DbTableReader();
-			LookupSessionBeans.genericDomain().readTable("SELECT * FROM " + poiTable + " WHERE " + stIntersectsSql, reader );
+			String sql = "SELECT * FROM " + poiTable + " WHERE " + stIntersectsSql;
+			if (cat != null) {
+				if (cat.equals("without")) {
+					sql += " AND cat_id is null";
+				} else {
+					sql += " AND cat_id = " + escSqlStr(cat);
+				}
+			}
+			
+			LookupSessionBeans.genericDomain().readTable(
+					sql, reader );
 			
 			DbInt4Field gid = reader.table.int4Field("gid");
 			
@@ -218,6 +228,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 
 
 		return ResponseEntity.ok().header("Content-Type", "application/json;charset=UTF-8").body(jsonOut);
+	}
+
+	private String escSqlStr(String sql) {
+		return "'" + sql.replace("'", "''") + "'";
 	}
 
 

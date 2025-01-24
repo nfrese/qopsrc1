@@ -1,13 +1,15 @@
 package at.qop.ws;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import at.qop.qoplib.Config;
 
 public abstract class QOPRestApiBase {
-	
+
 	protected Config checkAuth(String username, String password) {
 		if (username == null) throw new RuntimeException("URL parameter username required");
 		if (password == null) throw new RuntimeException("URL parameter password required");
-		
+
 		Config cfg = Config.read();
 		if (!password.equals(cfg.getUserPassword(username)))
 		{
@@ -16,4 +18,7 @@ public abstract class QOPRestApiBase {
 		return cfg;
 	}
 
+	protected ObjectMapper om() {
+		return new ObjectMapper();
+	}
 }
