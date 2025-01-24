@@ -56,9 +56,9 @@ import at.qop.qoplib.osrmclient.LonLat;
 import at.qop.qoplib.osrmclient.OSRMClient;
 
 @RestController
-public class QOPRestApiRoute extends QOPRestApiBase {
+public class QOPRestApiRead extends QOPRestApiBase {
        
-    public QOPRestApiRoute() {
+    public QOPRestApiRead() {
         super();
     }
 
@@ -98,78 +98,30 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		public boolean display;    	
     }
     
-    @GetMapping("/qop/rest/api/traveltime_to_pois")
-	protected ResponseEntity<?> traveltime(
+    @GetMapping("/qop/rest/api/read")
+	protected ResponseEntity<?> read(
 			@RequestParam(name="username") String username, 
 			@RequestParam(name="password") String password, 
-			@RequestParam(name="lat") double start_lat, 
-			@RequestParam(name="lon") double start_lon,
-			@RequestParam(name="radius_meters") double radius,
-			@RequestParam(name="poi_table") String[] poiTables,
-			@RequestParam(name="cat_id", required = false) String cat
+			@RequestParam(name="table") String table
 		) throws ServletException, IOException, SQLException {
 		
 		Config cfg = checkAuth(username, password);
 		
-		Point start = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lat,start_lon));
-		Geometry buffer = CRSTransform.singleton.bufferWGS84Corr(start, radius);
 		String geomField ="geom";
-		String stIntersectsSql = "ST_Intersects(" +geomField + ", 'SRID=4326;" + buffer + "'::geometry)";
+		
+		List<SimpleFeature> outFeatures = new ArrayList<>();
 
-		IRouter router = new OSRMClient(cfg.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
-		
-		List<Feature> outFeatures = new ArrayList<>();
-		
-		for (String poiTable : poiTables) {
-			
 			DbTableReader reader = new DbTableReader();
-			String sql = "SELECT * FROM " + poiTable + " WHERE " + stIntersectsSql;
-			if (cat != null) {
-				if (cat.equals("without")) {
-					sql += " AND cat_id is null";
-				} else {
-					sql += " AND cat_id = " + escSqlStr(cat);
-				}
-			}
+			String sql = "SELECT * FROM " + table;
 			
 			LookupSessionBeans.genericDomain().readTable(
 					sql, reader );
-			
-			DbInt4Field gid = reader.table.int4Field("gid");
-			
-			LonLat[] sources = new LonLat[1];
-			sources[0] = new LonLat(start.getX(), start.getY());
-
-			int n = reader.records.size();
-			LonLat[] destinations = new LonLat[n];
-			for (int i = 0; i < n; i++)
-			{
-				DbRecord record = reader.records.get(i);
-				Point targetPoint = (Point)reader.table.geometryField(geomField).get(record);
-				destinations[i] = new LonLat(targetPoint.getX(), targetPoint.getY());
-			}
-
-			ModeEnum[] modes = new  ModeEnum[] {ModeEnum.foot, ModeEnum.bike, ModeEnum.car};
-			double[][] time = new double[n][4];
-			
-			try {
-				for (int j = 0; j < modes.length; j++) {
-					double[][] r = router.table(modes[j], sources, destinations);
-					for (int i = 0; i < n; i++) {
-						double timeMinutes = r[0][i] / 60;  // minutes
-						time[i][j] = ((double)Math.round(timeMinutes * 100)) / 100;  // round 2 decimal places 
-					}
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e); 
-			}
-			
-			int cnt =0;
+			int cnt=0;
 			for (DbRecord record : reader.records)
 			{
-				Feature outFeature = new Feature();
+				SimpleFeature outFeature = new SimpleFeature();
 				
-				outFeature.id = poiTable + ":" + gid.get(record);
+				outFeature.id = table + ":rec_"+ cnt;
 				for (int i = 0; i < reader.table.colNames.length;i++) {
 					String colName = reader.table.colNames[i];
 					if (reader.table.typeNames[i].equals("geometry"))
@@ -198,26 +150,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						outFeature.properties.put(colName, value);
 					}
 				}
-				
-				outFeature.routingResults.walk.minutes = time[cnt][0];
-				outFeature.routingResults.bike.minutes = time[cnt][1];
-				outFeature.routingResults.car.minutes = time[cnt][2];
-				outFeature.routingResults.set();
-				
 				outFeatures.add(outFeature);
 				cnt++;
 			}
-		}
-		
-		List<Feature> sorted = outFeatures.stream()
-				.filter(f -> f.routingResults.disp())
-				.sorted((f,g) -> new Double(f.routingResults.bike.minutes).compareTo(g.routingResults.bike.minutes))
-				.collect(Collectors.toList());
-		
-		return returnGeoJson(sorted);
+		return returnGeoJson(outFeatures);
 	}
-
-
-
 
 }

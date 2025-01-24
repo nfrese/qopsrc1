@@ -34,6 +34,7 @@ import java.util.concurrent.ThreadFactory;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.postgresql.jdbc.PgResultSetMetaData;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -173,6 +174,7 @@ public class GenericDomain extends AbstractDomain implements IGenericDomain {
 
 				for (int i = 0; i< cols; i++)
 				{
+					
 					table.sqlTypes[i] = metaData.getColumnType(i+1);
 					table.typeNames[i] = metaData.getColumnTypeName(i+1);
 					table.colNames[i] = metaData.getColumnName(i+1);
