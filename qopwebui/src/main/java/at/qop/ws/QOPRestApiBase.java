@@ -33,6 +33,7 @@ public abstract class QOPRestApiBase {
 
 	protected ResponseEntity<?> returnGeoJson(List<? extends SimpleFeature> outFeatures) throws JsonProcessingException {
 		Map<String,Object> outRoot = new LinkedHashMap<>();
+		outRoot.put("type","FeatureCollection");
 		outRoot.put("features", outFeatures);
 		String jsonOut = om().writeValueAsString(outRoot);
 

@@ -103,7 +103,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="username") String username, 
 			@RequestParam(name="password") String password, 
 			@RequestParam(name="lat") double start_lat, 
-			@RequestParam(name="lon") double start_lon,
+			@RequestParam(name="lng") double start_lng,
 			@RequestParam(name="radius_meters") double radius,
 			@RequestParam(name="poi_table") String[] poiTables,
 			@RequestParam(name="cat_id", required = false) String cat
@@ -111,7 +111,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		
 		Config cfg = checkAuth(username, password);
 		
-		Point start = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lat,start_lon));
+		Point start = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lng,start_lat));
 		Geometry buffer = CRSTransform.singleton.bufferWGS84Corr(start, radius);
 		String geomField ="geom";
 		String stIntersectsSql = "ST_Intersects(" +geomField + ", 'SRID=4326;" + buffer + "'::geometry)";
