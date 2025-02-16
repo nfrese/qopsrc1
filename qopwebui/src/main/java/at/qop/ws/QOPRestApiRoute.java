@@ -51,6 +51,7 @@ import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTableReader;
 import at.qop.qoplib.dbconnector.fieldtypes.DbInt4Field;
+import at.qop.qoplib.dbconnector.fieldtypes.DbTextField;
 import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.osrmclient.LonLat;
 import at.qop.qoplib.osrmclient.OSRMClient;
@@ -135,8 +136,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			LookupSessionBeans.genericDomain().readTable(
 					sql, reader );
 			
-			DbInt4Field gid = reader.table.int4Field("gid");
-			
+			DbTextField fid = reader.table.textField("fid");
+		
 			LonLat[] sources = new LonLat[1];
 			sources[0] = new LonLat(start.getX(), start.getY());
 
@@ -169,9 +170,14 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			{
 				Feature outFeature = new Feature();
 				
-				outFeature.id = poiTable + ":" + gid.get(record);
+				outFeature.id = fid.get(record);
 				for (int i = 0; i < reader.table.colNames.length;i++) {
 					String colName = reader.table.colNames[i];
+					if ("fid".equals(colName))
+					{
+						continue;
+					}
+					
 					if (reader.table.typeNames[i].equals("geometry"))
 					{
 						Geometry value = reader.table.geometryField(colName).get(record);
