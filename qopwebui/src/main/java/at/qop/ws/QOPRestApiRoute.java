@@ -23,6 +23,7 @@ package at.qop.ws;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +37,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.geojson.GeoJsonWriter;
 
@@ -48,6 +51,7 @@ import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.IRouter;
+import at.qop.qoplib.calculation.LayerTarget;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTableReader;
 import at.qop.qoplib.dbconnector.fieldtypes.DbInt4Field;
@@ -117,7 +121,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		String geomField ="geom";
 		String stIntersectsSql = "ST_Intersects(" +geomField + ", 'SRID=4326;" + buffer + "'::geometry)";
 
-		IRouter router = new OSRMClient(cfg.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
+		IRouter router = osrm(cfg);
 		
 		List<Feature> outFeatures = new ArrayList<>();
 		
@@ -181,9 +185,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 					if (reader.table.typeNames[i].equals("geometry"))
 					{
 						Geometry value = reader.table.geometryField(colName).get(record);
-						GeoJsonWriter gw = new GeoJsonWriter();
-						String json = gw.write(value);
-						JsonNode jo = om().readTree(json);
+						JsonNode jo = geomToGeoJson(value);
 						if (geomField.equals(colName))
 						{
 							outFeature.geometry= jo;
@@ -223,7 +225,65 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		return returnGeoJson(sorted);
 	}
 
+	private JsonNode geomToGeoJson(Geometry value) throws JsonProcessingException, JsonMappingException {
+		GeoJsonWriter gw = new GeoJsonWriter();
+		String json = gw.write(value);
+		JsonNode jo = om().readTree(json);
+		return jo;
+	}
 
+	private OSRMClient osrm(Config cfg) {
+		return new OSRMClient(cfg.getOSRMConf(), Constants.SPLIT_DESTINATIONS_AT);
+	}
 
+    @GetMapping("/qop/rest/api/route")
+	protected ResponseEntity<?> route(
+			@RequestParam(name="username") String username, 
+			@RequestParam(name="password") String password, 
+			@RequestParam(name="lat") double start_lat, 
+			@RequestParam(name="lng") double start_lng,
+			@RequestParam(name="dest_lat") double dest_lat, 
+			@RequestParam(name="dest_lng") double dest_lng
+		) throws ServletException, IOException, SQLException {
+    
+    	Config cfg = checkAuth(username, password);
+    	
+		IRouter router = osrm(cfg);
+		
+		List<SimpleFeature> outFeatures = new ArrayList<>();
+		
+		ModeEnum[] modes = new ModeEnum[] {ModeEnum.foot, ModeEnum.bike, ModeEnum.car};
+    	
+    	
+		for (ModeEnum mode : modes)
+		{
+			SimpleFeature routeResult = new SimpleFeature();
+			String modName;
+			switch (mode) {
+			case foot : modName="walk"; break;
+			case bike : modName="bike"; break;
+			case car : modName="publicTransport"; break;
+			default : modName="unexpected " + mode;
+			}
+			
+			routeResult.properties.put("mode", modName);
+			
+		
+			LonLat[] points = new LonLat[2];
+			points[0] = new LonLat(start_lng, start_lat);
+			points[1] = new LonLat(dest_lng, dest_lat);
+			try {
+				LonLat[] lonLatArr = router.route(mode, points);
+				List<Coordinate> list = Arrays.stream(lonLatArr).map(lonLat -> new Coordinate(lonLat.lon, lonLat.lat)).collect(Collectors.toList());
+				LineString geom = CRSTransform.gfWGS84.createLineString(list.toArray(new Coordinate[list.size()]));
+				JsonNode jo = geomToGeoJson(geom);
+				routeResult.geometry = jo;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			outFeatures.add(routeResult);
+		}
+		return returnGeoJson(outFeatures);
+    }
 
 }
