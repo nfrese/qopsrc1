@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
@@ -266,8 +267,11 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			default : modName="unexpected " + mode;
 			}
 			
-			routeResult.properties.put("mode", modName);
+			String idStr = start_lat + " " +  start_lng + " " + dest_lat + " " + dest_lng + " " + mode;
 			
+			routeResult.id=UUID.nameUUIDFromBytes(idStr.getBytes()).toString();
+			
+			routeResult.properties.put("mode", modName);
 		
 			LonLat[] points = new LonLat[2];
 			points[0] = new LonLat(start_lng, start_lat);
