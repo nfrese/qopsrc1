@@ -188,6 +188,11 @@
     <artifactId>osmosis-tagfilter</artifactId>
     <version>0.47.3</version>
 </dependency>
+<dependency>
+    <groupId>org.openstreetmap.osmosis</groupId>
+    <artifactId>osmosis-areafilter</artifactId>
+    <version>0.47.3</version>
+</dependency>
 
 <dependency>
     <groupId>org.openstreetmap.osmosis</groupId>

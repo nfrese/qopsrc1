@@ -17,12 +17,26 @@ public class ImportOsmPoisTest {
 	}
 
 	@Test
+	public void testExtractBoundaries() {
+		
+		// wget -O weinviertel.poly "https://polygons.openstreetmap.fr/get_poly.py?id=11317717&params=0"
+		
+		Osmosis.main(new String[]{
+				"--read-pbf", 
+				userDir() + "/work/qop/pbf/austria-latest.osm.pbf", 
+				"--bounding-polygon", 
+				"completeWays=yes", "file=" + userDir() + "/work/qop/pbf/weinviertel.poly",
+				"--write-pbf", 
+				userDir() + "/work/qop/pbf/weinviertel-latest.osm.pbf"});
+	}
+	
+	@Test
 	public void testWriteSql() throws FileNotFoundException {
 		OsmosisPoisToDb.importAmenitys(userDir() + "/Downloads/austria-latest.osm.pbf", userDir() + "/Downloads/pois.sql", true);
 	}
 
 	private String userDir() {
-		return System.getProperty("user.dir");
+		return "/Users/norbert"; //System.getProperty("user.dir");
 	}
 
 	@Test
