@@ -35,6 +35,10 @@ public abstract class QOPRestApiBase {
 		Map<String,Object> outRoot = new LinkedHashMap<>();
 		outRoot.put("type","FeatureCollection");
 		outRoot.put("features", outFeatures);
+		return returnJson(outRoot);
+	}
+
+	protected ResponseEntity<?> returnJson(Object outRoot) throws JsonProcessingException {
 		String jsonOut = om().writeValueAsString(outRoot);
 
 		return ResponseEntity.ok().header("Content-Type", "application/json;charset=UTF-8").body(jsonOut);

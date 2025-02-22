@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -51,6 +52,7 @@ import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTableReader;
 import at.qop.qoplib.dbconnector.fieldtypes.DbInt4Field;
+import at.qop.qoplib.dbconnector.fieldtypes.DbTextField;
 import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.osrmclient.LonLat;
 import at.qop.qoplib.osrmclient.OSRMClient;
@@ -102,26 +104,48 @@ public class QOPRestApiRead extends QOPRestApiBase {
 	protected ResponseEntity<?> read(
 			@RequestParam(name="username") String username, 
 			@RequestParam(name="password") String password, 
-			@RequestParam(name="table") String table
+			@RequestParam(name="table") String table,
+			@RequestParam(name="maxFeatures", defaultValue = "10000") Integer maxFeatures
 		) throws ServletException, IOException, SQLException {
 		
 		Config cfg = checkAuth(username, password);
 		
+		String sql = "SELECT * FROM " + table;
+		if (maxFeatures != null)
+		{
+			sql += " LIMIT " + maxFeatures;
+		}
+		
+		List<SimpleFeature> outFeatures = readInt(table, sql);
+		return returnGeoJson(outFeatures);
+	}
+
+	private List<SimpleFeature> readInt(String table, String sql)
+			throws SQLException, JsonProcessingException, JsonMappingException {
 		String geomField ="geom";
 		
 		List<SimpleFeature> outFeatures = new ArrayList<>();
 
 			DbTableReader reader = new DbTableReader();
-			String sql = "SELECT * FROM " + table;
 			
 			LookupSessionBeans.genericDomain().readTable(
 					sql, reader );
 			int cnt=0;
+			
+			DbTextField fidField = reader.table.textField("fid");
+			
 			for (DbRecord record : reader.records)
 			{
 				SimpleFeature outFeature = new SimpleFeature();
+				if (fidField != null)
+				{
+					outFeature.id = fidField.get(record);
+				}
+				else
+				{
+					outFeature.id = table + ":rec_"+ cnt;
+				}
 				
-				outFeature.id = table + ":rec_"+ cnt;
 				for (int i = 0; i < reader.table.colNames.length;i++) {
 					String colName = reader.table.colNames[i];
 					if (reader.table.typeNames[i].equals("geometry"))
@@ -153,7 +177,41 @@ public class QOPRestApiRead extends QOPRestApiBase {
 				outFeatures.add(outFeature);
 				cnt++;
 			}
-		return returnGeoJson(outFeatures);
+		return outFeatures;
 	}
 
+    @GetMapping("/qop/rest/api/readsingle")
+	protected ResponseEntity<?> single(
+			@RequestParam(name="username") String username, 
+			@RequestParam(name="password") String password, 
+			@RequestParam(name="id") String id
+		) throws ServletException, IOException, SQLException {
+		
+		Config cfg = checkAuth(username, password);
+		
+		String[] split = id.split(":");
+		String tableName;
+		if (split.length > 1)
+		{
+			tableName = split[0];
+		}
+		else
+		{
+			throw new RuntimeException("invalid id, no ':' to separate tablename " + id);
+		}
+		
+		String sql = "SELECT * FROM " + tableName + " WHERE fid=" + escSqlStr(id)+ "";
+		
+		List<SimpleFeature> outFeatures = readInt(tableName, sql);
+		if (outFeatures.size() == 1)
+		{
+			return returnJson(outFeatures.get(0));
+		}
+		else
+		{
+			return returnJson(null);
+		}
+	}
+
+    
 }
