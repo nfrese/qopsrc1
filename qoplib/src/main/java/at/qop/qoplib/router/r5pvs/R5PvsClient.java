@@ -10,12 +10,16 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.entities.ModeEnum;
@@ -42,11 +46,14 @@ public class R5PvsClient implements IRouter {
 
 	public static class TableResult {
 		public List<TableResultRow> rows = new ArrayList<>();
+		public Map<Integer, TableResultRouteInfo> routeInfos = new TreeMap<>();
 	}
 
 	public static class TableResultRow {
 
 		public double minTotalTime;
+		public TableResultRoute bestRoute;
+		public List<TableResultRoute> routes = new ArrayList<>();
 
 	}
 
@@ -101,8 +108,13 @@ public class R5PvsClient implements IRouter {
 		}
 	}
 
+	private static ObjectMapper om = new ObjectMapper();
+	
 	public static void parseTableResult(TableResult durationArr, Reader jsonReader) throws JsonProcessingException, IOException
 	{
+		
+		JsonNode jn = om.readTree(jsonReader);
+		
 
 		JsonFactory jfactory = new JsonFactory();
 
@@ -133,34 +145,37 @@ public class R5PvsClient implements IRouter {
 						}
 						if ("bestRoute".equals(fieldname))
 						{
-							while (jParser.nextToken() == JsonToken.START_ARRAY) {
-
-								parseRoute(jParser);		    	
-							}
+								TableResultRoute route = parseRoute(jParser);
+								row.bestRoute = route;
 						}
 
 						if ("routes".equals(fieldname))
 						{
-							if (jParser.nextToken() != JsonToken.START_ARRAY) throw new RuntimeException("Expected START_ARRAY");
-							while (jParser.nextToken() == JsonToken.START_ARRAY) {
+							while (jParser.nextToken() != JsonToken.END_ARRAY) {
 
-								parseRoute(jParser);
+								TableResultRoute route = parseRoute(jParser);
+								row.routes .add(route);
 							}
 						}
 					}
 				}
 				if ("routeInfos".equals(fieldname0))
 				{
+					while (jParser.nextToken() != JsonToken.END_OBJECT) {
 
+						String fieldname4 = jParser.getCurrentName();
+						TableResultRouteInfo ri = parseRouteInfo(jParser);
+						durationArr.routeInfos.put(ri.routeId, ri);
+					}
 				}
 			}
 		}
 	}
-
-	private static void parseRoute(JsonParser jParser) throws IOException {
+	
+	private static TableResultRoute parseRoute(JsonParser jParser) throws IOException {
+		TableResultRoute trRoute = new TableResultRoute();
 		while (jParser.nextToken() != JsonToken.END_OBJECT) {
 
-			TableResultRoute trRoute = new TableResultRoute();
 
 			String fieldname2 = jParser.getCurrentName();
 
@@ -182,8 +197,58 @@ public class R5PvsClient implements IRouter {
 				trRoute.count = jParser.getIntValue();
 			}
 		}
+		return trRoute;
 	}
 
+	public static class TableResultRouteInfo {
+
+		public int routeId;
+		public String routeName;
+		public String routeLongName;
+		public int routeType;
+
+	}
+	
+	private static TableResultRouteInfo parseRouteInfo(JsonParser jParser) throws IOException {
+		TableResultRouteInfo trRoute = new TableResultRouteInfo();
+		while (jParser.nextToken() != JsonToken.END_OBJECT) {
+
+			/*
+			 * "routeId": 156,
+            "routeName": "500",
+            "routeLongName": "Wien Floridsdorf - Schrick - Mistelbach",
+            "routeType": 3
+			 */
+
+			String fieldname2 = jParser.getCurrentName();
+
+			if ("routeId".equals(fieldname2))
+			{
+				jParser.nextToken();
+				trRoute.routeId = jParser.getIntValue();
+			}
+
+			if ("routeName".equals(fieldname2))
+			{
+				jParser.nextToken();
+				trRoute.routeName = jParser.getValueAsString();	    		    	
+			}
+
+			if ("routeLongName".equals(fieldname2))
+			{
+				jParser.nextToken();
+				trRoute.routeLongName = jParser.getValueAsString();	    		    	
+			}
+			
+			if ("routeType".equals(fieldname2))
+			{
+				jParser.nextToken();
+				trRoute.routeType = jParser.getIntValue();
+			}
+		}
+		return trRoute;
+	}
+	
 	@Override
 	public LonLat[] route(ModeEnum mode, LonLat[] points) throws IOException {
 		// TODO Auto-generated method stub

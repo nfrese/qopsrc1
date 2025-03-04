@@ -1,0 +1,90 @@
+{
+    "results": [
+        {
+            "minTotalTime": 386.0,
+            "routes": []
+        },
+        {
+            "minTotalTime": 146.0,
+            "routes": []
+        },
+        {
+            "minTotalTime": 110.0,
+            "routes": []
+        },
+        {
+            "bestRoute": {
+                "routeId": 797,
+                "count": 43,
+                "minDuration": 451.0
+            },
+            "minTotalTime": 451.0,
+            "routes": [
+                {
+                    "routeId": 156,
+                    "count": 13,
+                    "minDuration": 1291.0
+                },
+                {
+                    "routeId": 167,
+                    "count": 11,
+                    "minDuration": 1149.0
+                },
+                {
+                    "routeId": 797,
+                    "count": 43,
+                    "minDuration": 451.0
+                }
+            ]
+        },
+        {
+            "minTotalTime": 155.0,
+            "routes": []
+        },
+        {
+            "bestRoute": {
+                "routeId": 797,
+                "count": 41,
+                "minDuration": 551.0
+            },
+            "minTotalTime": 551.0,
+            "routes": [
+                {
+                    "routeId": 156,
+                    "count": 10,
+                    "minDuration": 1391.0
+                },
+                {
+                    "routeId": 167,
+                    "count": 2,
+                    "minDuration": 1688.0
+                },
+                {
+                    "routeId": 797,
+                    "count": 41,
+                    "minDuration": 551.0
+                }
+            ]
+        }
+    ],
+    "routeInfos": {
+        "156": {
+            "routeId": 156,
+            "routeName": "500",
+            "routeLongName": "Wien Floridsdorf - Schrick - Mistelbach",
+            "routeType": 3
+        },
+        "167": {
+            "routeId": 167,
+            "routeName": "520",
+            "routeLongName": "Wien Aderklaaer Straße - Deutsch Wagram - Kollnbrunn",
+            "routeType": 3
+        },
+        "797": {
+            "routeId": 797,
+            "routeName": "535",
+            "routeLongName": "Gänserndorf - Schönkirchen - Kollnbrunn - Mistelbach",
+            "routeType": 3
+        }
+    }
+}
