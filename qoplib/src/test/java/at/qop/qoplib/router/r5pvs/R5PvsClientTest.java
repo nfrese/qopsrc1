@@ -1,10 +1,9 @@
 package at.qop.qoplib.router.r5pvs;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.io.StringReader;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,10 +37,6 @@ public class R5PvsClientTest {
 		System.out.println(tr);
 	}
 	
-	
-//	/qoplib/src/main/resources/at/qop/qoplib/router/r5pvs/response.json
-	
-	
 	@Test
 	public void testParse() throws JsonProcessingException, IOException {
 		String json = Utils.readResourceToString("/at/qop/qoplib/router/r5pvs/response.json");
@@ -49,9 +44,7 @@ public class R5PvsClientTest {
 		R5PvsClient.TableResult tr = new TableResult();
 		R5PvsClient.parseTableResult(tr, new StringReader(json));
 		
-		System.out.println(tr);
-		
-		
+		Assert.assertEquals("797", tr.rows.get(5).bestRoute.routeId+"");
 		
 	}
 	
