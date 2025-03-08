@@ -115,88 +115,29 @@ public class R5PvsClient implements IRouter {
 		
 		JsonNode jn = om.readTree(jsonReader);
 		
+		for (JsonNode n : jn.at("/results")) {
 
-		JsonFactory jfactory = new JsonFactory();
+			TableResultRow row = new TableResultRow();
+			row.minTotalTime = n.get("minTotalTime").asDouble();
+			row.bestRoute = parseRoute(n.get("bestRoute"));
+			for (JsonNode rn : n.get("routes")) {
 
-		JsonParser jParser = jfactory.createParser(jsonReader);
-
-		while (jParser.nextToken() != JsonToken.END_OBJECT) {
-
-			String fieldname0 = jParser.getCurrentName();
-
-			if ("results".equals(fieldname0))
-			{
-
-				while (jParser.nextToken() != JsonToken.END_ARRAY) {
-
-					TableResultRow row = new TableResultRow();
-					durationArr.rows.add(row);
-
-					while (jParser.nextToken() != JsonToken.END_OBJECT) {
-
-						String fieldname = jParser.getCurrentName();
-
-						if ("minTotalTime".equals(fieldname))
-						{
-							jParser.nextToken();
-							double value = jParser.getDoubleValue();
-							row.minTotalTime = value;
-
-						}
-						if ("bestRoute".equals(fieldname))
-						{
-								TableResultRoute route = parseRoute(jParser);
-								row.bestRoute = route;
-						}
-
-						if ("routes".equals(fieldname))
-						{
-							while (jParser.nextToken() != JsonToken.END_ARRAY) {
-
-								TableResultRoute route = parseRoute(jParser);
-								row.routes .add(route);
-							}
-						}
-					}
-				}
-				if ("routeInfos".equals(fieldname0))
-				{
-					while (jParser.nextToken() != JsonToken.END_OBJECT) {
-
-						String fieldname4 = jParser.getCurrentName();
-						TableResultRouteInfo ri = parseRouteInfo(jParser);
-						durationArr.routeInfos.put(ri.routeId, ri);
-					}
-				}
+				TableResultRoute route = parseRoute(rn);
+				row.routes .add(route);
 			}
+
 		}
+	
 	}
 	
-	private static TableResultRoute parseRoute(JsonParser jParser) throws IOException {
+	private static TableResultRoute parseRoute(JsonNode jsonNode) throws IOException {
 		TableResultRoute trRoute = new TableResultRoute();
-		while (jParser.nextToken() != JsonToken.END_OBJECT) {
-
-
-			String fieldname2 = jParser.getCurrentName();
-
-			if ("routeId".equals(fieldname2))
-			{
-				jParser.nextToken();
-				trRoute.routeId = jParser.getIntValue();
-			}
-
-			if ("minDuration".equals(fieldname2))
-			{
-				jParser.nextToken();
-				trRoute.minDuration = jParser.getDoubleValue();		    		    	
-			}
-
-			if ("count".equals(fieldname2))
-			{
-				jParser.nextToken();
-				trRoute.count = jParser.getIntValue();
-			}
-		}
+		
+		trRoute.routeId = jsonNode.get("routeId").asInt();
+		trRoute.minDuration = jsonNode.get("minDuration").asDouble();
+		trRoute.count = jsonNode.get("routeId").asInt();
+		
+	
 		return trRoute;
 	}
 
