@@ -51,6 +51,7 @@ import com.vividsolutions.jts.io.geojson.GeoJsonWriter;
 import at.qop.qoplib.Config;
 import at.qop.qoplib.Constants;
 import at.qop.qoplib.LookupSessionBeans;
+import at.qop.qoplib.Utils;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.calculation.LayerTarget;
@@ -128,6 +129,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 
 		IRouter router = osrm(cfg);
 		
+		List<Geometry> collectGeoms = new ArrayList<>();
 		List<Feature> outFeatures = new ArrayList<>();
 		
 		for (String poiTable : poiTables) {
@@ -197,6 +199,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 					if (reader.table.typeNames[i].equals("geometry"))
 					{
 						Geometry value = reader.table.geometryField(colName).get(record);
+						if (value != null && isStandort1Analysis) { 
+							collectGeoms.add(value);
+						}
+						
 						JsonNode jo = geomToGeoJson(value);
 						if (geomField.equals(colName))
 						{
@@ -238,6 +244,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		if (isStandort1Analysis)
 		{
 			extended = new LinkedHashMap<>();
+			
+			Geometry hull = Utils.convexHull(collectGeoms, CRSTransform.gfWGS84);
+			JsonNode jo = geomToGeoJson(hull);
+			extended.put("isochrone15m", jo);
 		
 			Map<String, Integer> stats = new LinkedHashMap<>();
 			for (Feature f : sorted)

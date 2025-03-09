@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,7 +35,10 @@ import java.util.regex.Pattern;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import com.vividsolutions.jts.algorithm.ConvexHull;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
 import at.qop.qoplib.calculation.CRSTransform;
@@ -147,6 +152,18 @@ public class Utils {
 		if (resourceAsStream == null) throw new RuntimeException("Utils.class.getResourceAsStream(" + resPath +") failed");
 		String str = new Scanner(resourceAsStream, "UTF-8").useDelimiter("\\A").next();
 		return str;
+	}
+
+	public static Geometry convexHull(List<Geometry> collectGeoms, GeometryFactory gf) {
+		
+		List<Coordinate> coords = new ArrayList<>();
+		for (Geometry geom : collectGeoms) {
+			for (Coordinate coord : geom.getCoordinates()) {
+				coords.add(coord);
+			}
+		}
+		
+		return new ConvexHull(coords.toArray(new Coordinate[coords.size()]), gf).getConvexHull();
 	}
 	
 }
