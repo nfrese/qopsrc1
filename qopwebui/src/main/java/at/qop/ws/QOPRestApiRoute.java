@@ -235,7 +235,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			}
 		}
 		
-		List<Feature> sorted = outFeatures.stream()
+		List<SimpleFeature> sorted = outFeatures.stream()
 				.filter(f -> f.routingResults.disp())
 				.sorted((f,g) -> new Double(f.routingResults.bike.minutes).compareTo(g.routingResults.bike.minutes))
 				.collect(Collectors.toList());
@@ -245,12 +245,19 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		{
 			extended = new LinkedHashMap<>();
 			
-			Geometry hull = Utils.convexHull(collectGeoms, CRSTransform.gfWGS84);
+			Geometry hull = CRSTransform.singleton.bufferWGS84Corr(Utils.convexHull(collectGeoms, CRSTransform.gfWGS84),200);
 			JsonNode jo = geomToGeoJson(hull);
-			extended.put("isochrone15m", jo);
+			
+			SimpleFeature hullFeature = new SimpleFeature();
+			hullFeature.id = UUID.nameUUIDFromBytes((""+hull).getBytes())+"";
+			hullFeature.geometry = jo;
+			hullFeature.properties.put("isochrone", "15min");
+			sorted.add(hullFeature);
+			
+			//extended.put("isochrone15m", jo);
 		
 			Map<String, Integer> stats = new LinkedHashMap<>();
-			for (Feature f : sorted)
+			for (SimpleFeature f : sorted)
 			{
 				String catId = (String) f.properties.get("cat_label");
 				if (catId != null)
