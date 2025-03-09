@@ -31,10 +31,19 @@ public abstract class QOPRestApiBase {
 		return OBJECT_MAPPER;
 	}
 
-	protected ResponseEntity<?> returnGeoJson(List<? extends SimpleFeature> outFeatures) throws JsonProcessingException {
+	protected ResponseEntity<?> returnGeoJson(List<? extends SimpleFeature> outFeatures) throws JsonProcessingException 
+	{
+		return returnGeoJson(outFeatures, null);
+	}	
+	
+	protected ResponseEntity<?> returnGeoJson(List<? extends SimpleFeature> outFeatures, Map<String,Object> extended) throws JsonProcessingException {
 		Map<String,Object> outRoot = new LinkedHashMap<>();
 		outRoot.put("type","FeatureCollection");
 		outRoot.put("features", outFeatures);
+		if (extended != null)
+		{
+			outRoot.put("extended", extended);
+		}
 		return returnJson(outRoot);
 	}
 

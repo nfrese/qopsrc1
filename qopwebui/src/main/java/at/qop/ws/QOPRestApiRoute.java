@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -112,8 +113,11 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="lng") double start_lng,
 			@RequestParam(name="radius_meters") double radius,
 			@RequestParam(name="poi_table") String[] poiTables,
-			@RequestParam(name="cat_id", required = false) String cat
+			@RequestParam(name="cat_id", required = false) String cat,
+			@RequestParam(name="analysis_id", required = false) String analysisId
+			
 		) throws ServletException, IOException, SQLException {
+    	boolean isStandort1Analysis = "standort1".equals(analysisId);
 		
 		Config cfg = checkAuth(username, password);
 		
@@ -130,9 +134,16 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			
 			DbTableReader reader = new DbTableReader();
 			String sql = "SELECT * FROM " + poiTable + " WHERE " + stIntersectsSql;
-			if (cat != null) {
+			if (isStandort1Analysis)
+			{
+				sql += " AND cat_id is not null and cat_id != 'latest'";
+			}
+			else if (cat != null) {
 				if (cat.equals("without")) {
 					sql += " AND cat_id is null";
+				}
+				else if (cat.equals("with")) {
+					sql += " AND cat_id is not null";
 				} else {
 					sql += " AND cat_id = " + escSqlStr(cat);
 				}
@@ -223,9 +234,52 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				.sorted((f,g) -> new Double(f.routingResults.bike.minutes).compareTo(g.routingResults.bike.minutes))
 				.collect(Collectors.toList());
 		
-		return returnGeoJson(sorted);
+		Map<String, Object> extended = null;
+		if (isStandort1Analysis)
+		{
+			extended = new LinkedHashMap<>();
+		
+			Map<String, Integer> stats = new LinkedHashMap<>();
+			for (Feature f : sorted)
+			{
+				String catId = (String) f.properties.get("cat_label");
+				if (catId != null)
+				{
+					Integer stat = stats.get(catId);
+					if (stat == null)
+					{
+						stat = 0;
+					}
+					stat++;
+					stats.put(catId, stat);
+				}
+			}
+			
+			List<FrequencyItem> freqs = new ArrayList<>();
+			
+			for (Entry<String, Integer> stat : stats.entrySet()) {
+				
+				FrequencyItem freq = new FrequencyItem();
+				freq.category = stat.getKey();
+				freq.count = stat.getValue();
+				
+				freqs.add(freq);
+				
+			}
+			
+			extended.put("frequencies", freqs);
+		}	
+		
+		return returnGeoJson(sorted, extended );
 	}
 
+    public static class FrequencyItem {
+
+		public Integer count;
+		public String category;
+    	
+    }
+    
 	private JsonNode geomToGeoJson(Geometry value) throws JsonProcessingException, JsonMappingException {
 		GeoJsonWriter gw = new GeoJsonWriter();
 		String json = gw.write(value);
@@ -289,5 +343,5 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		}
 		return returnGeoJson(outFeatures);
     }
-
+    
 }
