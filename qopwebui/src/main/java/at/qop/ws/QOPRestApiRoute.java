@@ -326,6 +326,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		
 		ModeEnum[] modes = new ModeEnum[] {ModeEnum.foot, ModeEnum.bike, ModeEnum.car};
     	
+		String idStr0 = start_lat + " " +  start_lng + " " + dest_lat + " " + dest_lng;
     	
 		for (ModeEnum mode : modes)
 		{
@@ -338,11 +339,14 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			default : modName="unexpected " + mode;
 			}
 			
-			String idStr = start_lat + " " +  start_lng + " " + dest_lat + " " + dest_lng + " " + mode;
+			String idStr = idStr0 +  " " + mode;
 			
 			routeResult.id=UUID.nameUUIDFromBytes(idStr.getBytes()).toString();
 			
 			routeResult.properties.put("mode", modName);
+			routeResult.properties.put("stroke", "#ff0000");
+			routeResult.properties.put("stroke-width", 3);
+			routeResult.properties.put("stroke-opacity", 1);
 		
 			LonLat[] points = new LonLat[2];
 			points[0] = new LonLat(start_lng, start_lat);
@@ -357,6 +361,29 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				throw new RuntimeException(e);
 			}
 			outFeatures.add(routeResult);
+		}
+		
+		{
+			SimpleFeature feature = new SimpleFeature();
+			feature.id=UUID.nameUUIDFromBytes((idStr0+"st").getBytes()).toString();
+			feature.properties.put("marker-color", "#808080");
+			feature.properties.put("marker-size", "medium");
+			feature.properties.put("marker-symbol", "circle");
+			Point geom = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lng,start_lat));
+			JsonNode jo = geomToGeoJson(geom);
+			feature.geometry=jo;
+			outFeatures.add(feature);
+		}
+		{
+			SimpleFeature feature = new SimpleFeature();
+			feature.id=UUID.nameUUIDFromBytes((idStr0+"en").getBytes()).toString();
+			feature.properties.put("marker-color", "#00aa00");
+			feature.properties.put("marker-size", "medium");
+			feature.properties.put("marker-symbol", "circle");
+			Point geom = CRSTransform.gfWGS84.createPoint(new Coordinate(dest_lng,dest_lat));
+			JsonNode jo = geomToGeoJson(geom);
+			feature.geometry=jo;
+			outFeatures.add(feature);
 		}
 		return returnGeoJson(outFeatures);
     }
