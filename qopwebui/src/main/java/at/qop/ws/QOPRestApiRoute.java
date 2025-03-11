@@ -361,7 +361,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				routeResult.geometry = jo;
 				
 				routeResult.properties.put("distanceMeters", result.distanceMeters);
-				routeResult.properties.put("durationSeconds", result.durationSeconds);
+				routeResult.properties.put("durationMinutes", result.durationSeconds / 60);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
