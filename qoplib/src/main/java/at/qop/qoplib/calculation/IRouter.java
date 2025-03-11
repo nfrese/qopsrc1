@@ -24,11 +24,12 @@ import java.io.IOException;
 
 import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.osrmclient.LonLat;
+import at.qop.qoplib.osrmclient.RouteResult;
 
 public interface IRouter {
 
 	double[][] table(ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException;
 
-	LonLat[] route(ModeEnum mode, LonLat[] points) throws IOException;
+	RouteResult route(ModeEnum mode, LonLat[] points) throws IOException;
 
 }

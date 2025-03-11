@@ -183,7 +183,7 @@ public class OSRMClient implements IRouter {
 	}
 
 	@Override
-	public LonLat[] route(ModeEnum mode, LonLat[] points) throws IOException {
+	public RouteResult route(ModeEnum mode, LonLat[] points) throws IOException {
 		
 		StringBuilder urlSb = new StringBuilder();
 		urlSb.append(baseUrl(mode));
@@ -205,7 +205,9 @@ public class OSRMClient implements IRouter {
 		}
 	}
 
-	public static LonLat[] parseRouteResult(String json) throws JsonProcessingException, IOException {
+	public static RouteResult parseRouteResult(String json) throws JsonProcessingException, IOException {
+		
+		RouteResult result = new RouteResult();
 		
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode node = mapper.readTree(json);
@@ -215,7 +217,12 @@ public class OSRMClient implements IRouter {
 			throw new RuntimeException("osrm return code != ok");
 		}
 		
-		JsonNode coordsNode = node.get("routes").iterator().next().get("geometry").get("coordinates");
+		JsonNode fistRoute = node.get("routes").iterator().next();
+		
+		result.durationSeconds = fistRoute.at("/duration").asDouble();
+		result.distanceMeters = fistRoute.at("/distance").asDouble();
+		
+		JsonNode coordsNode = fistRoute.get("geometry").get("coordinates");
 		int rows = 0;
 
 		{ // count 
@@ -240,7 +247,9 @@ public class OSRMClient implements IRouter {
 				i++;
 			}
 		}
-		return vertices;
+		
+		result.vertices = vertices;
+		return result;
 	}
 	
 }

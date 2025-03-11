@@ -43,6 +43,7 @@ import at.qop.qoplib.dbconnector.DbTable;
 import at.qop.qoplib.entities.Analysis;
 import at.qop.qoplib.entities.ProfileAnalysis;
 import at.qop.qoplib.osrmclient.LonLat;
+import at.qop.qoplib.osrmclient.RouteResult;
 
 public abstract class LayerCalculation implements ILayerCalculation {
 	
@@ -231,8 +232,8 @@ public abstract class LayerCalculation implements ILayerCalculation {
 				Coordinate c = target.geom.getCoordinate();
 				points[1] = new LonLat(c.x, c.y);
 				try {
-					LonLat[] lonLatArr = router.route(analysis().mode, points);
-					List<Coordinate> list = Arrays.stream(lonLatArr).map(lonLat -> new Coordinate(lonLat.lon, lonLat.lat)).collect(Collectors.toList());
+					RouteResult lonLatArr = router.route(analysis().mode, points);
+					List<Coordinate> list = Arrays.stream(lonLatArr.vertices).map(lonLat -> new Coordinate(lonLat.lon, lonLat.lat)).collect(Collectors.toList());
 					target.route = CRSTransform.gfWGS84.createLineString(list.toArray(new Coordinate[list.size()]));
 				} catch (IOException e) {
 					throw new RuntimeException(e);

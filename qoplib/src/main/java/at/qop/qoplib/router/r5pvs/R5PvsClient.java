@@ -25,6 +25,7 @@ import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.osrmclient.LonLat;
 import at.qop.qoplib.osrmclient.OSRMClient;
+import at.qop.qoplib.osrmclient.RouteResult;
 import at.qop.qoplib.osrmclient.matrix.Arr;
 import at.qop.qoplib.osrmclient.matrix.ArrImpl;
 import at.qop.qoplib.osrmclient.matrix.ArrView;
@@ -170,7 +171,7 @@ public class R5PvsClient implements IRouter {
 	}
 
 	@Override
-	public LonLat[] route(ModeEnum mode, LonLat[] points) throws IOException {
+	public RouteResult route(ModeEnum mode, LonLat[] points) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

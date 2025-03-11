@@ -62,6 +62,7 @@ import at.qop.qoplib.dbconnector.fieldtypes.DbTextField;
 import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.osrmclient.LonLat;
 import at.qop.qoplib.osrmclient.OSRMClient;
+import at.qop.qoplib.osrmclient.RouteResult;
 
 @RestController
 public class QOPRestApiRoute extends QOPRestApiBase {
@@ -353,11 +354,14 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			points[0] = new LonLat(start_lng, start_lat);
 			points[1] = new LonLat(dest_lng, dest_lat);
 			try {
-				LonLat[] lonLatArr = router.route(mode, points);
-				List<Coordinate> list = Arrays.stream(lonLatArr).map(lonLat -> new Coordinate(lonLat.lon, lonLat.lat)).collect(Collectors.toList());
+				RouteResult result = router.route(mode, points);
+				List<Coordinate> list = Arrays.stream(result.vertices).map(lonLat -> new Coordinate(lonLat.lon, lonLat.lat)).collect(Collectors.toList());
 				LineString geom = CRSTransform.gfWGS84.createLineString(list.toArray(new Coordinate[list.size()]));
 				JsonNode jo = geomToGeoJson(geom);
 				routeResult.geometry = jo;
+				
+				routeResult.properties.put("distanceMeters", result.distanceMeters);
+				routeResult.properties.put("durationSeconds", result.durationSeconds);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
