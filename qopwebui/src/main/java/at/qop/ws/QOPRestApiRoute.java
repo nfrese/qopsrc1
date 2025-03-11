@@ -332,11 +332,12 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		{
 			SimpleFeature routeResult = new SimpleFeature();
 			String modName;
+			String color;
 			switch (mode) {
-			case foot : modName="walk"; break;
-			case bike : modName="bike"; break;
-			case car : modName="publicTransport"; break;
-			default : modName="unexpected " + mode;
+			case foot : modName="walk"; color="000000"; break;
+			case bike : modName="bike"; color="#00ff00"; break;
+			case car : modName="publicTransport"; color="#ff0000"; break;
+			default : modName="unexpected " + mode; color="#a0a0a0";
 			}
 			
 			String idStr = idStr0 +  " " + mode;
@@ -344,7 +345,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			routeResult.id=UUID.nameUUIDFromBytes(idStr.getBytes()).toString();
 			
 			routeResult.properties.put("mode", modName);
-			routeResult.properties.put("stroke", "#ff0000");
+			routeResult.properties.put("stroke", color);
 			routeResult.properties.put("stroke-width", 3);
 			routeResult.properties.put("stroke-opacity", 1);
 		
