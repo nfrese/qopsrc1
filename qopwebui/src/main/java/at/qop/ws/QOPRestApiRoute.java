@@ -381,9 +381,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		{
 			SimpleFeature feature = new SimpleFeature();
 			feature.id=UUID.nameUUIDFromBytes((idStr0+"st").getBytes()).toString();
-			feature.properties.put("marker-color", "#808080");
+			feature.properties.put("color", "#808080");
 			feature.properties.put("marker-size", "medium");
-			feature.properties.put("marker-symbol", "circle");
+			feature.properties.put("icon", "dot");
 			Point geom = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lng,start_lat));
 			JsonNode jo = geomToGeoJson(geom);
 			feature.geometry=jo;
@@ -392,9 +392,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		{
 			SimpleFeature feature = new SimpleFeature();
 			feature.id=UUID.nameUUIDFromBytes((idStr0+"en").getBytes()).toString();
-			feature.properties.put("marker-color", "#00aa00");
+			feature.properties.put("color", "#00aa00");
 			feature.properties.put("marker-size", "medium");
-			feature.properties.put("marker-symbol", "circle");
+			feature.properties.put("icon", "map-pin");
 			Point geom = CRSTransform.gfWGS84.createPoint(new Coordinate(dest_lng,dest_lat));
 			JsonNode jo = geomToGeoJson(geom);
 			feature.geometry=jo;
