@@ -115,7 +115,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="lng") double start_lng,
 			@RequestParam(name="radius_meters") double radius,
 			@RequestParam(name="poi_table") String[] poiTables,
-			@RequestParam(name="cat_id", required = false) String cat,
+			@RequestParam(name="cat_id", required = false) List<String> cat,
 			@RequestParam(name="analysis_id", required = false) String analysisId
 			
 		) throws ServletException, IOException, SQLException {
@@ -141,14 +141,24 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			{
 				sql += " AND cat_id is not null and cat_id != 'latest'";
 			}
-			else if (cat != null) {
-				if (cat.equals("without")) {
+			else if (cat != null && cat.size() > 0) {
+				if (cat.contains("without")) {
 					sql += " AND cat_id is null";
 				}
-				else if (cat.equals("with")) {
+				else if (cat.contains("with")) {
 					sql += " AND cat_id is not null";
 				} else {
-					sql += " AND cat_id = " + escSqlStr(cat);
+					sql += " AND cat_id IN ("; 
+					int cnt=0;
+					for (String ca : cat)
+					{
+						if (cnt > 0) {
+							sql += ", "; 
+						}
+						sql += escSqlStr(ca);
+						cnt++;
+					}
+					sql += " )"; 
 				}
 			}
 			
