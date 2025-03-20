@@ -32,17 +32,49 @@ import at.qop.qoplib.osrmclient.matrix.ArrView;
 import at.qop.qoplib.osrmclient.matrix.DoubleMatrix;
 import at.qop.qoplib.osrmclient.matrix.DoubleMatrixImpl;
 
-public class R5PvsClient implements IRouter {
+public class R5PvsClient {
 
+	private static ObjectMapper om = new ObjectMapper();
 
+	public static class TripLeg {
+		public String routeId;
+		public String routeLongName;
+		public String routeShortName;
+		public int routeType;
+		public int boardStopId;
+		public int alightStopId;
+		public String mode;
+		public int legDistance;
+		public int legDurationSeconds;
+		public String boardStopName;
+		public String alightStopName;
+		public String geom;
+	}
+
+	public static class TripInfos {
+		public String mode;
+		public String routeId;
+		public String routeLongName;
+		public String routeShortName;
+		public double totalDurationSeconds=Double.MAX_VALUE;
+		public String accessMode;
+		public int accessTime;
+		public String egressMode;
+		public int egressTime;
+		public int departureTime;
+		public double rideTimesSeconds;
+
+		public List<TripLeg> tripLegs = new ArrayList<>();
+	}
+	
+	public static class TripResult {
+		public TripInfos bestTrip;
+		public List<TripInfos> trips;
+	}
+	
 	private String baseUrl(ModeEnum mode) {
 		return "http://localhost:5325";
 		//return osrmConf.baseUrl(mode);
-	}
-
-	@Override
-	public double[][] table(ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
-		throw new RuntimeException("not imlemented");
 	}
 
 	public static class TableResult {
@@ -67,8 +99,7 @@ public class R5PvsClient implements IRouter {
 	}
 
 
-	public void table_(TableResult results, ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
-		// http://router.project-osrm.org/table/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?sources=0'
+	public void table(TableResult results, ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
 
 		if (destinations.length == 0)
 		{
@@ -87,7 +118,6 @@ public class R5PvsClient implements IRouter {
 		urlSb.append(targetsStr);
 
 		long t_start = System.currentTimeMillis();
-		//hostPort + "/table/v1/driving/16.369561009437817,48.20423271310815;16.37741831002266,48.20776186641345?sources=0&destinations=1"
 		URL url = new URL(urlSb.toString());
 
 		URLConnection con = url.openConnection();
@@ -108,8 +138,6 @@ public class R5PvsClient implements IRouter {
 			throw new RuntimeException("osrm problem for " + url, ex);
 		}
 	}
-
-	private static ObjectMapper om = new ObjectMapper();
 
 	public static void parseTableResult(TableResult tr, Reader jsonReader) throws JsonProcessingException, IOException
 	{
@@ -135,12 +163,11 @@ public class R5PvsClient implements IRouter {
 		}
 	}
 
-	public void route_(TableResult results, ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
-		// http://router.project-osrm.org/table/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?sources=0'
+	public TripResult route(ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
 
 		if (destinations.length == 0)
 		{
-			return;
+			return null;
 		}
 
 		StringBuilder urlSb = new StringBuilder();
@@ -155,20 +182,17 @@ public class R5PvsClient implements IRouter {
 		urlSb.append(targetsStr);
 
 		long t_start = System.currentTimeMillis();
-		//hostPort + "/table/v1/driving/16.369561009437817,48.20423271310815;16.37741831002266,48.20776186641345?sources=0&destinations=1"
 		URL url = new URL(urlSb.toString());
 
 		URLConnection con = url.openConnection();
 
 		try (InputStream is= con.getInputStream()) {
 			long t_callFinished = System.currentTimeMillis();
-
-			parseTableResult(results, new BufferedReader(new InputStreamReader(is)));
-			long t_finished = System.currentTimeMillis();
-
 			System.out.println(sources.length + "x" + destinations.length 
 					+ " t_call=" + (t_callFinished - t_start) 
-					+ "ms t_parse="+ (t_finished - t_callFinished) + "ms " + url);
+				    + "ms " + url);
+			TripResult tr = om.readValue(is, TripResult.class);
+			return tr;
 
 		}
 		catch (Exception ex)
@@ -211,12 +235,6 @@ public class R5PvsClient implements IRouter {
 
 		trRoute.routeType = n.at("/routeType").asInt();
 		return trRoute;
-	}
-
-	@Override
-	public RouteResult route(ModeEnum mode, LonLat[] points) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

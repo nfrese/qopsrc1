@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import at.qop.qoplib.Utils;
 import at.qop.qoplib.osrmclient.LonLat;
 import at.qop.qoplib.router.r5pvs.R5PvsClient.TableResult;
+import at.qop.qoplib.router.r5pvs.R5PvsClient.TripResult;
 
 public class R5PvsClientTest {
 
@@ -32,7 +33,7 @@ public class R5PvsClientTest {
 		};
 		
 		R5PvsClient.TableResult tr = new TableResult();
-		client.table_(tr, null, sources , destinations);
+		client.table(tr, null, sources , destinations);
 		
 		System.out.println(tr);
 	}
@@ -65,8 +66,7 @@ public class R5PvsClientTest {
 				new LonLat(16.5915001, 48.4781261)
 		};
 		
-		R5PvsClient.TableResult tr = new TableResult();
-		client.route_(tr, null, sources , destinations);
+		TripResult tr = client.route(null, sources , destinations);
 		
 		System.out.println(tr);
 	}
