@@ -63,6 +63,9 @@ import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.osrmclient.LonLat;
 import at.qop.qoplib.osrmclient.OSRMClient;
 import at.qop.qoplib.osrmclient.RouteResult;
+import at.qop.qoplib.router.r5pvs.R5PvsClient;
+import at.qop.qoplib.router.r5pvs.R5PvsClient.TableResult;
+import at.qop.qoplib.router.r5pvs.R5PvsClient.TableResultRow;
 
 @RestController
 public class QOPRestApiRoute extends QOPRestApiBase {
@@ -87,8 +90,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		public void set() {
 			
 			eBike.minutes  = bike.minutes / 1.5;
-			publicTransport.minutes = car.minutes * 2;
-			publicTransport.minutes = publicTransport.minutes > 7 ? publicTransport.minutes : Double.NaN;
+//			publicTransport.minutes = car.minutes * 2;
+//			publicTransport.minutes = publicTransport.minutes > 7 ? publicTransport.minutes : Double.NaN;
 
 			walk.display = walk.minutes <= THRES;
 			bike.display = bike.minutes <= THRES;
@@ -194,6 +197,14 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				throw new RuntimeException(e); 
 			}
 			
+			R5PvsClient r5p = new R5PvsClient();
+			TableResult tr = r5p.table(null, sources, destinations);
+			int r = 0;
+			for (TableResultRow row : tr.rows) {
+				time[r][3] = row.minTotalTime/60;
+				r++;
+			}
+			
 			int cnt =0;
 			for (DbRecord record : reader.records)
 			{
@@ -239,6 +250,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				outFeature.routingResults.walk.minutes = time[cnt][0];
 				outFeature.routingResults.bike.minutes = time[cnt][1];
 				outFeature.routingResults.car.minutes = time[cnt][2];
+				outFeature.routingResults.publicTransport.minutes = time[cnt][3];
 				outFeature.routingResults.set();
 				
 				outFeatures.add(outFeature);
