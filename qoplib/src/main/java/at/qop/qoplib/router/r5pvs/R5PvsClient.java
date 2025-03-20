@@ -31,6 +31,7 @@ import at.qop.qoplib.osrmclient.matrix.ArrImpl;
 import at.qop.qoplib.osrmclient.matrix.ArrView;
 import at.qop.qoplib.osrmclient.matrix.DoubleMatrix;
 import at.qop.qoplib.osrmclient.matrix.DoubleMatrixImpl;
+import at.qop.qoplib.router.r5pvs.R5PvsClient.TableResult;
 
 public class R5PvsClient {
 
@@ -99,13 +100,15 @@ public class R5PvsClient {
 	}
 
 
-	public void table(TableResult results, ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
+	public TableResult table(ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
 
 		if (destinations.length == 0)
 		{
-			return;
+			return null;
 		}
 
+		R5PvsClient.TableResult results = new TableResult();
+		
 		StringBuilder urlSb = new StringBuilder();
 		urlSb.append(baseUrl(mode));
 		urlSb.append("/single");
@@ -131,12 +134,14 @@ public class R5PvsClient {
 			System.out.println(sources.length + "x" + destinations.length 
 					+ " t_call=" + (t_callFinished - t_start) 
 					+ "ms t_parse="+ (t_finished - t_callFinished) + "ms " + url);
+			
 
 		}
 		catch (Exception ex)
 		{
 			throw new RuntimeException("osrm problem for " + url, ex);
 		}
+		return results;
 	}
 
 	public static void parseTableResult(TableResult tr, Reader jsonReader) throws JsonProcessingException, IOException

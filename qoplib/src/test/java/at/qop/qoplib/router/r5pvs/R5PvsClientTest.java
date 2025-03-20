@@ -32,8 +32,8 @@ public class R5PvsClientTest {
 				new LonLat(16.5915001, 48.4781261)
 		};
 		
-		R5PvsClient.TableResult tr = new TableResult();
-		client.table(tr, null, sources , destinations);
+		;
+		R5PvsClient.TableResult tr = client.table(null, sources , destinations);
 		
 		System.out.println(tr);
 	}
@@ -66,7 +66,7 @@ public class R5PvsClientTest {
 				new LonLat(16.5915001, 48.4781261)
 		};
 		
-		TripResult tr = client.route(null, sources , destinations);
+		TripResult tr = client.route(null, sources, destinations);
 		
 		System.out.println(tr);
 	}
