@@ -69,8 +69,8 @@ public class R5PvsClient {
 	}
 	
 	public static class TripResult {
-		public TripInfos bestTrip;
 		public List<TripInfos> trips;
+		public Map<String, TripInfos> bestTrips;
 	}
 	
 	private String baseUrl(ModeEnum mode) {
