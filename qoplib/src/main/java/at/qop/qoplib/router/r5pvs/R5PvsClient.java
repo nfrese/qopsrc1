@@ -135,6 +135,49 @@ public class R5PvsClient implements IRouter {
 		}
 	}
 
+	public void route_(TableResult results, ModeEnum mode, LonLat[] sources, LonLat[] destinations) throws IOException {
+		// http://router.project-osrm.org/table/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?sources=0'
+
+		if (destinations.length == 0)
+		{
+			return;
+		}
+
+		StringBuilder urlSb = new StringBuilder();
+		urlSb.append(baseUrl(mode));
+		urlSb.append("/plan2");
+
+		urlSb.append("?sources=");
+		String sourcesStr = Arrays.stream(sources).map(p -> p.toString()).collect(Collectors.joining(";"));
+		urlSb.append(sourcesStr);
+		urlSb.append("&destinations=");
+		String targetsStr = Arrays.stream(destinations).map(p -> p.toString()).collect(Collectors.joining(";"));
+		urlSb.append(targetsStr);
+
+		long t_start = System.currentTimeMillis();
+		//hostPort + "/table/v1/driving/16.369561009437817,48.20423271310815;16.37741831002266,48.20776186641345?sources=0&destinations=1"
+		URL url = new URL(urlSb.toString());
+
+		URLConnection con = url.openConnection();
+
+		try (InputStream is= con.getInputStream()) {
+			long t_callFinished = System.currentTimeMillis();
+
+			parseTableResult(results, new BufferedReader(new InputStreamReader(is)));
+			long t_finished = System.currentTimeMillis();
+
+			System.out.println(sources.length + "x" + destinations.length 
+					+ " t_call=" + (t_callFinished - t_start) 
+					+ "ms t_parse="+ (t_finished - t_callFinished) + "ms " + url);
+
+		}
+		catch (Exception ex)
+		{
+			throw new RuntimeException("osrm problem for " + url, ex);
+		}
+	}
+	
+	
 	private static TableResultRoute parseRoute(JsonNode jsonNode) throws IOException {
 		if (jsonNode.isMissingNode())
 		{
