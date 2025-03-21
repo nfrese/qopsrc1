@@ -21,9 +21,11 @@
 package at.qop.ws;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,13 +92,11 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		public void set() {
 			
 			eBike.minutes  = bike.minutes / 1.5;
-//			publicTransport.minutes = car.minutes * 2;
-//			publicTransport.minutes = publicTransport.minutes > 7 ? publicTransport.minutes : Double.NaN;
 
 			walk.display = walk.minutes <= THRES;
 			bike.display = bike.minutes <= THRES;
 			eBike.display = eBike.minutes <= THRES;
-			publicTransport.display = publicTransport.minutes <= THRES;
+			publicTransport.display = publicTransport.minutes > 0 && publicTransport.minutes <= THRES;
 		}
 
 		public boolean disp() {
@@ -119,12 +119,15 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="radius_meters") double radius,
 			@RequestParam(name="poi_table") String[] poiTables,
 			@RequestParam(name="cat_id", required = false) List<String> cat,
-			@RequestParam(name="analysis_id", required = false) String analysisId
+			@RequestParam(name="analysis_id", required = false) String analysisId,
+			@RequestParam(name="provide_data_url", required = false, defaultValue = "false") boolean provideDataUrl
+			
 			
 		) throws ServletException, IOException, SQLException {
     	boolean isStandort1Analysis = "standort1".equals(analysisId);
 		
 		Config cfg = checkAuth(username, password);
+		boolean enableR5 = "true".equalsIgnoreCase(System.getenv("QOP_ENABLE_R5"));
 		
 		Point start = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lng,start_lat));
 		Geometry buffer = CRSTransform.singleton.bufferWGS84Corr(start, radius);
@@ -197,12 +200,24 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				throw new RuntimeException(e); 
 			}
 			
-			R5PvsClient r5p = new R5PvsClient();
-			TableResult tr = r5p.table(null, sources, destinations);
-			int r = 0;
-			for (TableResultRow row : tr.rows) {
-				time[r][3] = row.minTotalTime/60;
-				r++;
+			if (enableR5) {
+				R5PvsClient r5p = new R5PvsClient();
+				TableResult tr = r5p.table(null, sources, destinations);
+				int r = 0;
+				for (TableResultRow row : tr.rows) {
+					time[r][3] = row.minTotalTime/60;
+					r++;
+				}
+			}
+			else
+			{
+				for (int r = 0; r < n; r++) {
+					double publicTransportMinutes = time[r][2] * 2;
+					publicTransportMinutes = publicTransportMinutes > 7 ? publicTransportMinutes : Double.NaN;
+
+					time[r][3] = publicTransportMinutes;
+					r++;
+				}
 			}
 			
 			int cnt =0;
@@ -252,6 +267,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				outFeature.routingResults.car.minutes = time[cnt][2];
 				outFeature.routingResults.publicTransport.minutes = time[cnt][3];
 				outFeature.routingResults.set();
+				
+				if (provideDataUrl) createDataUrl(outFeature);
 				
 				outFeatures.add(outFeature);
 				cnt++;
@@ -313,7 +330,19 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		return returnGeoJson(sorted, extended );
 	}
 
-    public static class FrequencyItem {
+    private void createDataUrl(Feature outFeature) {
+    	try {
+    		outFeature.properties.remove("url");
+			String jsonOut = om().writeValueAsString(outFeature);
+			String url = "data:application/json;base64," + new String(
+					Base64.getEncoder().encode(jsonOut.getBytes("UTF-8")));
+			outFeature.properties.put("url", url);
+		} catch (JsonProcessingException | UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static class FrequencyItem {
 
 		public Integer count;
 		public String category;
