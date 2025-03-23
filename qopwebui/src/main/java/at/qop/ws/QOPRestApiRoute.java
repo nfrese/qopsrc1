@@ -48,6 +48,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.geojson.GeoJsonWriter;
 
 import at.qop.qoplib.Config;
@@ -68,6 +70,9 @@ import at.qop.qoplib.osrmclient.RouteResult;
 import at.qop.qoplib.router.r5pvs.R5PvsClient;
 import at.qop.qoplib.router.r5pvs.R5PvsClient.TableResult;
 import at.qop.qoplib.router.r5pvs.R5PvsClient.TableResultRow;
+import at.qop.qoplib.router.r5pvs.R5PvsClient.TripInfos;
+import at.qop.qoplib.router.r5pvs.R5PvsClient.TripLeg;
+import at.qop.qoplib.router.r5pvs.R5PvsClient.TripResult;
 
 @RestController
 public class QOPRestApiRoute extends QOPRestApiBase {
@@ -127,7 +132,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
     	boolean isStandort1Analysis = "standort1".equals(analysisId);
 		
 		Config cfg = checkAuth(username, password);
-		boolean enableR5 = "true".equalsIgnoreCase(System.getenv("QOP_ENABLE_R5"));
+		boolean enableR5 = enableR5();
 		
 		Point start = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lng,start_lat));
 		Geometry buffer = CRSTransform.singleton.bufferWGS84Corr(start, radius);
@@ -330,6 +335,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		return returnGeoJson(sorted, extended );
 	}
 
+	private boolean enableR5() {
+		return "true".equalsIgnoreCase(System.getenv("QOP_ENABLE_R5"));
+	}
+
     private void createDataUrl(Feature outFeature) {
     	try {
     		outFeature.properties.remove("url");
@@ -371,6 +380,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		) throws ServletException, IOException, SQLException {
     
     	Config cfg = checkAuth(username, password);
+    	boolean enableR5 = enableR5();
     	
 		IRouter router = osrm(cfg);
 		
@@ -380,15 +390,33 @@ public class QOPRestApiRoute extends QOPRestApiBase {
     	
 		String idStr0 = start_lat + " " +  start_lng + " " + dest_lat + " " + dest_lng;
     	
+		LonLat[] points = new LonLat[2];
+		points[0] = new LonLat(start_lng, start_lat);
+		points[1] = new LonLat(dest_lng, dest_lat);
+		
 		for (ModeEnum mode : modes)
 		{
+			if (enableR5 && mode==ModeEnum.car) 
+			{ 
+				continue;
+			}
+			
 			SimpleFeature routeResult = new SimpleFeature();
 			String modName;
 			String color;
 			switch (mode) {
-			case foot : modName="walk"; color="000000"; break;
+			case foot : modName="walk"; color="#000000"; break;
 			case bike : modName="bike"; color="#00ff00"; break;
-			case car : modName="publicTransport"; color="#ff0000"; break;
+			case car : 
+				if (!enableR5) 
+				{ 
+					modName="publicTransport"; color="#ff0000";
+				} 
+				else {
+					modName="car"; color="#ffff00";
+				}
+			
+			break;
 			default : modName="unexpected " + mode; color="#a0a0a0";
 			}
 			
@@ -401,9 +429,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			routeResult.properties.put("stroke-width", 3);
 			routeResult.properties.put("stroke-opacity", 1);
 		
-			LonLat[] points = new LonLat[2];
-			points[0] = new LonLat(start_lng, start_lat);
-			points[1] = new LonLat(dest_lng, dest_lat);
+
 			try {
 				RouteResult result = router.route(mode, points);
 				List<Coordinate> list = Arrays.stream(result.vertices).map(lonLat -> new Coordinate(lonLat.lon, lonLat.lat)).collect(Collectors.toList());
@@ -416,7 +442,44 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+			
+
 			outFeatures.add(routeResult);
+		}
+		
+		if (enableR5) {
+			R5PvsClient r5p = new R5PvsClient();
+			TripResult tr = r5p.route(null, new LonLat[] {points[0]}, new LonLat[] {points[1]});
+			
+			Map<String, TripInfos> selected = tr.bestTrips.entrySet().stream().filter(x -> x.getKey().equals("BUS") || x.getKey().equals("RAIL")).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+			
+			for (TripInfos sel : selected.values())
+			{
+				for (TripLeg leg : sel.tripLegs) {
+					SimpleFeature feature2 = new SimpleFeature();
+					feature2.id=UUID.nameUUIDFromBytes((idStr0+"_"+leg.legDurationSeconds).getBytes()).toString();
+					feature2.properties.put("mode", leg.mode);
+					feature2.properties.put("stroke", !("WALK".equals(leg.mode)) ? "#FF0000" : "#000000");
+					feature2.properties.put("stroke-width", 3);
+					feature2.properties.put("stroke-opacity", 1);
+					
+					LineString geom;
+					try {
+						geom = (LineString) new WKTReader(CRSTransform.gfWGS84).read(leg.geom);
+					} catch (ParseException e) {
+						throw new RuntimeException(e);
+					}
+					JsonNode jo = geomToGeoJson(geom);
+					feature2.geometry = jo;
+					
+					feature2.properties.put("distanceMeters", leg.legDistance);
+					feature2.properties.put("durationMinutes", leg.legDurationSeconds / 60);
+					feature2.properties.put("routeId", leg.routeId);
+					feature2.properties.put("routeShortName", leg.routeShortName);
+					feature2.properties.put("routeLongName", leg.routeLongName);
+					outFeatures.add(feature2);
+				}
+			}
 		}
 		
 		{
