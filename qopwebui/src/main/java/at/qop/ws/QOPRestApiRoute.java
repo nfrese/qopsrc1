@@ -22,6 +22,8 @@ package at.qop.ws;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -339,12 +341,20 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		return "true".equalsIgnoreCase(System.getenv("QOP_ENABLE_R5"));
 	}
 
+	private String myAddress() {
+		return System.getenv("QOP_MY_PUBLIC_ADDRESS");
+	}
+	
     private void createDataUrl(Feature outFeature) {
     	try {
     		outFeature.properties.remove("url");
 			String jsonOut = om().writeValueAsString(outFeature);
-			String url = "data:application/json;base64," + new String(
-					Base64.getEncoder().encode(jsonOut.getBytes("UTF-8")));
+			String url = myAddress() + "/qop/rest/api/decode64?dataUrl=" + 
+					URLEncoder.encode("data:application/json;base64,"
+							+ new String(
+									Base64.getEncoder().encode(jsonOut.getBytes("UTF-8")))
+							, StandardCharsets.UTF_8.toString())
+					;
 			outFeature.properties.put("url", url);
 		} catch (JsonProcessingException | UnsupportedEncodingException e) {
 			throw new RuntimeException(e);

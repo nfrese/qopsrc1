@@ -23,6 +23,7 @@ package at.qop.ws;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import javax.servlet.ServletException;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -212,6 +214,22 @@ public class QOPRestApiRead extends QOPRestApiBase {
 			return returnJson(null);
 		}
 	}
+    
+    @GetMapping("/qop/rest/api/decode64")
+	protected ResponseEntity<byte[]> decode64(@RequestParam String dataUrl) {
+    	String[] sp1 = dataUrl.split(";base64,");
+    	if (sp1.length != 2)
+    	{
+    		throw new RuntimeException("no ',' found");
+    	}
+    	String[] sp2 = sp1[0].split(":");
+       	if (sp1.length != 2)
+    	{
+    		throw new RuntimeException("no ':' found in first part");
+    	}
+       	String mime = sp2[1];
+       	return ResponseEntity.ok().header("Content-Type", mime).body(Base64.getDecoder().decode(sp1[1]));
+    }
 
     
 }
