@@ -74,8 +74,15 @@ public class R5PvsClient {
 	}
 	
 	private String baseUrl(ModeEnum mode) {
-		return "http://localhost:5325";
-		//return osrmConf.baseUrl(mode);
+		String baseUrl = System.getenv("QOP_R5_BASEURL");
+		if (baseUrl != null)
+		{
+			return baseUrl;
+		}
+		else
+		{
+			return "http://localhost:5325";
+		}
 	}
 
 	public static class TableResult {
