@@ -46,8 +46,10 @@ var vector = new VectorLayer({
   style: [lineStyle, styleMarker]
 });
 
-const url = 'http://localhost:4380/qop/rest/api/traveltime_to_pois?provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=infra'
-      + `&lat=${targetCoord[1]}&lng=${targetCoord[0]}&radius_meters=5000`
+const url = 'http://localhost:4380/qop/rest/api/traveltime_to_pois?'
+	  + 'provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=infra'
+      + '&routingResultsAsProperties=true'
+	  + `&lat=${targetCoord[1]}&lng=${targetCoord[0]}&radius_meters=5000`
       + `&username=api&password=zrS/NVPqlIUwSjcU`
 
 const featureLayer = new VectorLayer({
@@ -83,11 +85,26 @@ map.on('click', function (evt) {
   });
   if (feature) {
     const coordinates = feature.getGeometry().getCoordinates();
-    content.innerHTML =
-      '<p>Category:</p><code>' + feature.getId() + '</code><br>' +
-      '<p>Title:</p><code>' + feature.get('title') + '</code><br>' +
-      '<p>Description:</p><code>' + feature.get('description') + '</code>'
-    //overlay.setPosition(coordinates);
+
+    content.innerHTML = htmltable(feature.getProperties());
   }
 });
 
+function htmltable (obj) {
+	var html = '<table>';
+	for (const [key, value] of Object.entries(obj)) {
+		if (key === 'geometry')
+		{
+			continue;
+		}
+		
+	  var valueHtml = value;
+	  if (value != null && typeof value === "object")
+	  {
+		valueHtml = htmltable(value);
+	  }
+	  html += (`<tr><td valign='top'>${key}:</td><td> ${valueHtml}</td></tr>`);
+	}
+	html += '</table>'
+	return html;
+}

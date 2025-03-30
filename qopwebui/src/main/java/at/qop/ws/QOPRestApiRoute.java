@@ -127,7 +127,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="poi_table") String[] poiTables,
 			@RequestParam(name="cat_id", required = false) List<String> cat,
 			@RequestParam(name="analysis_id", required = false) String analysisId,
-			@RequestParam(name="provide_data_url", required = false, defaultValue = "false") boolean provideDataUrl
+			@RequestParam(name="provide_data_url", required = false, defaultValue = "false") boolean provideDataUrl,
+			@RequestParam(name="routingResultsAsProperties", required = false, defaultValue = "false") boolean routingResultsAsProperties
 			
 			
 		) throws ServletException, IOException, SQLException {
@@ -275,6 +276,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				outFeature.routingResults.publicTransport.minutes = time[cnt][3];
 				outFeature.routingResults.set();
 				
+				if (routingResultsAsProperties) {
+					outFeature.properties.put("routingResults",outFeature.routingResults);
+				}
 				if (provideDataUrl) createDataUrl(outFeature);
 				
 				outFeatures.add(outFeature);
