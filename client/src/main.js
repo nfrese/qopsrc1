@@ -1,7 +1,6 @@
 import './style.css';
 import {Map, View, Feature} from 'ol';
 import TileLayer from 'ol/layer/Tile';
-//import Vector from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
 import Point from 'ol/geom/Point';
 import Style from 'ol/style/Style';
@@ -11,6 +10,8 @@ import VectorSource from 'ol/source/Vector';
 import OSM from 'ol/source/OSM';
 import Icon from 'ol/style/Icon';
 import {fromLonLat} from 'ol/proj.js';
+
+const content = document.getElementById('details');
 
 var lineStyle = new Style({
   stroke: new Stroke({ color: '#ffcc33', width: 3 })
@@ -85,3 +86,22 @@ const map = new Map({
 
 console.log(map.getView().getProjection());
 console.log(url);
+
+//map.setSize(500,500);
+
+map.on('click', function (evt) {
+  const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+    return feature;
+  });
+  if (feature) {
+    const coordinates = feature.getGeometry().getCoordinates();
+    content.innerHTML =
+      '<p>Category:</p><code>' + feature.get('category') + '</code><br>' +
+      '<p>Title:</p><code>' + feature.get('title') + '</code><br>' +
+      '<p>Description:</p><code>' + feature.get('description') + '</code>'
+    //overlay.setPosition(coordinates);
+  }
+});
+
+//setTimeout(() => { map.updateSize(); });
+
