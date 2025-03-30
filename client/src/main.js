@@ -10,12 +10,14 @@ import VectorSource from 'ol/source/Vector';
 import OSM from 'ol/source/OSM';
 import Icon from 'ol/style/Icon';
 import {fromLonLat} from 'ol/proj.js';
+import {toLonLat} from 'ol/proj.js';
 
 const content = document.getElementById('details');
 
 var lineStyle = new Style({
   stroke: new Stroke({ color: '#ffcc33', width: 3 })
 });
+
 var styleMarker = new Style({
   image: new Icon({
     scale: .7, anchor: [0.5, 1],
@@ -43,7 +45,7 @@ var vector = new VectorLayer({
   source: new VectorSource({
   	features: [featureMarker1]
   }),
-  style: [lineStyle, styleMarker]
+  style: [styleMarker]
 });
 
 const url = 'http://localhost:4380/qop/rest/api/traveltime_to_pois?'
@@ -58,15 +60,31 @@ const featureLayer = new VectorLayer({
     format: new GeoJSON(),
     url:  url
   }),
-  style: [lineStyle, styleMarkerTarget]
+  style: [styleMarkerTarget]
 })
+
+const routeLayer = new VectorLayer({
+  title: 'added Layer',
+//  source: new VectorSource({
+//    format: new GeoJSON(),
+//  }),
+declutter: true,
+  style: routeStyle
+})
+
+function routeStyle(feature) {
+	const style = new Style({
+	  stroke: new Stroke({ color: feature.get("stroke"), width: 3 })
+	});	
+	return style;
+}
 
 const map = new Map({
   target: 'mapId',
   layers: [
     new TileLayer({
       source: new OSM()
-    }), vector, featureLayer
+    }), vector, featureLayer, routeLayer
   ],
   view: new View({
     center: targetCoordPrj,
@@ -84,9 +102,23 @@ map.on('click', function (evt) {
     return feature;
   });
   if (feature) {
-    const coordinates = feature.getGeometry().getCoordinates();
+    const poiCoordPrj = feature.getGeometry().getCoordinates();
+	const poiCoord = toLonLat(poiCoordPrj);
 
     content.innerHTML = htmltable(feature.getProperties());
+	
+	const routeUrl = 'http://localhost:4380/qop/rest/api/route?'
+	  + `lat=${targetCoord[1]}&lng=${targetCoord[0]}`
+	  + `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}&username=api&password=zrS/NVPqlIUwSjcU`
+	
+	routeLayer.setSource(
+		new VectorSource({
+		    format: new GeoJSON(),
+		    url:  routeUrl
+		  })
+		
+	);
+	
   }
 });
 
@@ -103,7 +135,7 @@ function htmltable (obj) {
 	  {
 		valueHtml = htmltable(value);
 	  }
-	  html += (`<tr><td valign='top'>${key}:</td><td> ${valueHtml}</td></tr>`);
+	  html += (`<tr><td valign='top'>${key}:</td><td>${valueHtml}</td></tr>`);
 	}
 	html += '</table>'
 	return html;
