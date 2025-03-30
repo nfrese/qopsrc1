@@ -50,7 +50,10 @@ public abstract class QOPRestApiBase {
 	protected ResponseEntity<?> returnJson(Object outRoot) throws JsonProcessingException {
 		String jsonOut = om().writeValueAsString(outRoot);
 
-		return ResponseEntity.ok().header("Content-Type", "application/json;charset=UTF-8").body(jsonOut);
+		return ResponseEntity.ok()
+				.header("Content-Type", "application/json;charset=UTF-8")
+				.header("Access-Control-Allow-Origin", "*")
+				.body(jsonOut);
 	}
 
 	protected String escSqlStr(String sql) {

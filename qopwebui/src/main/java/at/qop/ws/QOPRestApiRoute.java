@@ -458,16 +458,21 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		}
 		
 		if (enableR5) {
+			
 			R5PvsClient r5p = new R5PvsClient();
 			TripResult tr = r5p.route(null, new LonLat[] {points[0]}, new LonLat[] {points[1]});
 			
 			Map<String, TripInfos> selected = tr.bestTrips.entrySet().stream().filter(x -> x.getKey().equals("BUS") || x.getKey().equals("RAIL")).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 			
+			int tripNr = 0;
 			for (TripInfos sel : selected.values())
 			{
+				UUID tripId = UUID.nameUUIDFromBytes((idStr0+"_"+tripNr).getBytes());
+				
 				for (TripLeg leg : sel.tripLegs) {
 					SimpleFeature feature2 = new SimpleFeature();
 					feature2.id=UUID.nameUUIDFromBytes((idStr0+"_"+leg.legDurationSeconds).getBytes()).toString();
+					feature2.properties.put("tripId", tripId+"");
 					feature2.properties.put("mode", leg.mode);
 					feature2.properties.put("stroke", !("WALK".equals(leg.mode)) ? "#FF0000" : "#000000");
 					feature2.properties.put("stroke-width", 3);
@@ -489,6 +494,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 					feature2.properties.put("routeLongName", leg.routeLongName);
 					outFeatures.add(feature2);
 				}
+				tripNr++;
 			}
 		}
 		
