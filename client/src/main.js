@@ -55,24 +55,12 @@ const featureLayer = new VectorLayer({
   source: new VectorSource({
     format: new GeoJSON(),
     url:  url
-    // // new GeoJSON().readFeatures(url , {
-    // //   dataProjection: 'EPSG:4326',
-    // //   featureProjection: 'EPSG:3857'
-    // // })
-    // new GeoJSON({
-    //   // projection : 'EPSG:4326',
-    //   url:  url   ,
-    //   dataProjection: 'EPSG:4326',
-    //   featureProjection: 'EPSG:3857'
-    // })
   }),
   style: [lineStyle, styleMarkerTarget]
 })
 
 const map = new Map({
-  // dataProjection: 'EPSG:4326',
-  // projection: 'EPSG:4326',
-  target: 'map',
+  target: 'mapId',
   layers: [
     new TileLayer({
       source: new OSM()
@@ -96,12 +84,10 @@ map.on('click', function (evt) {
   if (feature) {
     const coordinates = feature.getGeometry().getCoordinates();
     content.innerHTML =
-      '<p>Category:</p><code>' + feature.get('category') + '</code><br>' +
+      '<p>Category:</p><code>' + feature.getId() + '</code><br>' +
       '<p>Title:</p><code>' + feature.get('title') + '</code><br>' +
       '<p>Description:</p><code>' + feature.get('description') + '</code>'
     //overlay.setPosition(coordinates);
   }
 });
-
-//setTimeout(() => { map.updateSize(); });
 
