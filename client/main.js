@@ -149,17 +149,19 @@ $.get("http://localhost:4380/qop/rest/api/read?table=qop.pvs_category&username=a
 		option.value = elt.properties.id;   
 		select.appendChild(option); 
 	}
-	showCat(select.value);
+	showCat();
 })
 
 $("#layersSelect").on('change', function() {
   console.log( this.value );
-  showCat(this.value);
+  showCat();
 });
 
-function showCat(selVal) {
+function showCat() {
+	const sel = document.querySelector("#layersSelect").value;
+	
 	const url = 'http://localhost:4380/qop/rest/api/traveltime_to_pois?'
-		  + `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${selVal}`
+		  + `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
 	      + '&routingResultsAsProperties=true'
 		  + `&lat=${targetCoord[1]}&lng=${targetCoord[0]}&radius_meters=5000`
 	      + `&username=api&password=zrS/NVPqlIUwSjcU`
