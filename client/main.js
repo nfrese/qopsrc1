@@ -28,12 +28,20 @@ var styleMarker = new Style({
   })
 });
 
-var styleMarkerTarget = new Style({
+function styleMarkerTarget(feature) { 
+	if (feature.get("icon") != null) {
+	var icon = feature.get("icon").replace('.svg','');
+	var color = feature.get("color").replace('#','');
+	var url = `https://cmbaimg.s3.amazonaws.com/map/icons/${icon}%2Bcircle%2B---${color}%2Bwhite.png`
+	
+	return new Style({
   image: new Icon({
     scale: .4, anchor: [0.5, 1],
-    src: '//raw.githubusercontent.com/jonataswalker/map-utils/master/images/marker.png'
+    src: url
   })
-});
+	});
+}
+}
 
 window.targetCoord = [16.6000785, 48.4526522];
 
@@ -65,7 +73,7 @@ function reset() {
 const featureLayer = new VectorLayer({
   title: 'added Layer',
 
-  style: [styleMarkerTarget]
+  style: styleMarkerTarget
 })
 
 const routeLayer = new VectorLayer({
@@ -83,6 +91,7 @@ function routeStyle(feature) {
 	});	
 	return style;
 }
+
 
 const map = new Map({
   target: 'mapId',
