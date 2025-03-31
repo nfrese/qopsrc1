@@ -36,7 +36,7 @@ function styleMarkerTarget(feature) {
 	
 	return new Style({
   image: new Icon({
-    scale: .4, anchor: [0.5, 1],
+    scale: 1, anchor: [0, 0],
     src: url
   })
 	});
