@@ -35,22 +35,31 @@ var styleMarkerTarget = new Style({
   })
 });
 
-const targetCoord = [16.6000785, 48.4526522];
-var targetCoordPrj = fromLonLat(targetCoord);
+window.targetCoord = [16.6000785, 48.4526522];
 
-var marker1 = new Point(targetCoordPrj);
-var featureMarker1 = new Feature(marker1);
-
-//var line = new ol.geom.LineString([coord1, coord2]);
-//var lineFeature = new ol.Feature(line);
+var root = am5.Root.new("chartdiv1");
 
 var vector = new VectorLayer({
-  source: new VectorSource({
-  	features: [featureMarker1]
-  }),
+
   style: [styleMarker]
 });
 
+function targetCoordPrj() { 
+	return fromLonLat(window.targetCoord);
+}
+function reset() {
+	
+
+	var marker1 = new Point(targetCoordPrj());
+	var featureMarker1 = new Feature(marker1);
+	
+	vector.setSource(
+		new VectorSource({
+			features: [featureMarker1]
+		}),
+	)
+	showCat();
+}
 
 
 const featureLayer = new VectorLayer({
@@ -83,11 +92,17 @@ const map = new Map({
     }), vector, featureLayer, routeLayer
   ],
   view: new View({
-    center: targetCoordPrj,
+    center: targetCoordPrj(),
     zoom: 15
   })
 });
 
+map.getViewport().addEventListener('contextmenu', function (evt) {
+	evt.preventDefault();
+	
+	window.targetCoord = toLonLat(map.getEventCoordinate(evt));
+	reset();
+})
 
 map.on('click', function (evt) {
 	
@@ -103,7 +118,7 @@ map.on('click', function (evt) {
     content.innerHTML = htmltable(feature.getProperties());
 	
 	const routeUrl = 'http://localhost:4380/qop/rest/api/route?'
-	  + `lat=${targetCoord[1]}&lng=${targetCoord[0]}`
+	  + `lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
 	  + `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}`
 	  + `&username=api&password=zrS/NVPqlIUwSjcU`
 	
@@ -140,6 +155,8 @@ function htmltable (obj) {
 	return html;
 }
 
+reset();
+
 $(document).ready(function() {
     console.log("ready");
 })
@@ -169,7 +186,7 @@ function getUrl() {
 		  + `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
 		  + `&analysis_id=standort1`
 	      + '&routingResultsAsProperties=true'
-		  + `&lat=${targetCoord[1]}&lng=${targetCoord[0]}&radius_meters=5000`
+		  + `&lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}&radius_meters=5000`
 	      + `&username=api&password=zrS/NVPqlIUwSjcU`
 	return url;
 }
@@ -183,10 +200,6 @@ function showCat() {
 	
 	showChart();
 }
-
-
-
-var root = am5.Root.new("chartdiv1");
 
 function clearChart() {
 	root.container.children.clear();
@@ -203,18 +216,6 @@ function showChart() {
 	    layout: root.verticalLayout
 	  }) 
 	);
-
-	// Define data
-	var data = [{
-	  country: "France",
-	  sales: 100000
-	}, {
-	  country: "Spain",
-	  sales: 160000
-	}, {
-	  country: "United Kingdom",
-	  sales: 80000
-	}];
 
 	// Create series
 	var series = chart.series.push(
