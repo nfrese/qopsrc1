@@ -23,6 +23,7 @@
 <modules>
     <module>qoplib</module>
     <module>qopwebui</module>
+    <module>client</module>
 </modules>
 
 </project>

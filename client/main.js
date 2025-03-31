@@ -109,7 +109,8 @@ map.on('click', function (evt) {
 	
 	const routeUrl = 'http://localhost:4380/qop/rest/api/route?'
 	  + `lat=${targetCoord[1]}&lng=${targetCoord[0]}`
-	  + `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}&username=api&password=zrS/NVPqlIUwSjcU`
+	  + `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}`
+	  + `&username=api&password=zrS/NVPqlIUwSjcU`
 	
 	routeLayer.setSource(
 		new VectorSource({
