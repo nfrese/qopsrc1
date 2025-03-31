@@ -12,6 +12,8 @@ import Icon from 'ol/style/Icon';
 import {fromLonLat} from 'ol/proj.js';
 import {toLonLat} from 'ol/proj.js';
 import $ from "jquery";
+import * as am5 from "@amcharts/amcharts5";
+import * as am5percent from "@amcharts/amcharts5/percent";
 
 const content = document.getElementById('details');
 
@@ -86,11 +88,11 @@ const map = new Map({
   })
 });
 
-console.log(map.getView().getProjection());
-
-//map.setSize(500,500);
 
 map.on('click', function (evt) {
+	
+	clearChart();
+	
   const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
     return feature;
   });
@@ -113,6 +115,9 @@ map.on('click', function (evt) {
 		
 	);
 	
+  }
+  else {
+	showChart();
   }
 });
 
@@ -157,16 +162,92 @@ $("#layersSelect").on('change', function() {
   showCat();
 });
 
-function showCat() {
+function getUrl() {
 	const sel = document.querySelector("#layersSelect").value;
-	
+
 	const url = 'http://localhost:4380/qop/rest/api/traveltime_to_pois?'
 		  + `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
+		  + `&analysis_id=standort1`
 	      + '&routingResultsAsProperties=true'
 		  + `&lat=${targetCoord[1]}&lng=${targetCoord[0]}&radius_meters=5000`
 	      + `&username=api&password=zrS/NVPqlIUwSjcU`
+	return url;
+}
+
+function showCat() {
+
 	featureLayer.setSource( new VectorSource({
 		  format: new GeoJSON(),
-		  url:  url
-	}))
+		  url:  getUrl()
+	}));
+	
+	showChart();
+}
+
+
+
+var root = am5.Root.new("chartdiv1");
+
+function clearChart() {
+	root.container.children.clear();
+	$('#chartdiv1').hide();
+}
+
+function showChart() {
+	clearChart();
+	$('#chartdiv1').show();
+	
+	
+	var chart = root.container.children.push( 
+	  am5percent.PieChart.new(root, {
+	    layout: root.verticalLayout
+	  }) 
+	);
+
+	// Define data
+	var data = [{
+	  country: "France",
+	  sales: 100000
+	}, {
+	  country: "Spain",
+	  sales: 160000
+	}, {
+	  country: "United Kingdom",
+	  sales: 80000
+	}];
+
+	// Create series
+	var series = chart.series.push(
+	  am5percent.PieSeries.new(root, {
+	    name: "Series",
+	    valueField: "count",
+	    categoryField: "category"
+	  })
+	);
+	
+	$.get(getUrl(),
+		function(data) {
+			series.data.setAll(data.extended.frequencies);
+		});
+	
+	
+
+//	// Add legend
+//	var legend = chart.children.push(am5.Legend.new(root, {
+//		centerX: am5.percent(50),
+//	  x: am5.percent(50),
+//		layout: root.horizontalLayout
+//	}));
+//
+//	legend.data.setAll(series.dataItems);
+
+	series.labels.template.setAll({
+	  text: "{category}: {value}",
+	  textType: "circular",
+	  inside: true,
+	  radius: 10
+	});
+	
+	
+	
 }

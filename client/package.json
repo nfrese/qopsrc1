@@ -10,6 +10,7 @@
     "vite": "^6.2.2"
   },
   "dependencies": {
+    "@amcharts/amcharts5": "^5.11.2",
     "jquery": "^3.7.1",
     "ol": "latest"
   }

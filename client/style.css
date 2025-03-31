@@ -18,3 +18,8 @@ html, body {
           float: left;
         }
       }
+      
+.chartdiv {
+  width: 100%;
+  height: 300px;
+}
