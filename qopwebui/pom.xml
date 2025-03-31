@@ -181,6 +181,12 @@
 			<version>${qop.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>at.qop</groupId>
+			<artifactId>client</artifactId>
+			<version>${qop.version}</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
