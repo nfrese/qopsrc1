@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -20,6 +21,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import at.qop.qoplib.calculation.IRouter;
 import at.qop.qoplib.entities.ModeEnum;
@@ -120,17 +123,21 @@ public class R5PvsClient {
 		urlSb.append(baseUrl(mode));
 		urlSb.append("/single");
 
-		urlSb.append("?sources=");
-		String sourcesStr = Arrays.stream(sources).map(p -> p.toString()).collect(Collectors.joining(";"));
-		urlSb.append(sourcesStr);
-		urlSb.append("&destinations=");
-		String targetsStr = Arrays.stream(destinations).map(p -> p.toString()).collect(Collectors.joining(";"));
-		urlSb.append(targetsStr);
 
 		long t_start = System.currentTimeMillis();
 		URL url = new URL(urlSb.toString());
 
 		URLConnection con = url.openConnection();
+		con.setDoOutput(true);
+
+	    OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream());
+
+	    ObjectNode rn = om.createObjectNode();
+	    rn.set("sources", toArrayNode(sources));
+	    rn.set("destinations", toArrayNode(destinations));
+	    
+	    writer.write(rn+"");
+	    writer.flush();
 
 		try (InputStream is= con.getInputStream()) {
 			long t_callFinished = System.currentTimeMillis();
@@ -149,6 +156,17 @@ public class R5PvsClient {
 			throw new RuntimeException("osrm problem for " + url, ex);
 		}
 		return results;
+	}
+
+	private ArrayNode toArrayNode(LonLat[] sources) {
+		ArrayNode an = om.createArrayNode();
+	    for ( LonLat ll : sources) {
+	    	ArrayNode an2 = om.createArrayNode();
+	    	an2.add(ll.lon);
+	    	an2.add(ll.lat);
+	    	an.add(an2);
+	    }
+		return an;
 	}
 
 	public static void parseTableResult(TableResult tr, Reader jsonReader) throws JsonProcessingException, IOException

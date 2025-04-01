@@ -144,7 +144,6 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 
 		IRouter router = osrm(cfg);
 		
-		List<Geometry> collectGeoms = new ArrayList<>();
 		List<Feature> outFeatures = new ArrayList<>();
 		
 		for (String poiTable : poiTables) {
@@ -245,12 +244,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 					
 					if (reader.table.typeNames[i].equals("geometry"))
 					{
-						Geometry value = reader.table.geometryField(colName).get(record);
-						if (value != null && isStandort1Analysis) { 
-							collectGeoms.add(value);
-						}
+						outFeature.geom_ = reader.table.geometryField(colName).get(record);
 						
-						JsonNode jo = geomToGeoJson(value);
+						JsonNode jo = geomToGeoJson(outFeature.geom_);
 						if (geomField.equals(colName))
 						{
 							outFeature.geometry= jo;
@@ -304,6 +300,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 
 			
 			extended = new LinkedHashMap<>();
+			
+			List<Geometry> collectGeoms = sorted.stream().map(f -> f.geom_).filter(g -> g!=null).collect(Collectors.toList());
 			
 			Geometry hull = CRSTransform.singleton.bufferWGS84Corr(Utils.convexHull(collectGeoms, CRSTransform.gfWGS84),200);
 			JsonNode jo = geomToGeoJson(hull);

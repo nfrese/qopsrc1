@@ -15,8 +15,6 @@ import $ from "jquery";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
 
-const content = document.getElementById('details');
-
 var lineStyle = new Style({
 	stroke: new Stroke({ color: '#c0c0c0', width: 3 })
 });
@@ -52,8 +50,12 @@ const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get("lng") != null && urlParams.get("lat") != null) {
 	window.targetCoord = [parseFloat(urlParams.get("lng")), parseFloat(urlParams.get("lat"))];
 }
-
-
+if (urlParams.get("radius_meters") != null ) {
+	$('#radius_meters').val(parseInt(urlParams.get("radius_meters")));
+}
+else {
+	$('#radius_meters').val(8000);
+}
 
 const featureLayer = new VectorLayer({
 	title: 'added Layer',
@@ -134,28 +136,32 @@ map.on('click', function(evt) {
 		const poiCoordPrj = feature.getGeometry().getCoordinates();
 		const poiCoord = toLonLat(poiCoordPrj);
 
-		content.innerHTML = htmltable(feature.getProperties());
+		$('#details').html( htmltable(feature.getProperties()));
 
 		if (feature.get('icon')) {
-		
-		const routeUrl = baseUrl() + '/qop/rest/api/route?'
-			+ `lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
-			+ `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}`
-			+ authParams();
 
-		routeLayer.setSource(
-			new VectorSource({
-				format: new GeoJSON(),
-				url: routeUrl
-			})
+			const routeUrl = baseUrl() + '/qop/rest/api/route?'
+				+ `lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
+				+ `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}`
+				+ authParams();
 
-		);
+			routeLayer.setSource(
+				new VectorSource({
+					format: new GeoJSON(),
+					url: routeUrl
+				})
+
+			);
 		}
 
 	}
 	else {
 		showChart();
 	}
+});
+
+$('#radius_meters').on('change', function() {
+	reset();
 });
 
 function htmltable(obj) {
@@ -238,7 +244,8 @@ function getUrl() {
 		+ `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
 		+ (analysisMode() ? `&analysis_id=standort1` : '')
 		+ '&routingResultsAsProperties=true'
-		+ `&lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}&radius_meters=5000`
+		+ `&lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
+		+ `&radius_meters=${$('#radius_meters').val()}`
 		+ authParams();
 	return url;
 }
@@ -290,6 +297,8 @@ function showChart() {
 	
 	$.get(getUrl(),
 		function(data) {
+			$('#details').html( htmltable(data.extended.frequencies));
+			
 			for (const el of data.extended.frequencies) {
 				
 				el.columnSettings = {
@@ -299,6 +308,7 @@ function showChart() {
 			
 			
 			series.data.setAll(data.extended.frequencies);
+			
 		});
 
 	series.labels.template.setAll({
