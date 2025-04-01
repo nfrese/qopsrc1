@@ -1,5 +1,5 @@
 import './style.css';
-import {Map, View, Feature} from 'ol';
+import { Map, View, Feature } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import GeoJSON from 'ol/format/GeoJSON';
 import Point from 'ol/geom/Point';
@@ -9,8 +9,8 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import OSM from 'ol/source/OSM';
 import Icon from 'ol/style/Icon';
-import {fromLonLat} from 'ol/proj.js';
-import {toLonLat} from 'ol/proj.js';
+import { fromLonLat } from 'ol/proj.js';
+import { toLonLat } from 'ol/proj.js';
 import $ from "jquery";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
@@ -18,14 +18,14 @@ import * as am5percent from "@amcharts/amcharts5/percent";
 const content = document.getElementById('details');
 
 var lineStyle = new Style({
-  stroke: new Stroke({ color: '#c0c0c0', width: 3 })
+	stroke: new Stroke({ color: '#c0c0c0', width: 3 })
 });
 
 var styleMarker = new Style({
-  image: new Icon({
-    scale: .6, anchor: [0.5, 1],
-    src: '//raw.githubusercontent.com/jonataswalker/map-utils/master/images/marker.png'
-  })
+	image: new Icon({
+		scale: .6, anchor: [0.5, 1],
+		src: '//raw.githubusercontent.com/jonataswalker/map-utils/master/images/marker.png'
+	})
 });
 
 function styleMarkerTarget(feature) {
@@ -48,119 +48,118 @@ function styleMarkerTarget(feature) {
 
 window.targetCoord = [16.6000785, 48.4526522];
 
+const featureLayer = new VectorLayer({
+	title: 'added Layer',
+
+	style: styleMarkerTarget
+})
+
+const routeLayer = new VectorLayer({
+	title: 'added Layer',
+	//  source: new VectorSource({
+	//    format: new GeoJSON(),
+	//  }),
+	declutter: true,
+	style: routeStyle
+})
+
 var root = am5.Root.new("chartdiv1");
 
 var vector = new VectorLayer({
 
-  style: [styleMarker]
+	style: [styleMarker]
 });
 
-function targetCoordPrj() { 
+function targetCoordPrj() {
 	return fromLonLat(window.targetCoord);
 }
 function reset() {
-	
+
 	var marker1 = new Point(targetCoordPrj());
 	var featureMarker1 = new Feature(marker1);
-	
+
 	vector.setSource(
 		new VectorSource({
 			features: [featureMarker1]
 		}),
 	)
+	routeLayer.setSource(
+				null);
 	showCat();
 }
 
-
-const featureLayer = new VectorLayer({
-  title: 'added Layer',
-
-  style: styleMarkerTarget
-})
-
-const routeLayer = new VectorLayer({
-  title: 'added Layer',
-//  source: new VectorSource({
-//    format: new GeoJSON(),
-//  }),
-declutter: true,
-  style: routeStyle
-})
-
 function routeStyle(feature) {
 	const style = new Style({
-	  stroke: new Stroke({ color: feature.get("stroke"), width: 3 })
-	});	
+		stroke: new Stroke({ color: feature.get("stroke"), width: 3 })
+	});
 	return style;
 }
 
 
 const map = new Map({
-  target: 'mapId',
-  layers: [
-    new TileLayer({
-      source: new OSM()
-    }), vector, featureLayer, routeLayer
-  ],
-  view: new View({
-    center: targetCoordPrj(),
-    zoom: 15
-  })
+	target: 'mapId',
+	layers: [
+		new TileLayer({
+			source: new OSM()
+		}), vector, featureLayer, routeLayer
+	],
+	view: new View({
+		center: targetCoordPrj(),
+		zoom: 15
+	})
 });
 
-map.getViewport().addEventListener('contextmenu', function (evt) {
+map.getViewport().addEventListener('contextmenu', function(evt) {
 	evt.preventDefault();
-	
+
 	window.targetCoord = toLonLat(map.getEventCoordinate(evt));
 	reset();
 })
 
-map.on('click', function (evt) {
-	
-	clearChart();
-	
-  const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
-    return feature;
-  });
-  if (feature) {
-    const poiCoordPrj = feature.getGeometry().getCoordinates();
-	const poiCoord = toLonLat(poiCoordPrj);
+map.on('click', function(evt) {
 
-    content.innerHTML = htmltable(feature.getProperties());
-	
-	const routeUrl = baseUrl() + '/qop/rest/api/route?'
-	  + `lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
-	  + `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}`
-	  + `&username=api&password=zrS/NVPqlIUwSjcU`
-	
-	routeLayer.setSource(
-		new VectorSource({
-		    format: new GeoJSON(),
-		    url:  routeUrl
-		  })
-		
-	);
-	
-  }
-  else {
-	showChart();
-  }
+	clearChart();
+
+	const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+		return feature;
+	});
+	if (feature) {
+		const poiCoordPrj = feature.getGeometry().getCoordinates();
+		const poiCoord = toLonLat(poiCoordPrj);
+
+		content.innerHTML = htmltable(feature.getProperties());
+
+		const routeUrl = baseUrl() + '/qop/rest/api/route?'
+			+ `lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
+			+ `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}`
+			+ authParams();
+
+		routeLayer.setSource(
+			new VectorSource({
+				format: new GeoJSON(),
+				url: routeUrl
+			})
+
+		);
+
+	}
+	else {
+		showChart();
+	}
 });
 
-function htmltable (obj) {
+function htmltable(obj) {
 	var html = '<table>';
 	for (const [key, value] of Object.entries(obj)) {
-		if (key === 'geometry')
-		{
+		if (key === 'geometry') {
 			continue;
 		}
-		
-	  var valueHtml = value;
-	  if (value != null && typeof value === "object")
-	  {
-		valueHtml = htmltable(value);
-	  }
-	  html += (`<tr><td valign='top'>${key}:</td><td>${valueHtml}</td></tr>`);
+
+		var valueHtml = value;
+		if (value != null && typeof value === "object") {
+			valueHtml = htmltable(value);
+		}
+		html += (`<tr><td valign='top'>${key}:</td><td>${valueHtml}</td></tr>`);
 	}
 	html += '</table>'
 	return html;
@@ -169,25 +168,32 @@ function htmltable (obj) {
 reset();
 
 $(document).ready(function() {
-    console.log("ready");
+	console.log("ready");
 })
 
 
-$.get("http://localhost:4380/qop/rest/api/read?table=qop.pvs_category&username=api&password=zrS/NVPqlIUwSjcU",
-	function(data) 
-{ let select = document.querySelector("#layersSelect")  
-	for (let elt of data.features){   
-		let option = document.createElement("option");   
-		option.text = elt.properties.label;   
-		option.value = elt.properties.id;   
-		select.appendChild(option); 
-	}
-	showCat();
-})
+$.get(baseUrl() + "/qop/rest/api/read?table=qop.pvs_category" + authParams(),
+	function(data) {
+		let select = document.querySelector("#layersSelect")
+		for (let elt of data.features) {
+			let option = document.createElement("option");
+			option.text = elt.properties.label;
+			option.value = elt.properties.id;
+			select.appendChild(option);
+		}
+		
+		{
+			let option = document.createElement("option");
+			option.text = "STANDORT1";
+			option.value = "standort1";
+			select.appendChild(option);
+		}
+		showCat();
+	})
 
 $("#layersSelect").on('change', function() {
-  console.log( this.value );
-  showCat();
+	reset();
+	showCat();
 });
 
 function baseUrl() {
@@ -195,31 +201,44 @@ function baseUrl() {
 	if (develMode) {
 		return 'http://localhost:4380';
 	}
-	else
-	{
+	else {
 		return '';
 	}
 }
 
-function getUrl() {
-	const sel = document.querySelector("#layersSelect").value;
+function selCat() {
+	return document.querySelector("#layersSelect").value;
+}
 
+function analysisMode() {
+	return selCat() == 'standort1';
+}
+
+function authParams() {
+	const urlParams = new URLSearchParams(window.location.search);
+	
+	return `&username=${urlParams.get('username')}&password=${urlParams.get('password')}`;
+}
+
+function getUrl() {
+	const sel = selCat();
+	
 	const url = baseUrl() + '/qop/rest/api/traveltime_to_pois?'
-		  + `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
-		  + `&analysis_id=standort1`
-	      + '&routingResultsAsProperties=true'
-		  + `&lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}&radius_meters=5000`
-	      + `&username=api&password=zrS/NVPqlIUwSjcU`
+		+ `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
+		+ (analysisMode() ? `&analysis_id=standort1` : '')
+		+ '&routingResultsAsProperties=true'
+		+ `&lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}&radius_meters=5000`
+		+ authParams();
 	return url;
 }
 
 function showCat() {
-
-	featureLayer.setSource( new VectorSource({
-		  format: new GeoJSON(),
-		  url:  getUrl()
-	}));
 	
+	featureLayer.setSource(new VectorSource({
+		format: new GeoJSON(),
+		url: getUrl()
+	}));
+
 	showChart();
 }
 
@@ -230,47 +249,51 @@ function clearChart() {
 
 function showChart() {
 	clearChart();
+	if (!analysisMode())
+	{
+		return;
+	}
+	
 	$('#chartdiv1').show();
-	
-	
-	var chart = root.container.children.push( 
-	  am5percent.PieChart.new(root, {
-	    layout: root.verticalLayout
-	  }) 
+
+	var chart = root.container.children.push(
+		am5percent.PieChart.new(root, {
+			layout: root.verticalLayout
+		})
 	);
 
 	// Create series
 	var series = chart.series.push(
-	  am5percent.PieSeries.new(root, {
-	    name: "Series",
-	    valueField: "count",
-	    categoryField: "category"
-	  })
+		am5percent.PieSeries.new(root, {
+			name: "Series",
+			valueField: "count",
+			categoryField: "category"
+		})
 	);
-	
+
 	$.get(getUrl(),
 		function(data) {
 			series.data.setAll(data.extended.frequencies);
 		});
-	
-	
 
-//	// Add legend
-//	var legend = chart.children.push(am5.Legend.new(root, {
-//		centerX: am5.percent(50),
-//	  x: am5.percent(50),
-//		layout: root.horizontalLayout
-//	}));
-//
-//	legend.data.setAll(series.dataItems);
+
+
+	//	// Add legend
+	//	var legend = chart.children.push(am5.Legend.new(root, {
+	//		centerX: am5.percent(50),
+	//	  x: am5.percent(50),
+	//		layout: root.horizontalLayout
+	//	}));
+	//
+	//	legend.data.setAll(series.dataItems);
 
 	series.labels.template.setAll({
-	  text: "{category}: {value}",
-	  textType: "circular",
-	  inside: true,
-	  radius: 10
+		text: "{category}: {value}",
+		textType: "circular",
+		inside: true,
+		radius: 10
 	});
-	
-	
-	
+
+
+
 }
