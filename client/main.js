@@ -48,6 +48,13 @@ function styleMarkerTarget(feature) {
 
 window.targetCoord = [16.6000785, 48.4526522];
 
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get("lng") != null && urlParams.get("lat") != null) {
+	window.targetCoord = [parseFloat(urlParams.get("lng")), parseFloat(urlParams.get("lat"))];
+}
+
+
+
 const featureLayer = new VectorLayer({
 	title: 'added Layer',
 
@@ -129,6 +136,8 @@ map.on('click', function(evt) {
 
 		content.innerHTML = htmltable(feature.getProperties());
 
+		if (feature.get('icon')) {
+		
 		const routeUrl = baseUrl() + '/qop/rest/api/route?'
 			+ `lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
 			+ `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}`
@@ -141,6 +150,7 @@ map.on('click', function(evt) {
 			})
 
 		);
+		}
 
 	}
 	else {
