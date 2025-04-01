@@ -296,6 +296,13 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		Map<String, Object> extended = null;
 		if (isStandort1Analysis)
 		{
+			String sqlCat = "SELECT * FROM qop.pvs_category";
+			List<SimpleFeature> catF = readInt("qop.pvs_category", sqlCat);
+			
+			Map<String, String> catColorMap = catF.stream().collect(Collectors.toMap(f -> (String)f.properties.get("id"), f -> (String)f.properties.get("color")));
+			Map<String, String> catLabelMap = catF.stream().collect(Collectors.toMap(f -> (String)f.properties.get("id"), f -> (String)f.properties.get("label")));
+
+			
 			extended = new LinkedHashMap<>();
 			
 			Geometry hull = CRSTransform.singleton.bufferWGS84Corr(Utils.convexHull(collectGeoms, CRSTransform.gfWGS84),200);
@@ -312,7 +319,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			Map<String, Integer> stats = new LinkedHashMap<>();
 			for (SimpleFeature f : sorted)
 			{
-				String catId = (String) f.properties.get("cat_label");
+				String catId = (String) f.properties.get("cat_id");
 				if (catId != null)
 				{
 					Integer stat = stats.get(catId);
@@ -330,8 +337,11 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			for (Entry<String, Integer> stat : stats.entrySet()) {
 				
 				FrequencyItem freq = new FrequencyItem();
-				freq.category = stat.getKey();
+				freq.cat_id = stat.getKey();
+				freq.category = catLabelMap.get(freq.cat_id);
+				freq.label = freq.category;
 				freq.count = stat.getValue();
+				freq.color = catColorMap.get(freq.cat_id);
 				
 				freqs.add(freq);
 				
@@ -369,8 +379,12 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 
 	public static class FrequencyItem {
 
+		public String color;
 		public Integer count;
+		@Deprecated
 		public String category;
+		public String label;
+		public String cat_id;
     	
     }
     

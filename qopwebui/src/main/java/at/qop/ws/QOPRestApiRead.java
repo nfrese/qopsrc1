@@ -122,66 +122,6 @@ public class QOPRestApiRead extends QOPRestApiBase {
 		return returnGeoJson(outFeatures);
 	}
 
-	private List<SimpleFeature> readInt(String table, String sql)
-			throws SQLException, JsonProcessingException, JsonMappingException {
-		String geomField ="geom";
-		
-		List<SimpleFeature> outFeatures = new ArrayList<>();
-
-			DbTableReader reader = new DbTableReader();
-			
-			LookupSessionBeans.genericDomain().readTable(
-					sql, reader );
-			int cnt=0;
-			
-			DbTextField fidField = reader.table.textField("fid");
-			
-			for (DbRecord record : reader.records)
-			{
-				SimpleFeature outFeature = new SimpleFeature();
-				if (fidField != null)
-				{
-					outFeature.id = fidField.get(record);
-				}
-				else
-				{
-					outFeature.id = table + ":rec_"+ cnt;
-				}
-				
-				for (int i = 0; i < reader.table.colNames.length;i++) {
-					String colName = reader.table.colNames[i];
-					if (reader.table.typeNames[i].equals("geometry"))
-					{
-						Geometry value = reader.table.geometryField(colName).get(record);
-						GeoJsonWriter gw = new GeoJsonWriter();
-						String json = gw.write(value);
-						JsonNode jo = om().readTree(json);
-						if (geomField.equals(colName))
-						{
-							outFeature.geometry= jo;
-						}
-						else
-						{
-							outFeature.properties.put(colName, jo);
-						}
-					}
-					else if (reader.table.typeNames[i].equals("jsonb"))
-					{
-						String json = String.valueOf(record.values[i]);
-						outFeature.properties.put(colName, om().readTree(json));
-					}
-					else
-					{
-						Object value = record.values[i];
-						outFeature.properties.put(colName, value);
-					}
-				}
-				outFeatures.add(outFeature);
-				cnt++;
-			}
-		return outFeatures;
-	}
-
     @GetMapping("/qop/rest/api/readsingle")
 	protected ResponseEntity<?> single(
 			@RequestParam(name="username") String username, 

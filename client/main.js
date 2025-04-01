@@ -196,6 +196,7 @@ $.get(baseUrl() + "/qop/rest/api/read?table=qop.pvs_category" + authParams(),
 			let option = document.createElement("option");
 			option.text = "STANDORT1";
 			option.value = "standort1";
+			option.selected = true;
 			select.appendChild(option);
 		}
 		showCat();
@@ -277,33 +278,35 @@ function showChart() {
 		am5percent.PieSeries.new(root, {
 			name: "Series",
 			valueField: "count",
-			categoryField: "category"
+			categoryField: "category",
+			
 		})
 	);
 
+	series.slices.template.setAll({
+		fillOpacity: 0.5,
+		templateField: "columnSettings"
+	});
+	
 	$.get(getUrl(),
 		function(data) {
+			for (const el of data.extended.frequencies) {
+				
+				el.columnSettings = {
+				    fill: am5.color(el.color)
+				}
+			}
+			
+			
 			series.data.setAll(data.extended.frequencies);
 		});
-
-
-
-	//	// Add legend
-	//	var legend = chart.children.push(am5.Legend.new(root, {
-	//		centerX: am5.percent(50),
-	//	  x: am5.percent(50),
-	//		layout: root.horizontalLayout
-	//	}));
-	//
-	//	legend.data.setAll(series.dataItems);
 
 	series.labels.template.setAll({
 		text: "{category}: {value}",
 		textType: "circular",
 		inside: true,
-		radius: 10
+		radius: 5,
+		
 	});
-
-
-
+	
 }
