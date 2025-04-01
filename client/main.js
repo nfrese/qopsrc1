@@ -18,29 +18,32 @@ import * as am5percent from "@amcharts/amcharts5/percent";
 const content = document.getElementById('details');
 
 var lineStyle = new Style({
-  stroke: new Stroke({ color: '#ffcc33', width: 3 })
+  stroke: new Stroke({ color: '#c0c0c0', width: 3 })
 });
 
 var styleMarker = new Style({
   image: new Icon({
-    scale: .7, anchor: [0.5, 1],
+    scale: .6, anchor: [0.5, 1],
     src: '//raw.githubusercontent.com/jonataswalker/map-utils/master/images/marker.png'
   })
 });
 
-function styleMarkerTarget(feature) { 
+function styleMarkerTarget(feature) {
 	if (feature.get("icon") != null) {
-	var icon = feature.get("icon").replace('.svg','');
-	var color = feature.get("color").replace('#','');
-	var url = `https://cmbaimg.s3.amazonaws.com/map/icons/${icon}%2Bcircle%2B---${color}%2Bwhite.png`
-	
-	return new Style({
-  image: new Icon({
-    scale: 1, anchor: [0, 0],
-    src: url
-  })
-	});
-}
+		var icon = feature.get("icon").replace('.svg', '');
+		var color = feature.get("color").replace('#', '');
+		var url = `https://cmbaimg.s3.amazonaws.com/map/icons/${icon}%2Bcircle%2B---${color}%2Bwhite.png`
+
+		return new Style({
+			image: new Icon({
+				scale: 1, anchor: [0, 0],
+				src: url
+			})
+		});
+	}
+	else {
+		return lineStyle;
+	}
 }
 
 window.targetCoord = [16.6000785, 48.4526522];
@@ -57,7 +60,6 @@ function targetCoordPrj() {
 }
 function reset() {
 	
-
 	var marker1 = new Point(targetCoordPrj());
 	var featureMarker1 = new Feature(marker1);
 	
@@ -126,7 +128,7 @@ map.on('click', function (evt) {
 
     content.innerHTML = htmltable(feature.getProperties());
 	
-	const routeUrl = 'http://localhost:4380/qop/rest/api/route?'
+	const routeUrl = baseUrl() + '/qop/rest/api/route?'
 	  + `lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
 	  + `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}`
 	  + `&username=api&password=zrS/NVPqlIUwSjcU`
@@ -188,10 +190,21 @@ $("#layersSelect").on('change', function() {
   showCat();
 });
 
+function baseUrl() {
+	var develMode = window.location.host.includes("5173");
+	if (develMode) {
+		return 'http://localhost:4380';
+	}
+	else
+	{
+		return '';
+	}
+}
+
 function getUrl() {
 	const sel = document.querySelector("#layersSelect").value;
 
-	const url = 'http://localhost:4380/qop/rest/api/traveltime_to_pois?'
+	const url = baseUrl() + '/qop/rest/api/traveltime_to_pois?'
 		  + `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
 		  + `&analysis_id=standort1`
 	      + '&routingResultsAsProperties=true'
