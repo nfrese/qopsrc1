@@ -315,6 +315,14 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			//extended.put("isochrone15m", jo);
 		
 			Map<String, Integer> stats = new LinkedHashMap<>();
+			for (String catId : catLabelMap.keySet())
+			{
+				if (!"latest".equals(catId))
+				{
+					stats.put(catId, new Integer(0));
+				}
+			}
+			
 			for (SimpleFeature f : sorted)
 			{
 				String catId = (String) f.properties.get("cat_id");
@@ -339,6 +347,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				freq.category = catLabelMap.get(freq.cat_id);
 				freq.label = freq.category;
 				freq.count = stat.getValue();
+				freq.rating = Math.min(freq.count, 10)*1.0/10.0;
 				freq.color = catColorMap.get(freq.cat_id);
 				
 				freqs.add(freq);
@@ -378,7 +387,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 	public static class FrequencyItem {
 
 		public String color;
-		public Integer count;
+		public int count;
+		public double rating;
 		@Deprecated
 		public String category;
 		public String label;

@@ -54,7 +54,7 @@ if (urlParams.get("radius_meters") != null ) {
 	$('#radius_meters').val(parseInt(urlParams.get("radius_meters")));
 }
 else {
-	$('#radius_meters').val(8000);
+	$('#radius_meters').val(15000);
 }
 
 const featureLayer = new VectorLayer({
@@ -200,8 +200,15 @@ $.get(baseUrl() + "/qop/rest/api/read?table=qop.pvs_category" + authParams(),
 		
 		{
 			let option = document.createElement("option");
-			option.text = "STANDORT1";
+			option.text = "STANDORT PIE COUNTS";
 			option.value = "standort1";
+			option.selected = false;
+			select.appendChild(option);
+		}
+		{
+			let option = document.createElement("option");
+			option.text = "STANDORT PIE RATED";
+			option.value = "standort2";
 			option.selected = true;
 			select.appendChild(option);
 		}
@@ -228,7 +235,7 @@ function selCat() {
 }
 
 function analysisMode() {
-	return selCat() == 'standort1';
+	return selCat().startsWith('standort');
 }
 
 function authParams() {
@@ -271,6 +278,7 @@ function showChart() {
 	{
 		return;
 	}
+	const ana2 = selCat() == 'standort2';
 	
 	$('#chartdiv1').show();
 
@@ -280,18 +288,21 @@ function showChart() {
 		})
 	);
 
+	var conf = 	{
+				name: "Series",
+				valueField: "count",
+				categoryField: 'category'
+			};
+			
+	if (ana2) { conf.valueField= 'one'; }
+	
 	// Create series
 	var series = chart.series.push(
-		am5percent.PieSeries.new(root, {
-			name: "Series",
-			valueField: "count",
-			categoryField: "category",
-			
-		})
+		am5percent.PieSeries.new(root, conf)
 	);
 
 	series.slices.template.setAll({
-		fillOpacity: 0.5,
+		
 		templateField: "columnSettings"
 	});
 	
@@ -301,8 +312,10 @@ function showChart() {
 			
 			for (const el of data.extended.frequencies) {
 				
+				el.one = 1;
 				el.columnSettings = {
-				    fill: am5.color(el.color)
+				    fill: am5.color(el.color),
+					fillOpacity: ana2 ? el.rating : 0.7
 				}
 			}
 			
@@ -312,7 +325,7 @@ function showChart() {
 		});
 
 	series.labels.template.setAll({
-		text: "{category}: {value}",
+		text: ana2 ? "{category}" : "{category}: {value}",
 		textType: "circular",
 		inside: true,
 		radius: 5,
