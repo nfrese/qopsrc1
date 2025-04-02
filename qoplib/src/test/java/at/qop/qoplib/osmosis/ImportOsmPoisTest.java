@@ -42,10 +42,11 @@ public class ImportOsmPoisTest {
 	@Test
 	public void testScript2Db() throws Exception {
 
-		String jdbcUrl = System.getenv("IMPORT_DB_URL");
-		String username = "postgres";
-		String password = System.getenv("IMPORT_DB_PASSWORD");
+		String jdbcUrl = "jdbc:postgresql://" +  System.getenv("QOP_DBHOST") + ":5432/" + System.getenv("QOP_DB");
+		String username = System.getenv("QOP_DBUSER");
+		String password = System.getenv("QOP_DBPASSWD");
 
+		System.out.println("connecting to " + jdbcUrl + " with user " + username);
 
 		Class.forName("org.postgresql.Driver");
 

@@ -7,8 +7,12 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -16,8 +20,11 @@ import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.NodeContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.RelationContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.WayContainer;
+import org.openstreetmap.osmosis.core.domain.v0_6.Entity;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
+import org.openstreetmap.osmosis.core.domain.v0_6.Way;
+import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,11 +75,88 @@ public class OsmosisPoisToDb implements Sink {
     public void initialize(Map<String, Object> arg0) {
     }
  
+	private Map<Long,Way> collectedWays = new HashMap<>();
+	public int pass = 1;
+	
     @Override
     public void process(EntityContainer entityContainer) {
+    	if (pass == 1) {
+    		processStep1(entityContainer);
+    	}
+    	else if (pass == 2)
+    	{
+    		processStep2(entityContainer);
+    	}
+    	else
+    	{
+    		throw new RuntimeException("already finished!");
+    	}
+    	
+    }   	
+    
+    public void processStep1(EntityContainer entityContainer) {
+    	
+        if (entityContainer instanceof WayContainer) {
+          Way w = ((WayContainer) entityContainer).getEntity();
+          String mainKey = checkType(w);
+          if (mainKey != null) {
+    		Iterator<WayNode> it = w.getWayNodes().iterator();
+    		if (it.hasNext()) {
+    			WayNode wn = it.next();
+    			collectedWays.put(wn.getNodeId(), w);
+    		}
+          }
+        }
+    }
+    	
+    public void processStep2(EntityContainer entityContainer) {
+    	
         if (entityContainer instanceof NodeContainer) {
           Node n = ((NodeContainer) entityContainer).getEntity();
-          String mainKey = null;
+          Way w = collectedWays.get(n.getId());
+          if (w != null)
+          {
+          	  String mainKey = checkType(w);
+
+        	  Map<String,String> tagsMap = tagsMap(w.getTags());
+        	  if (mainKey != null) {
+        		  String mainValue = tagsMap.get(mainKey);
+        		  writeInsert(n, mainKey, tagsMap, mainValue);
+        	  }
+          }
+          else 
+          {
+        	  String mainKey = checkType(n);
+
+        	  Map<String,String> tagsMap = tagsMap(n.getTags());
+        	  if (mainKey != null) {
+        		  String mainValue = tagsMap.get(mainKey);
+        		  writeInsert(n, mainKey, tagsMap, mainValue);
+        	  }
+          }
+        } else if (entityContainer instanceof WayContainer) {
+        } else if (entityContainer instanceof RelationContainer) {
+        } else {
+            System.out.println("Unknown Entity: " + entityContainer);
+        }
+    }
+
+	private void writeInsert(Node n, String mainKey, Map<String, String> tagsMap, String mainValue) {
+		String json = tagsToJson(tagsMap);
+		  ow.print("INSERT INTO qop.osm_pois ");
+		  ow.print("(nodeid, mainkey, mainval, \"name\", tags, geom)");
+		  ow.print(" VALUES (");
+		  ow.print(n.getId() + ", ");
+		  ow.print(writeStr(mainKey)+ ", ");
+		  ow.print(writeStr(mainValue)+ ", ");
+		  ow.print(writeStr(tagsMap.get("name"))+ ", ");
+		  ow.print(writeStrS(json )+ "::jsonb, ");
+		  ow.print("ST_GeomFromText('" + geom(n) + "')");
+		  ow.println(");");
+	}
+
+	private String checkType(Entity n) {
+		String mainKey = null;
           for (Tag myTag : n.getTags()) {
               if ("amenity".equalsIgnoreCase(myTag.getKey())) {
             	  mainKey = "amenity";
@@ -82,29 +166,8 @@ public class OsmosisPoisToDb implements Sink {
                   break;
               }
           }
-          
-          Map<String,String> tagsMap = tagsMap(n.getTags());
-          
-          if (mainKey != null) {
-        	  String mainValue = tagsMap.get("amenity");
-        	  String json = tagsToJson(tagsMap);
-        	  ow.print("INSERT INTO qop.osm_pois ");
-        	  ow.print("(nodeid, mainkey, mainval, \"name\", tags, geom)");
-        	  ow.print(" VALUES (");
-        	  ow.print(n.getId() + ", ");
-        	  ow.print(writeStr(mainKey)+ ", ");
-        	  ow.print(writeStr(mainValue)+ ", ");
-        	  ow.print(writeStr(tagsMap.get("name"))+ ", ");
-        	  ow.print(writeStrS(json )+ "::jsonb, ");
-        	  ow.print("ST_GeomFromText('" + geom(n) + "')");
-        	  ow.println(");");
-          }
-        } else if (entityContainer instanceof WayContainer) {
-        } else if (entityContainer instanceof RelationContainer) {
-        } else {
-            System.out.println("Unknown Entity!");
-        }
-    }
+		return mainKey;
+	}
  
     private Map<String, String> tagsMap(Collection<Tag> tags) {
     	Map<String, String> m = new LinkedHashMap<>();
@@ -148,10 +211,21 @@ public class OsmosisPoisToDb implements Sink {
     }
  
     public static void importAmenitys(String filename, String outputfilename, boolean createTable ) throws FileNotFoundException {
-        InputStream inputStream = new FileInputStream(filename);
-        OsmosisReader reader = new OsmosisReader(inputStream);
-        reader.setSink(new OsmosisPoisToDb(outputfilename, createTable));
-        reader.run();
+        OsmosisPoisToDb sink = new OsmosisPoisToDb(outputfilename, createTable);
+        {
+        	InputStream inputStream = new FileInputStream(filename);
+        	OsmosisReader reader = new OsmosisReader(inputStream);
+        	reader.setSink(sink);
+        	reader.run();
+        }
+        sink.pass = 2;
+        {
+        	InputStream inputStream = new FileInputStream(filename);
+        	OsmosisReader reader = new OsmosisReader(inputStream);
+        	reader.setSink(sink);
+        	reader.run();
+        }
+        
     }
 
 }

@@ -211,7 +211,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				R5PvsClient r5p = new R5PvsClient();
 				TableResult tr = r5p.table(null, sources, destinations);
 				int r = 0;
-				if (tr.rows != null) {
+				if (tr != null && tr.rows != null) {
 					for (TableResultRow row : tr.rows) {
 						time[r][3] = row.minTotalTime/60;
 						r++;

@@ -27,17 +27,27 @@ var styleMarker = new Style({
 });
 
 function styleMarkerTarget(feature) {
-	if (feature.get("icon") != null) {
-		var icon = feature.get("icon").replace('.svg', '');
-		var color = feature.get("color").replace('#', '');
-		var url = `https://cmbaimg.s3.amazonaws.com/map/icons/${icon}%2Bcircle%2B---${color}%2Bwhite.png`
+	if (feature.getGeometry() instanceof Point) {
+		if (feature.get("icon") != null) {
+			var icon = feature.get("icon").replace('.svg', '');
+			var color = feature.get("color").replace('#', '');
+			var url = `https://cmbaimg.s3.amazonaws.com/map/icons/${icon}%2Bcircle%2B---${color}%2Bwhite.png`
 
-		return new Style({
-			image: new Icon({
-				scale: 1, anchor: [0, 0],
-				src: url
-			})
-		});
+			return new Style({
+				image: new Icon({
+					scale: 1, anchor: [0, 0],
+					src: url
+				})
+			});
+		}
+		else {
+			return new Style({
+				image: new Icon({
+					scale: .3, anchor: [0.3, 1],
+					src: '//raw.githubusercontent.com/jonataswalker/map-utils/master/images/marker.png'
+				})
+			});
+		}
 	}
 	else {
 		return lineStyle;
@@ -197,7 +207,13 @@ $.get(baseUrl() + "/qop/rest/api/read?table=qop.pvs_category" + authParams(),
 			option.value = elt.properties.id;
 			select.appendChild(option);
 		}
-		
+		{
+			let option = document.createElement("option");
+			option.text = "<<not categorized>>";
+			option.value = "without";
+			option.selected = false;
+			select.appendChild(option);
+		}
 		{
 			let option = document.createElement("option");
 			option.text = "STANDORT PIE COUNTS";
