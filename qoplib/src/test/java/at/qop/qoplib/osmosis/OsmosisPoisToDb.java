@@ -48,7 +48,7 @@ public class OsmosisPoisToDb implements Sink {
 			if (createTable) {
 				writeDDL();
 			}
-			this.ow.println("DELETE FROM qop.osm_pois;");
+			this.ow.println("DELETE FROM qop.pvs_osm_poi;");
 			
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
@@ -57,18 +57,18 @@ public class OsmosisPoisToDb implements Sink {
 
 	private void writeDDL() {
 		String sql = ""
-				+ "DROP TABLE IF EXISTS qop.osm_pois;\n"
-				+ "CREATE TABLE qop.osm_pois (\n"
-				+ "	gid serial4 NOT NULL,\n"
-				+ "	nodeid bigserial NOT NULL,\n"
-				+ "	mainkey text NULL,\n"
-				+ "	mainval text NULL,\n"
-				+ "	\"name\" text NULL,\n"
-				+ "	tags jsonb NULL,\n"
-				+ "	geom public.geometry(point, 4326) NULL,\n"
-				+ "	CONSTRAINT osm_pois_pkey PRIMARY KEY (gid)\n"
-				+ ");\n"
-				+ "CREATE INDEX osm_pois_geom_gist ON qop.osm_pois USING gist (geom);\n";
+				+ "-- DROP TABLE IF EXISTS qop.pvs_osm_poi;\n"
+				+ "-- CREATE TABLE qop.pvs_osm_poi (\n"
+				+ "-- 	gid serial4 NOT NULL,\n"
+				+ "-- 	nodeid bigserial NOT NULL,\n"
+				+ "--	mainkey text NULL,\n"
+				+ "--	mainval text NULL,\n"
+				+ "--	\"name\" text NULL,\n"
+				+ "--	tags jsonb NULL,\n"
+				+ "--	geom public.geometry(point, 4326) NULL,\n"
+				+ "--	CONSTRAINT pvs_osm_poi_pkey PRIMARY KEY (gid)\n"
+				+ "-- );\n"
+				+ "-- CREATE INDEX pvs_osm_poi_geom_gist ON qop.pvs_osm_poi USING gist (geom);\n";
 		
 		ow.println(sql);
 		
@@ -146,7 +146,7 @@ public class OsmosisPoisToDb implements Sink {
 
 	private void writeInsert(Node n, String mainKey, Map<String, String> tagsMap, String mainValue) {
 		String json = tagsToJson(tagsMap);
-		  ow.print("INSERT INTO qop.osm_pois ");
+		  ow.print("INSERT INTO qop.pvs_osm_poi ");
 		  ow.print("(nodeid, mainkey, mainval, \"name\", tags, geom)");
 		  ow.print(" VALUES (");
 		  ow.print(n.getId() + ", ");
@@ -160,15 +160,18 @@ public class OsmosisPoisToDb implements Sink {
 
 	private String checkType(Entity n) {
 		String mainKey = null;
-          for (Tag myTag : n.getTags()) {
-              if ("amenity".equalsIgnoreCase(myTag.getKey())) {
-            	  mainKey = "amenity";
-                  break;
-              } else  if ("office".equalsIgnoreCase(myTag.getKey())) {
-            	  mainKey = "office";
-                  break;
-              }
-          }
+		for (Tag myTag : n.getTags()) {
+			if ("amenity".equalsIgnoreCase(myTag.getKey())) {
+				mainKey = "amenity";
+				break;
+			} else  if ("office".equalsIgnoreCase(myTag.getKey())) {
+				mainKey = "office";
+				break;
+			} else  if ("shop".equalsIgnoreCase(myTag.getKey())) {
+				mainKey = "shop";
+				break;
+			}
+		}
 		return mainKey;
 	}
  
