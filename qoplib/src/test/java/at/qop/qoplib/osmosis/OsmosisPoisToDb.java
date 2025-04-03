@@ -26,6 +26,7 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
+import org.testcontainers.shaded.org.apache.commons.lang.StringEscapeUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -55,7 +56,9 @@ public class OsmosisPoisToDb implements Sink {
 	}
 
 	private void writeDDL() {
-		String sql = "CREATE TABLE qop.osm_pois (\n"
+		String sql = ""
+				+ "DROP TABLE IF EXISTS qop.osm_pois;\n"
+				+ "CREATE TABLE qop.osm_pois (\n"
 				+ "	gid serial4 NOT NULL,\n"
 				+ "	nodeid bigserial NOT NULL,\n"
 				+ "	mainkey text NULL,\n"
@@ -65,7 +68,7 @@ public class OsmosisPoisToDb implements Sink {
 				+ "	geom public.geometry(point, 4326) NULL,\n"
 				+ "	CONSTRAINT osm_pois_pkey PRIMARY KEY (gid)\n"
 				+ ");\n"
-				+ "CREATE INDEX osm_pois_geom_gist ON qop.osm_pois USING gist (geom);";
+				+ "CREATE INDEX osm_pois_geom_gist ON qop.osm_pois USING gist (geom);\n";
 		
 		ow.println(sql);
 		
@@ -150,7 +153,7 @@ public class OsmosisPoisToDb implements Sink {
 		  ow.print(writeStr(mainKey)+ ", ");
 		  ow.print(writeStr(mainValue)+ ", ");
 		  ow.print(writeStr(tagsMap.get("name"))+ ", ");
-		  ow.print(writeStrS(json )+ "::jsonb, ");
+		  ow.print(writeStr(json )+ "::jsonb, ");
 		  ow.print("ST_GeomFromText('" + geom(n) + "')");
 		  ow.println(");");
 	}
@@ -184,12 +187,7 @@ public class OsmosisPoisToDb implements Sink {
 
 	private String writeStr(String s) {
 		if (s == null) return null;
-		return "'" + s.replace("'", "''").replace("\n", "\\n") + "'";
-	}
-	
-	private String writeStrS(String s) {
-		if (s == null) return null;
-		return "'" + s.replace("'", "''").replace("\n", "\\n") + "'";
+		return "E'" + StringEscapeUtils.escapeJavaScript(s) + "'";
 	}
 
 	private String tagsToJson(Map<String, String> tagsMap) {
