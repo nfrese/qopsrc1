@@ -208,6 +208,11 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			}
 			
 			if (enableR5) {
+				for (int j = 0;j < n;j++)
+				{
+					time[j][3]=Double.MAX_VALUE;
+				}
+				
 				R5PvsClient r5p = new R5PvsClient();
 				TableResult tr = r5p.table(null, sources, destinations);
 				int r = 0;

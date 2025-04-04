@@ -149,11 +149,10 @@ public class R5PvsClient {
 					+ " t_call=" + (t_callFinished - t_start) 
 					+ "ms t_parse="+ (t_finished - t_callFinished) + "ms " + url);
 			
-
 		}
 		catch (Exception ex)
 		{
-			throw new RuntimeException("osrm problem for " + url, ex);
+			throw new RuntimeException("r5 problem for " + url, ex);
 		}
 		return results;
 	}
@@ -227,7 +226,7 @@ public class R5PvsClient {
 		}
 		catch (Exception ex)
 		{
-			throw new RuntimeException("osrm problem for " + url, ex);
+			throw new RuntimeException("r5 problem for " + url, ex);
 		}
 	}
 	
