@@ -307,7 +307,7 @@ function showChart() {
 	var conf = 	{
 				name: "Series",
 				valueField: "count",
-				categoryField: 'category'
+				categoryField: 'label'
 			};
 			
 	if (ana2) { conf.valueField= 'one'; }
@@ -341,8 +341,7 @@ function showChart() {
 		});
 
 	series.labels.template.setAll({
-		text: ana2 ? "{category}" : "{category}: {value}",
-		textType: "circular",
+		text: ana2 ? "{category}: {count}": "{category}: {value}",
 		inside: true,
 		radius: 5,
 		
