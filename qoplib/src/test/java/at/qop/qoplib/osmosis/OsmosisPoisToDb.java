@@ -7,12 +7,15 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.NodeContainer;
@@ -33,6 +36,14 @@ import crosby.binary.osmosis.OsmosisReader;
  
 public class OsmosisPoisToDb implements Sink {
  
+	public List<String> filter = new ArrayList<>();
+	{
+		filter.add("amenity:*");
+		filter.add("office:*");
+		filter.add("shop:*");
+		
+	}
+	
 	private ObjectMapper om = new ObjectMapper();
 	public final String outputFilename;
 	private PrintWriter ow;
@@ -159,15 +170,18 @@ public class OsmosisPoisToDb implements Sink {
 	private String checkType(Entity n) {
 		String mainKey = null;
 		for (Tag myTag : n.getTags()) {
-			if ("amenity".equalsIgnoreCase(myTag.getKey())) {
-				mainKey = "amenity";
-				break;
-			} else  if ("office".equalsIgnoreCase(myTag.getKey())) {
-				mainKey = "office";
-				break;
-			} else  if ("shop".equalsIgnoreCase(myTag.getKey())) {
-				mainKey = "shop";
-				break;
+			for (String f :filter) {
+				String[] s = f.split(":");
+				String key = s[0];
+				String value = s[1];
+				
+				if (key.equalsIgnoreCase(myTag.getKey())) {
+					if (value.equals("*")) {
+						mainKey = key;
+					}
+					break;
+				}
+				
 			}
 		}
 		return mainKey;
