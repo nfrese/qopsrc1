@@ -83,6 +83,27 @@ public class QOPRestApiRoute extends QOPRestApiBase {
         super();
     }
 
+	private static String colorCar() {
+		return "#666699";
+	}
+
+	private static String colorPublicTransport() {
+		return "#ff0000";
+	}
+
+	private static String colorEBike() {
+		return "#0390fc";
+	}
+
+	private static String colorBike() {
+		return "#00ff00";
+	}
+
+	private static String colorWalk() {
+		return "#000000";
+	}
+
+    
     public static class RoutingResults {
 		private static final double THRES = 15.;
 
@@ -97,8 +118,13 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		public TT car = new TT();
 
 		public void set() {
+			walk.color=colorWalk();
+			bike.color=colorBike();
+			eBike.color=colorEBike();
+			publicTransport.color=colorPublicTransport();
+			car.color = colorCar();
 			
-			eBike.minutes  = bike.minutes / 1.5;
+			eBike.minutes  = Utils.round(bike.minutes / 1.5,2);
 
 			walk.display = walk.minutes <= THRES;
 			bike.display = bike.minutes <= THRES;
@@ -114,7 +140,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
     
     public static class TT {
 		public double minutes;
-		public boolean display;    	
+		public boolean display;    
+		public String color;
     }
     
     @GetMapping("/qop/rest/api/traveltime_to_pois")
@@ -419,7 +446,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="lat") double start_lat, 
 			@RequestParam(name="lng") double start_lng,
 			@RequestParam(name="dest_lat") double dest_lat, 
-			@RequestParam(name="dest_lng") double dest_lng
+			@RequestParam(name="dest_lng") double dest_lng,
+			@RequestParam(name="modes", required = false) List<String> modes
 		) throws ServletException, IOException, SQLException {
     
     	Config cfg = checkAuth(username, password);
@@ -429,7 +457,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		
 		List<SimpleFeature> outFeatures = new ArrayList<>();
 		
-		ModeEnum[] modes = new ModeEnum[] {ModeEnum.foot, ModeEnum.bike, ModeEnum.car};
+		ModeEnum[] modesE = new ModeEnum[] {ModeEnum.foot, ModeEnum.bike, ModeEnum.car};
     	
 		String idStr0 = start_lat + " " +  start_lng + " " + dest_lat + " " + dest_lng;
     	
@@ -437,7 +465,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		points[0] = new LonLat(start_lng, start_lat);
 		points[1] = new LonLat(dest_lng, dest_lat);
 		
-		for (ModeEnum mode : modes)
+		for (ModeEnum mode : modesE)
 		{
 			if (enableR5 && mode==ModeEnum.car) 
 			{ 
@@ -448,19 +476,23 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			String modName;
 			String color;
 			switch (mode) {
-			case foot : modName="walk"; color="#000000"; break;
-			case bike : modName="bike"; color="#00ff00"; break;
+			case foot : modName="walk"; color=colorWalk(); break;
+			case bike : modName="bike"; color=colorBike(); break;
 			case car : 
 				if (!enableR5) 
 				{ 
-					modName="publicTransport"; color="#ff0000";
+					modName="publicTransport"; color=colorPublicTransport();
 				} 
 				else {
-					modName="car"; color="#ffff00";
+					modName="car"; color=colorCar();
 				}
 			
 			break;
 			default : modName="unexpected " + mode; color="#a0a0a0";
+			}
+			
+			if (modes != null && !modes.isEmpty() && !modes.contains(modName)) {
+				continue;
 			}
 			
 			String idStr = idStr0 +  " " + mode;
@@ -490,7 +522,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			outFeatures.add(routeResult);
 		}
 		
-		if (enableR5) {
+		boolean publicTransportEnabled = modes == null || !modes.isEmpty() && !modes.contains("publicTransport");
+		
+		if (enableR5 && publicTransportEnabled) {
 			
 			R5PvsClient r5p = new R5PvsClient();
 			TripResult tr = r5p.route(null, new LonLat[] {points[0]}, new LonLat[] {points[1]});
