@@ -150,7 +150,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="password") String password, 
 			@RequestParam(name="lat") double start_lat, 
 			@RequestParam(name="lng") double start_lng,
-			@RequestParam(name="radius_meters") double radius,
+			@RequestParam(name="radius_meters", required = false) Double radius,
 			@RequestParam(name="poi_table") String[] poiTables,
 			@RequestParam(name="cat_id", required = false) List<String> cat,
 			@RequestParam(name="analysis_id", required = false) String analysisId,
@@ -163,6 +163,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		
 		Config cfg = checkAuth(username, password);
 		boolean enableR5 = enableR5();
+		
+		if (radius == null) {
+			radius = 15000.0;
+		}
 		
 		Point start = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lng,start_lat));
 		Geometry buffer = CRSTransform.singleton.bufferWGS84Corr(start, radius);
@@ -542,7 +546,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 					feature2.id=UUID.nameUUIDFromBytes((idStr0+"_"+leg.legDurationSeconds).getBytes()).toString();
 					feature2.properties.put("tripId", tripId+"");
 					feature2.properties.put("mode", leg.mode.toLowerCase());
-					feature2.properties.put("stroke", !("WALK".equals(leg.mode)) ? "#FF0000" : "#000000");
+					feature2.properties.put("stroke", !("WALK".equals(leg.mode)) ? colorPublicTransport() : colorWalk());
 					feature2.properties.put("stroke-width", 3);
 					feature2.properties.put("stroke-opacity", 1);
 					
