@@ -491,7 +491,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			default : modName="unexpected " + mode; color="#a0a0a0";
 			}
 			
-			if (modes != null && !modes.isEmpty() && !modes.contains(modName)) {
+			if (modes != null && !modes.isEmpty() && !modes.contains(modName)
+					&& !(modName.equals("bike") && modes.contains("eBike"))) {
 				continue;
 			}
 			
@@ -522,7 +523,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			outFeatures.add(routeResult);
 		}
 		
-		boolean publicTransportEnabled = modes == null || !modes.isEmpty() && !modes.contains("publicTransport");
+		boolean publicTransportEnabled = modes == null || modes.isEmpty() || modes.contains("publicTransport");
 		
 		if (enableR5 && publicTransportEnabled) {
 			
@@ -540,7 +541,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 					SimpleFeature feature2 = new SimpleFeature();
 					feature2.id=UUID.nameUUIDFromBytes((idStr0+"_"+leg.legDurationSeconds).getBytes()).toString();
 					feature2.properties.put("tripId", tripId+"");
-					feature2.properties.put("mode", leg.mode);
+					feature2.properties.put("mode", leg.mode.toLowerCase());
 					feature2.properties.put("stroke", !("WALK".equals(leg.mode)) ? "#FF0000" : "#000000");
 					feature2.properties.put("stroke-width", 3);
 					feature2.properties.put("stroke-opacity", 1);
