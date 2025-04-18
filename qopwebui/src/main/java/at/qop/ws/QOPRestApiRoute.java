@@ -102,6 +102,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 	private static String colorWalk() {
 		return "#000000";
 	}
+	
+	
 
     
     public static class RoutingResults {
@@ -337,16 +339,42 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			
 			extended = new LinkedHashMap<>();
 			
-			List<Geometry> collectGeoms = sorted.stream().map(f -> f.geom_).filter(g -> g!=null).collect(Collectors.toList());
-			
-			Geometry hull = CRSTransform.singleton.bufferWGS84Corr(Utils.convexHull(collectGeoms, CRSTransform.gfWGS84),200);
-			JsonNode jo = geomToGeoJson(hull);
-			
-			SimpleFeature hullFeature = new SimpleFeature();
-			hullFeature.id = UUID.nameUUIDFromBytes((""+hull).getBytes())+"";
-			hullFeature.geometry = jo;
-			hullFeature.properties.put("isochrone", "15min");
-			sorted.add(hullFeature);
+			{
+				List<Feature> sel = sorted.stream()
+						.filter(f -> f instanceof Feature)
+						.map(f -> (Feature)f)
+						.filter(f -> f.routingResults.walk.display)
+						.collect(Collectors.toList());
+				SimpleFeature hullFeature = addConvexHullFeature(sel, "walk", colorWalk());
+				sorted.add(hullFeature);
+			}
+			{
+				List<Feature> sel = sorted.stream()
+						.filter(f -> f instanceof Feature)
+						.map(f -> (Feature)f)
+						.filter(f -> f.routingResults.bike.display)
+						.collect(Collectors.toList());
+				SimpleFeature hullFeature = addConvexHullFeature(sel, "bike", colorBike());
+				sorted.add(hullFeature);
+			}
+			{
+				List<Feature> sel = sorted.stream()
+						.filter(f -> f instanceof Feature)
+						.map(f -> (Feature)f)
+						.filter(f -> f.routingResults.eBike.display)
+						.collect(Collectors.toList());
+				SimpleFeature hullFeature = addConvexHullFeature(sel, "ebike", colorEBike());
+				sorted.add(hullFeature);
+			}
+			{
+				List<Feature> sel = sorted.stream()
+						.filter(f -> f instanceof Feature)
+						.map(f -> (Feature)f)
+						.filter(f -> f.routingResults.publicTransport.display)
+						.collect(Collectors.toList());
+				SimpleFeature hullFeature = addConvexHullFeature(sel, "publicTransport", colorPublicTransport());
+				sorted.add(hullFeature);
+			}
 			
 			//extended.put("isochrone15m", jo);
 		
@@ -394,6 +422,25 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		}	
 		
 		return returnGeoJson(sorted, extended );
+	}
+
+	private SimpleFeature addConvexHullFeature(List<Feature> sorted, String mode, String color)
+			throws JsonProcessingException, JsonMappingException {
+		List<Geometry> collectGeoms = sorted.stream()
+				.map(f -> f.geom_)
+				.filter(g -> g!=null).collect(Collectors.toList());
+		Geometry hull = CRSTransform.singleton.bufferWGS84Corr(Utils.convexHull(collectGeoms, CRSTransform.gfWGS84),200);
+		JsonNode jo = geomToGeoJson(hull);
+
+		SimpleFeature hullFeature = new SimpleFeature();
+		hullFeature.id = UUID.nameUUIDFromBytes((""+hull).getBytes())+"";
+		hullFeature.geometry = jo;
+		hullFeature.properties.put("isochrone", "15min");
+		hullFeature.properties.put("mode", mode);
+		hullFeature.properties.put("stroke", color);
+//		hullFeature.properties.put("fill", color);
+//		hullFeature.properties.put("transp", 0.5);
+		return hullFeature;
 	}
 
 	private boolean enableR5() {

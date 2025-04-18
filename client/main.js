@@ -50,7 +50,10 @@ function styleMarkerTarget(feature) {
 		}
 	}
 	else {
-		return lineStyle;
+		const style = new Style({
+			stroke: new Stroke({ color: feature.get("stroke"), width: 2 })
+		});
+		return style;
 	}
 }
 
