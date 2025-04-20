@@ -187,24 +187,33 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			{
 				sql += " AND cat_id is not null and cat_id != 'latest'";
 			}
-			else if (cat != null && cat.size() > 0) {
-				if (cat.contains("without")) {
-					sql += " AND cat_id is null";
+			else 
+			{
+				if (cat == null || cat.isEmpty())
+				{
+					continue;
 				}
-				else if (cat.contains("with")) {
-					sql += " AND cat_id is not null";
-				} else {
-					sql += " AND cat_id IN ("; 
-					int cnt=0;
-					for (String ca : cat)
-					{
-						if (cnt > 0) {
-							sql += ", "; 
-						}
-						sql += escSqlStr(ca);
-						cnt++;
+
+				if (!cat.contains("nofilter") && cat.size() > 0) {
+
+					if (cat.contains("without")) {
+						sql += " AND cat_id is null";
 					}
-					sql += " )"; 
+					else if (cat.contains("with")) {
+						sql += " AND cat_id is not null";
+					} else {
+						sql += " AND cat_id IN ("; 
+						int cnt=0;
+						for (String ca : cat)
+						{
+							if (cnt > 0) {
+								sql += ", "; 
+							}
+							sql += escSqlStr(ca);
+							cnt++;
+						}
+						sql += " )"; 
+					}
 				}
 			}
 			
