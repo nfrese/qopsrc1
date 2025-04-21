@@ -38,10 +38,26 @@ public class OsmosisPoisToDb implements Sink {
  
 	public List<String> filter = new ArrayList<>();
 	{
-		filter.add("amenity:*");
-		filter.add("office:*");
-		filter.add("shop:*");
-		
+		filter.add("amenity=*");
+		filter.add("office=*");
+		filter.add("shop=*");
+		filter.add("highway=footway");	
+		filter.add("natural=tree");
+		filter.add("leisure=park");
+		filter.add("bridge=yes");
+		filter.add("historic=memorial");
+		filter.add("historic=wayside_shrine");
+		filter.add("landuse=cemetery");
+		filter.add("water=lake");
+		filter.add("water=pond");
+		filter.add("landuse=vineyard");
+		filter.add("landuse=orchard");
+		filter.add("natural=scrub");
+		filter.add("landuse=forest");
+		filter.add("leisure=pitch");
+		filter.add("tourism=artwork");
+		filter.add("tourism=guest_house");
+		filter.add("leisure=fitness_station");
 	}
 	
 	private ObjectMapper om = new ObjectMapper();
@@ -171,15 +187,15 @@ public class OsmosisPoisToDb implements Sink {
 		String mainKey = null;
 		for (Tag myTag : n.getTags()) {
 			for (String f :filter) {
-				String[] s = f.split(":");
+				String[] s = f.split("=");
 				String key = s[0];
 				String value = s[1];
 				
 				if (key.equalsIgnoreCase(myTag.getKey())) {
-					if (value.equals("*")) {
+					if (value.equals("*") || value.equals(myTag.getValue())) {
 						mainKey = key;
+						break;
 					}
-					break;
 				}
 				
 			}

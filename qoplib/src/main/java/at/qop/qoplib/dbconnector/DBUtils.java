@@ -89,12 +89,14 @@ public class DBUtils {
 		        count++;
 
 		        if (count % batchSize == 0) {
-		            statement.executeBatch();
+			    	System.out.println("written: " + count);
+		        	statement.executeBatch();
 		            statement.clearBatch();
 		        }
 				
 			}
 		    if (count % batchSize != 0) {
+		    	System.out.println("written: " + count);
 		        statement.executeBatch();
 		    }
 		    connection.commit();
