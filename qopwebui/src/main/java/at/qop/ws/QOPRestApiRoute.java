@@ -381,7 +381,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				List<Feature> sel = sorted.stream()
 						.filter(f -> f instanceof Feature)
 						.map(f -> (Feature)f)
-						.filter(f -> f.routingResults.publicTransport.display || Boolean.TRUE.equals(f.properties.get("important")))
+						.filter(f -> f.routingResults.publicTransport.display)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(sel, "publicTransport", colorPublicTransport());
 				sorted.add(hullFeature);
