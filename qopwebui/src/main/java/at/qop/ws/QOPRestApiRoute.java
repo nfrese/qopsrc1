@@ -173,7 +173,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		Point start = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lng,start_lat));
 		Geometry buffer = CRSTransform.singleton.bufferWGS84Corr(start, radius);
 		String geomField ="geom";
-		String stIntersectsSql = "ST_Intersects(" +geomField + ", 'SRID=4326;" + buffer + "'::geometry)";
+		String stIntersectsSql = "(ST_Intersects(" 
+				+ geomField + ", 'SRID=4326;" 
+				+ buffer + "'::geometry) OR important = true)";
 
 		IRouter router = osrm(cfg);
 		
@@ -332,7 +334,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		}
 		
 		List<SimpleFeature> sorted = outFeatures.stream()
-				.filter(f -> f.routingResults.disp())
+				.filter(f -> f.routingResults.disp() || Boolean.TRUE.equals(f.properties.get("important")))
 				.sorted((f,g) -> new Double(f.routingResults.bike.minutes).compareTo(g.routingResults.bike.minutes))
 				.collect(Collectors.toList());
 		
@@ -379,7 +381,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				List<Feature> sel = sorted.stream()
 						.filter(f -> f instanceof Feature)
 						.map(f -> (Feature)f)
-						.filter(f -> f.routingResults.publicTransport.display)
+						.filter(f -> f.routingResults.publicTransport.display || Boolean.TRUE.equals(f.properties.get("important")))
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(sel, "publicTransport", colorPublicTransport());
 				sorted.add(hullFeature);
@@ -430,6 +432,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			extended.put("frequencies", freqs);
 		}	
 		
+		System.out.println(sorted.size() + " results");
 		return returnGeoJson(sorted, extended );
 	}
 
