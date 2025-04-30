@@ -38,6 +38,17 @@ import at.qop.qoplib.router.r5pvs.R5PvsClient.TableResult;
 
 public class R5PvsClient {
 
+	public R5PvsClient(boolean iv) {
+		super();
+		this.iv = iv;
+	}
+
+	public R5PvsClient() {
+		this(false);
+	}
+
+	private final boolean iv;
+	
 	private static ObjectMapper om = new ObjectMapper();
 
 	public static class TripLeg {
@@ -121,7 +132,7 @@ public class R5PvsClient {
 		
 		StringBuilder urlSb = new StringBuilder();
 		urlSb.append(baseUrl(mode));
-		urlSb.append("/single");
+		urlSb.append("/single" + (iv ? "IV" : ""));
 
 
 		long t_start = System.currentTimeMillis();
