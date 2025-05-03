@@ -239,6 +239,11 @@ $("#layersSelect").on('change', function() {
 	showCat();
 });
 
+$("#modesSelect").on('change', function() {
+	reset();
+	showCat();
+});
+
 function baseUrl() {
 	var develMode = window.location.host.includes("5173");
 	if (develMode) {
@@ -266,9 +271,18 @@ function authParams() {
 function getUrl() {
 	const sel = selCat();
 	
+	// Get the select element
+	var dnd = document.querySelector('#modesSelect');
+
+	// Get all selected values
+	var selectedModes = Array.from(dnd.options) // Convert options to an array
+	    .filter(option => option.selected)      // Filter selected options
+	    .map(option => option.value); 
+	
 	const url = baseUrl() + '/qop/rest/api/traveltime_to_pois?'
 		+ `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
 		+ (analysisMode() ? `&analysis_id=standort1` : '')
+		+ '&modes='+ selectedModes.join()
 		+ '&routingResultsAsProperties=true'
 		+ `&lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
 		+ `&radius_meters=${$('#radius_meters').val()}`

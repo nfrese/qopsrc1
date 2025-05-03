@@ -41,12 +41,12 @@ public abstract class QOPRestApiBase {
 		return OBJECT_MAPPER;
 	}
 
-	protected ResponseEntity<?> returnGeoJson(List<? extends SimpleFeature> outFeatures) throws JsonProcessingException 
+	protected ResponseEntity<String> returnGeoJson(List<? extends SimpleFeature> outFeatures) throws JsonProcessingException 
 	{
 		return returnGeoJson(outFeatures, null);
 	}	
 	
-	protected ResponseEntity<?> returnGeoJson(List<? extends SimpleFeature> outFeatures, Map<String,Object> extended) throws JsonProcessingException {
+	protected ResponseEntity<String> returnGeoJson(List<? extends SimpleFeature> outFeatures, Map<String,Object> extended) throws JsonProcessingException {
 		Map<String,Object> outRoot = new LinkedHashMap<>();
 		outRoot.put("type","FeatureCollection");
 		outRoot.put("features", outFeatures);
@@ -57,7 +57,7 @@ public abstract class QOPRestApiBase {
 		return returnJson(outRoot);
 	}
 
-	protected ResponseEntity<?> returnJson(Object outRoot) throws JsonProcessingException {
+	protected ResponseEntity<String> returnJson(Object outRoot) throws JsonProcessingException {
 		String jsonOut = om().writeValueAsString(outRoot);
 
 		return ResponseEntity.ok()

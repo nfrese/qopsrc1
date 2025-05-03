@@ -102,9 +102,6 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 	private static String colorWalk() {
 		return "#000000";
 	}
-	
-	
-
     
     public static class RoutingResults {
 		private static final double THRES = 15.;
@@ -119,7 +116,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		
 		public TT car = new TT();
 
-		public void set() {
+		public void set(List<String> modes, boolean important) {
 			walk.color=colorWalk();
 			bike.color=colorBike();
 			eBike.color=colorEBike();
@@ -127,21 +124,44 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			car.color = colorCar();
 			
 			eBike.minutes  = Utils.round(bike.minutes / 1.5,2);
-
-			walk.display = walk.minutes <= THRES;
-			bike.display = bike.minutes <= THRES;
-			eBike.display = eBike.minutes <= THRES;
-			publicTransport.display = publicTransport.minutes > 0 && publicTransport.minutes <= THRES;
+			walk.withinLimit = walk.minutes <= THRES;
+			walk.display = walk.withinLimit && walkEnabled(modes);
+			
+			bike.withinLimit = bike.minutes <= THRES;
+			bike.display = bike.withinLimit && bikeEnabled(modes);
+			
+			eBike.withinLimit = eBike.minutes <= THRES;
+			eBike.display = eBike.withinLimit  && eBikeEnabled(modes);
+			
+			publicTransport.withinLimit = publicTransport.minutes > 0 && publicTransport.minutes <= THRES;
+			publicTransport.display = important || (publicTransport.withinLimit && publicTransportEnabled(modes));
 		}
 
 		public boolean disp() {
 			return walk.display || bike.display  || eBike.display || publicTransport.display || car.display;
 		}
-    	
+
     }
+    
+    public static boolean publicTransportEnabled(List<String> modes) {
+		return modes == null || modes.contains("publicTransport");
+	}
+
+    public static boolean eBikeEnabled(List<String> modes) {
+		return modes == null || modes.contains("eBike");
+	}
+
+    public static boolean bikeEnabled(List<String> modes) {
+		return modes == null || modes.contains("bike");
+	}
+
+    public static boolean walkEnabled(List<String> modes) {
+		return modes == null || modes.contains("walk");
+	}
     
     public static class TT {
 		public double minutes;
+		public boolean withinLimit; 
 		public boolean display;    
 		public String color;
     }
@@ -155,6 +175,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="radius_meters", required = false) Double radius,
 			@RequestParam(name="poi_table") String[] poiTables,
 			@RequestParam(name="cat_id", required = false) List<String> cat,
+			@RequestParam(name="modes", required = false) List<String> modes,
+			@RequestParam(name="text_filter", required = false) String textFilter,
 			@RequestParam(name="analysis_id", required = false) String analysisId,
 			@RequestParam(name="provide_data_url", required = false, defaultValue = "false") boolean provideDataUrl,
 			@RequestParam(name="routingResultsAsProperties", required = false, defaultValue = "false") boolean routingResultsAsProperties
@@ -236,12 +258,12 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				destinations[i] = new LonLat(targetPoint.getX(), targetPoint.getY());
 			}
 
-			ModeEnum[] modes = new  ModeEnum[] {ModeEnum.foot, ModeEnum.bike, ModeEnum.car};
+			ModeEnum[] modesEn = new  ModeEnum[] {ModeEnum.foot, ModeEnum.bike, ModeEnum.car};
 			double[][] time = new double[n][4];
 			
 			try {
-				for (int j = 0; j < modes.length; j++) {
-					double[][] r = router.table(modes[j], sources, destinations);
+				for (int j = 0; j < modesEn.length; j++) {
+					double[][] r = router.table(modesEn[j], sources, destinations);
 					for (int i = 0; i < n; i++) {
 						double timeMinutes = r[0][i] / 60;  // minutes
 						time[i][j] = ((double)Math.round(timeMinutes * 100)) / 100;  // round 2 decimal places 
@@ -321,7 +343,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				outFeature.routingResults.bike.minutes = time[cnt][1];
 				outFeature.routingResults.car.minutes = time[cnt][2];
 				outFeature.routingResults.publicTransport.minutes = time[cnt][3];
-				outFeature.routingResults.set();
+				outFeature.routingResults.set(modes, important(outFeature));
 				
 				if (routingResultsAsProperties) {
 					outFeature.properties.put("routingResults",outFeature.routingResults);
@@ -334,7 +356,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		}
 		
 		List<SimpleFeature> sorted = outFeatures.stream()
-				.filter(f -> f.routingResults.disp() || Boolean.TRUE.equals(f.properties.get("important")))
+				.filter(f -> f.routingResults.disp())
 				.sorted((f,g) -> new Double(f.routingResults.bike.minutes).compareTo(g.routingResults.bike.minutes))
 				.collect(Collectors.toList());
 		
@@ -350,38 +372,45 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			
 			extended = new LinkedHashMap<>();
 			
+			if (walkEnabled(modes))
 			{
 				List<Feature> sel = sorted.stream()
 						.filter(f -> f instanceof Feature)
 						.map(f -> (Feature)f)
-						.filter(f -> f.routingResults.walk.display)
+						.filter(f -> f.routingResults.walk.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(sel, "walk", colorWalk());
 				sorted.add(hullFeature);
 			}
+			
+			if (bikeEnabled(modes))
 			{
 				List<Feature> sel = sorted.stream()
 						.filter(f -> f instanceof Feature)
 						.map(f -> (Feature)f)
-						.filter(f -> f.routingResults.bike.display)
+						.filter(f -> f.routingResults.bike.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(sel, "bike", colorBike());
 				sorted.add(hullFeature);
 			}
+			
+			if (eBikeEnabled(modes))
 			{
 				List<Feature> sel = sorted.stream()
 						.filter(f -> f instanceof Feature)
 						.map(f -> (Feature)f)
-						.filter(f -> f.routingResults.eBike.display)
+						.filter(f -> f.routingResults.eBike.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(sel, "ebike", colorEBike());
 				sorted.add(hullFeature);
 			}
+			
+			if (publicTransportEnabled(modes))
 			{
 				List<Feature> sel = sorted.stream()
 						.filter(f -> f instanceof Feature)
 						.map(f -> (Feature)f)
-						.filter(f -> f.routingResults.publicTransport.display)
+						.filter(f -> f.routingResults.publicTransport.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(sel, "publicTransport", colorPublicTransport());
 				sorted.add(hullFeature);
@@ -434,6 +463,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		
 		System.out.println(sorted.size() + " results");
 		return returnGeoJson(sorted, extended );
+	}
+
+	private boolean important(Feature f) {
+		return Boolean.TRUE.equals(f.properties.get("important"));
 	}
 
 	private SimpleFeature addConvexHullFeature(List<Feature> sorted, String mode, String color)
@@ -651,7 +684,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			feature.geometry=jo;
 			outFeatures.add(feature);
 		}
-		return returnGeoJson(outFeatures);
+		ResponseEntity<String> re = returnGeoJson(outFeatures);
+		return re;
     }
     
 }
