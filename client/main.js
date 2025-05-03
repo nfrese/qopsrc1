@@ -177,6 +177,10 @@ $('#radius_meters').on('change', function() {
 	reset();
 });
 
+$('#text_filter').on('change', function() {
+	reset();
+});
+
 function htmltable(obj) {
 	var html = '<table>';
 	for (const [key, value] of Object.entries(obj)) {
@@ -236,12 +240,12 @@ $.get(baseUrl() + "/qop/rest/api/read?table=qop.pvs_category" + authParams(),
 
 $("#layersSelect").on('change', function() {
 	reset();
-	showCat();
+	//showCat();
 });
 
 $("#modesSelect").on('change', function() {
 	reset();
-	showCat();
+	//showCat();
 });
 
 function baseUrl() {
@@ -278,11 +282,14 @@ function getUrl() {
 	var selectedModes = Array.from(dnd.options) // Convert options to an array
 	    .filter(option => option.selected)      // Filter selected options
 	    .map(option => option.value); 
+		
+	var textFilter = $('#text_filter').val();
 	
 	const url = baseUrl() + '/qop/rest/api/traveltime_to_pois?'
 		+ `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
 		+ (analysisMode() ? `&analysis_id=standort1` : '')
 		+ '&modes='+ selectedModes.join()
+		+ '&text_filter=' + textFilter
 		+ '&routingResultsAsProperties=true'
 		+ `&lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
 		+ `&radius_meters=${$('#radius_meters').val()}`

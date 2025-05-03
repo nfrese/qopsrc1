@@ -1,12 +1,13 @@
 package at.qop.ws;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vividsolutions.jts.geom.Geometry;
-
-import at.qop.ws.QOPRestApiRoute.RoutingResults;
 
 public class SimpleFeature {
 	public String type="Feature";
@@ -14,4 +15,30 @@ public class SimpleFeature {
 	public Map<String,Object> properties = new LinkedHashMap<>();
 	public JsonNode geometry;
 	public transient Geometry geom_;
+	
+	public boolean containsText(String textFilter) {
+		if (textFilter == null || textFilter.isEmpty())
+		{
+			return true; // no filtering
+		}
+		else
+		{
+			return f(properties.values(), textFilter);
+		}
+	}
+
+	private static boolean f(Collection<?> collection, String textFilter) {
+		for (Object p : collection) {
+			if (p instanceof Map) {
+				boolean fnd = f(((Map<?,?>)p).values(), textFilter);
+				if (fnd) {
+					return true;
+				}
+			} else
+			if (StringUtils.containsIgnoreCase(String.valueOf(p),textFilter)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

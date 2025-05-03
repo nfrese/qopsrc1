@@ -45,7 +45,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
@@ -60,10 +59,8 @@ import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.Utils;
 import at.qop.qoplib.calculation.CRSTransform;
 import at.qop.qoplib.calculation.IRouter;
-import at.qop.qoplib.calculation.LayerTarget;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTableReader;
-import at.qop.qoplib.dbconnector.fieldtypes.DbInt4Field;
 import at.qop.qoplib.dbconnector.fieldtypes.DbTextField;
 import at.qop.qoplib.entities.ModeEnum;
 import at.qop.qoplib.osrmclient.LonLat;
@@ -357,6 +354,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		
 		List<SimpleFeature> sorted = outFeatures.stream()
 				.filter(f -> f.routingResults.disp())
+				.filter(f -> f.containsText(textFilter))
 				.sorted((f,g) -> new Double(f.routingResults.bike.minutes).compareTo(g.routingResults.bike.minutes))
 				.collect(Collectors.toList());
 		
