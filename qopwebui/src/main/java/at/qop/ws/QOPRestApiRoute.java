@@ -163,6 +163,16 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		public String color;
     }
     
+    /*
+     SELECT * FROM qop.v_pvs_all_improved_1 
+   where cat_id='latest' and ((start_timestamp is null and end_timestamp is null)
+   or
+   ((start_timestamp <= (current_date + interval '2 week'))
+   and (end_timestamp is null or (end_timestamp + interval '2 week' >= current_date)))
+   )
+   order by end_timestamp desc
+     */
+    
     @GetMapping("/qop/rest/api/traveltime_to_pois")
 	protected ResponseEntity<?> traveltime(
 			@RequestParam(name="username") String username, 
@@ -174,13 +184,14 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="cat_id", required = false) List<String> cat,
 			@RequestParam(name="modes", required = false) List<String> modes,
 			@RequestParam(name="text_filter", required = false) String textFilter,
+			@RequestParam(name="time_filter", required = false, defaultValue = "standard") String timeFilter,
 			@RequestParam(name="analysis_id", required = false) String analysisId,
 			@RequestParam(name="provide_data_url", required = false, defaultValue = "false") boolean provideDataUrl,
 			@RequestParam(name="routingResultsAsProperties", required = false, defaultValue = "false") boolean routingResultsAsProperties
 			
 			
 		) throws ServletException, IOException, SQLException {
-    	boolean isStandort1Analysis = "standort1".equals(analysisId);
+    	boolean isStandortAnalysis = analysisId != null;
 		
 		Config cfg = checkAuth(username, password);
 		boolean enableR5 = enableR5();
@@ -203,10 +214,24 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		for (String poiTable : poiTables) {
 			
 			DbTableReader reader = new DbTableReader();
-			String sql = "SELECT * FROM " + poiTable + " WHERE " + stIntersectsSql;
-			if (isStandort1Analysis)
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT * FROM " + poiTable + " WHERE " + stIntersectsSql);
+			
+			switch (timeFilter) {
+			case ("standard") :
+				sql.append(" AND (start_timestamp is null or start_timestamp <= (current_date + interval '2 week'))");
+				sql.append(" AND (end_timestamp is null or (end_timestamp >= current_date))");	
+				break;
+			case ("more") :
+					sql.append(" AND (start_timestamp is null or start_timestamp <= (current_date + interval '2 week'))");
+					break;
+			case ("all") :
+				break;
+			}
+			
+			if (isStandortAnalysis)
 			{
-				sql += " AND cat_id is not null and cat_id != 'latest'";
+				sql.append(" AND cat_id is not null and cat_id != 'latest'");
 			}
 			else 
 			{
@@ -218,28 +243,28 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				if (!cat.contains("nofilter") && cat.size() > 0) {
 
 					if (cat.contains("without")) {
-						sql += " AND cat_id is null";
+						sql.append(" AND cat_id is null");
 					}
 					else if (cat.contains("with")) {
-						sql += " AND cat_id is not null";
+						sql.append(" AND cat_id is not null");
 					} else {
-						sql += " AND cat_id IN ("; 
+						sql.append(" AND cat_id IN ("); 
 						int cnt=0;
 						for (String ca : cat)
 						{
 							if (cnt > 0) {
-								sql += ", "; 
+								sql.append(", "); 
 							}
-							sql += escSqlStr(ca);
+							sql.append(escSqlStr(ca));
 							cnt++;
 						}
-						sql += " )"; 
+						sql.append(" )"); 
 					}
 				}
 			}
 			
 			LookupSessionBeans.genericDomain().readTable(
-					sql, reader );
+					sql.toString(), reader );
 			
 			DbTextField fid = reader.table.textField("fid");
 		
@@ -359,9 +384,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				.collect(Collectors.toList());
 		
 		Map<String, Object> extended = null;
-		if (isStandort1Analysis)
+		if (isStandortAnalysis)
 		{
-			String sqlCat = "SELECT * FROM qop.pvs_category";
+			
+			String sqlCat = "SELECT * FROM qop.v_pvs_category_"+ analysisId + "";
 			List<SimpleFeature> catF = readInt("qop.pvs_category", sqlCat);
 			
 			Map<String, String> catColorMap = catF.stream().collect(Collectors.toMap(f -> (String)f.properties.get("id"), f -> (String)f.properties.get("color")));

@@ -10,10 +10,16 @@
         <label>Category/Analysis:</label> <select id="layersSelect"></select>
         <label>Mode:</label> 
         <select id="modesSelect" multiple>
-         	<option value="walk">walk</option>
-  			<option value="bike">bike</option>
-  			<option value="eBike">eBike</option>
-  			<option value="publicTransport">publicTransport</option>
+         	<option value="walk" selected>walk</option>
+  			<option value="bike" selected>bike</option>
+  			<option value="eBike" selected>eBike</option>
+  			<option value="publicTransport" selected>publicTransport</option>
+        </select>
+        <label>Time Filter:</label> 
+        <select id="timeFilterSelect" multiple>
+         	<option value="standard" selected>standard</option>
+  			<option value="more">more</option>
+  			<option value="all">all</option>
         </select>
         <label>Text Filter:</label><input type="text" id="text_filter" name="text_filter"/>
         <label>Search-radius (m):</label><input type="number" id="radius_meters" name="radius_meters" min="10" max="30000" />

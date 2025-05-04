@@ -205,7 +205,7 @@ $(document).ready(function() {
 })
 
 
-$.get(baseUrl() + "/qop/rest/api/read?table=qop.pvs_category" + authParams(),
+$.get(baseUrl() + "/qop/rest/api/read?table=qop.v_pvs_category_main" + authParams(),
 	function(data) {
 		let select = document.querySelector("#layersSelect")
 		for (let elt of data.features) {
@@ -248,6 +248,11 @@ $("#modesSelect").on('change', function() {
 	//showCat();
 });
 
+$("#timeFilterSelect").on('change', function() {
+	reset();
+	//showCat();
+});
+
 function baseUrl() {
 	var develMode = window.location.host.includes("5173");
 	if (develMode) {
@@ -285,11 +290,14 @@ function getUrl() {
 		
 	var textFilter = $('#text_filter').val();
 	
+	var timeFilter = $('#timeFilterSelect').val();
+	
 	const url = baseUrl() + '/qop/rest/api/traveltime_to_pois?'
 		+ `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
 		+ (analysisMode() ? `&analysis_id=standort1` : '')
 		+ '&modes='+ selectedModes.join()
 		+ '&text_filter=' + textFilter
+		+ '&time_filter=' + timeFilter
 		+ '&routingResultsAsProperties=true'
 		+ `&lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
 		+ `&radius_meters=${$('#radius_meters').val()}`
