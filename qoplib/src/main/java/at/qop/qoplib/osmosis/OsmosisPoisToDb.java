@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,6 +19,10 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Polygon;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.NodeContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.RelationContainer;
@@ -58,6 +63,7 @@ public class OsmosisPoisToDb implements Sink {
 		filter.add("tourism=artwork");
 		filter.add("tourism=guest_house");
 		filter.add("leisure=fitness_station");
+		filter.add("emergency=ambulance_station");
 	}
 	
 	private ObjectMapper om = new ObjectMapper();
@@ -103,7 +109,41 @@ public class OsmosisPoisToDb implements Sink {
     public void initialize(Map<String, Object> arg0) {
     }
  
-	private Map<Long,Way> collectedWays = new HashMap<>();
+	private static GeometryFactory gf = new GeometryFactory();
+	
+	public static class WayKeep {
+		Way way;
+		List<Coordinate> shell = new ArrayList<Coordinate>();
+
+		public void addNode(Node n) {
+			shell.add(new Coordinate(n.getLongitude(), n.getLatitude()));
+		}
+		
+		public Coordinate getCentroid() {
+			if (shell.size() < 1)
+			{
+				throw new RuntimeException("no coords for way " + way);
+			}
+			else if (shell.size() < 2)
+			{
+				return shell.get(0);
+			}
+			else if (shell.size() < 3)
+			{
+				LineString ls = gf.createLineString(shell.toArray(new Coordinate[shell.size()]));
+				return ls.getCentroid().getCoordinate();
+			}
+			else
+			{
+				shell.add(shell.get(0));
+				Polygon poly = gf.createPolygon(shell.toArray(new Coordinate[shell.size()]));
+				return poly.getCentroid().getCoordinate();
+			}
+		}
+		
+	}
+	
+	private Map<Long,WayKeep> collectedWays = new HashMap<>();
 	public int pass = 1;
 	
     @Override
@@ -128,10 +168,14 @@ public class OsmosisPoisToDb implements Sink {
           Way w = ((WayContainer) entityContainer).getEntity();
           String mainKey = checkType(w);
           if (mainKey != null) {
+  			WayKeep wk = new WayKeep();
+  			wk.way = w;
+  			
     		Iterator<WayNode> it = w.getWayNodes().iterator();
-    		if (it.hasNext()) {
+    		while (it.hasNext()) {
     			WayNode wn = it.next();
-    			collectedWays.put(wn.getNodeId(), w);
+    			
+    			collectedWays.put(wn.getNodeId(), wk);
     		}
           }
         }
@@ -141,16 +185,10 @@ public class OsmosisPoisToDb implements Sink {
     	
         if (entityContainer instanceof NodeContainer) {
           Node n = ((NodeContainer) entityContainer).getEntity();
-          Way w = collectedWays.get(n.getId());
+          WayKeep w = collectedWays.get(n.getId());
           if (w != null)
           {
-          	  String mainKey = checkType(w);
-
-        	  Map<String,String> tagsMap = tagsMap(w.getTags());
-        	  if (mainKey != null) {
-        		  String mainValue = tagsMap.get(mainKey);
-        		  writeInsert(n, mainKey, tagsMap, mainValue);
-        	  }
+        	  w.addNode(n);
           }
           else 
           {
@@ -169,17 +207,48 @@ public class OsmosisPoisToDb implements Sink {
         }
     }
 
+    public void postProcess() 
+    {
+    	for (WayKeep wk : new HashSet<WayKeep>(collectedWays.values()))
+    	{
+    		String mainKey = checkType(wk.way);
+
+    		Map<String,String> tagsMap = tagsMap(wk.way.getTags());
+    		if (mainKey != null) {
+    			String mainValue = tagsMap.get(mainKey);
+    			writeInsert(wk, mainKey, tagsMap, mainValue);
+    		}
+    	}
+    	ow.flush();
+    }
+    
 	private void writeInsert(Node n, String mainKey, Map<String, String> tagsMap, String mainValue) {
 		String json = tagsToJson(tagsMap);
 		  ow.print("INSERT INTO qop.pvs_osm_poi ");
-		  ow.print("(nodeid, mainkey, mainval, \"name\", tags, geom)");
+		  ow.print("(nodeid, mainkey, mainval, \"name\", tags, geom, osm_element)");
 		  ow.print(" VALUES (");
 		  ow.print(n.getId() + ", ");
 		  ow.print(writeStr(mainKey)+ ", ");
 		  ow.print(writeStr(mainValue)+ ", ");
 		  ow.print(writeStr(tagsMap.get("name"))+ ", ");
 		  ow.print(writeStr(json )+ "::jsonb, ");
-		  ow.print("ST_GeomFromText('" + geom(n) + "')");
+		  ow.print("ST_GeomFromText('" + geom(n) + "'), ");
+		  ow.print("'osm:node'");
+		  ow.println(");");
+	}
+	
+	private void writeInsert(WayKeep wk, String mainKey, Map<String, String> tagsMap, String mainValue) {
+		String json = tagsToJson(tagsMap);
+		  ow.print("INSERT INTO qop.pvs_osm_poi ");
+		  ow.print("(nodeid, mainkey, mainval, \"name\", tags, geom, osm_element)");
+		  ow.print(" VALUES (");
+		  ow.print(wk.way.getId() + ", ");
+		  ow.print(writeStr(mainKey)+ ", ");
+		  ow.print(writeStr(mainValue)+ ", ");
+		  ow.print(writeStr(tagsMap.get("name"))+ ", ");
+		  ow.print(writeStr(json )+ "::jsonb, ");
+		  ow.print("ST_GeomFromText('" + geom(wk) + "')"+ ", ");
+		  ow.print("'osm:way'");
 		  ow.println(");");
 	}
 
@@ -215,6 +284,11 @@ public class OsmosisPoisToDb implements Sink {
 	private String geom(Node n) {
 		return "POINT(" + n.getLongitude() + " " + n.getLatitude() + ")";
 	}
+	
+	private String geom(WayKeep wk) {
+		Coordinate centroid = wk.getCentroid();
+		return "POINT(" +centroid.x + " " + centroid.y + ")";
+	}
 
 	private String writeStr(String s) {
 		if (s == null) return null;
@@ -242,6 +316,7 @@ public class OsmosisPoisToDb implements Sink {
     public static void importAmenitys(String filename, String outputfilename, boolean createTable ) throws FileNotFoundException {
         OsmosisPoisToDb sink = new OsmosisPoisToDb(outputfilename, createTable);
         {
+        	System.out.println("pass " + sink.pass);
         	InputStream inputStream = new FileInputStream(filename);
         	OsmosisReader reader = new OsmosisReader(inputStream);
         	reader.setSink(sink);
@@ -249,11 +324,14 @@ public class OsmosisPoisToDb implements Sink {
         }
         sink.pass = 2;
         {
+        	System.out.println("pass " + sink.pass);
         	InputStream inputStream = new FileInputStream(filename);
         	OsmosisReader reader = new OsmosisReader(inputStream);
         	reader.setSink(sink);
         	reader.run();
         }
+        System.out.println("postprocess");
+        sink.postProcess();
         
     }
 
