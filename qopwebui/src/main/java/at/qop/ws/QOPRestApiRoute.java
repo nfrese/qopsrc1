@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -185,19 +186,27 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="modes", required = false) List<String> modes,
 			@RequestParam(name="text_filter", required = false) String textFilter,
 			@RequestParam(name="time_filter", required = false, defaultValue = "standard") String timeFilter,
-			@RequestParam(name="analysis_id", required = false) String analysisId,
+			@RequestParam(name="analysis_id", required = false, defaultValue = "main") String analysisId,
 			@RequestParam(name="provide_data_url", required = false, defaultValue = "false") boolean provideDataUrl,
 			@RequestParam(name="routingResultsAsProperties", required = false, defaultValue = "false") boolean routingResultsAsProperties
 			
 			
 		) throws ServletException, IOException, SQLException {
-    	boolean isStandortAnalysis = analysisId != null;
+    	boolean isStandortAnalysis = analysisId != null && !"main".equals(analysisId);
 		
 		Config cfg = checkAuth(username, password);
 		boolean enableR5 = enableR5();
 		
-		if (radius == null) {
+		String sqlCat = "SELECT * FROM qop.v_pvs_category_"+ analysisId + "";
+		List<SimpleFeature> catF = readInt("qop.pvs_category", sqlCat);
+		
+		Set<String> catIds = catF.stream().map(c -> (String)c.properties.get("id")).collect(Collectors.toSet());
+		
+		if (radius == null || radius < 0) {
 			radius = 15000.0;
+			if ("standort_walkability".equals(analysisId)) {
+				radius = 3000.0;
+			}
 		}
 		
 		Point start = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lng,start_lat));
@@ -231,7 +240,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			
 			if (isStandortAnalysis)
 			{
-				sql.append(" AND cat_id is not null and cat_id != 'latest'");
+				sql.append(" AND cat_id IN (" + catIds.stream().map(c -> "'" + c + "'").collect(Collectors.joining(",")) + ") ");
 			}
 			else 
 			{
@@ -246,7 +255,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						sql.append(" AND cat_id is null");
 					}
 					else if (cat.contains("with")) {
-						sql.append(" AND cat_id is not null");
+						sql.append(" AND cat_id IN (" + catIds.stream().map(c -> "'" + c + "'").collect(Collectors.joining(",")) + ") ");
 					} else {
 						sql.append(" AND cat_id IN ("); 
 						int cnt=0;
@@ -387,9 +396,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		if (isStandortAnalysis)
 		{
 			
-			String sqlCat = "SELECT * FROM qop.v_pvs_category_"+ analysisId + "";
-			List<SimpleFeature> catF = readInt("qop.pvs_category", sqlCat);
-			
+
 			Map<String, String> catColorMap = catF.stream().collect(Collectors.toMap(f -> (String)f.properties.get("id"), f -> (String)f.properties.get("color")));
 			Map<String, String> catLabelMap = catF.stream().collect(Collectors.toMap(f -> (String)f.properties.get("id"), f -> (String)f.properties.get("label")));
 

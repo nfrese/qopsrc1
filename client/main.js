@@ -67,7 +67,7 @@ if (urlParams.get("radius_meters") != null ) {
 	$('#radius_meters').val(parseInt(urlParams.get("radius_meters")));
 }
 else {
-	$('#radius_meters').val(15000);
+	$('#radius_meters').val(-1);
 }
 
 const featureLayer = new VectorLayer({
@@ -223,15 +223,15 @@ $.get(baseUrl() + "/qop/rest/api/read?table=qop.v_pvs_category_main" + authParam
 		}
 		{
 			let option = document.createElement("option");
-			option.text = "STANDORT PIE COUNTS";
+			option.text = "STANDORT 1";
 			option.value = "standort1";
-			option.selected = false;
+			option.selected = true;
 			select.appendChild(option);
 		}
 		{
 			let option = document.createElement("option");
-			option.text = "STANDORT PIE RATED";
-			option.value = "standort2";
+			option.text = "STANDORT WALKABILITY";
+			option.value = "standort_walkability";
 			option.selected = true;
 			select.appendChild(option);
 		}
@@ -294,7 +294,7 @@ function getUrl() {
 	
 	const url = baseUrl() + '/qop/rest/api/traveltime_to_pois?'
 		+ `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
-		+ (analysisMode() ? `&analysis_id=standort1` : '')
+		+ (analysisMode() ? `&analysis_id=${selCat()}` : '')
 		+ '&modes='+ selectedModes.join()
 		+ '&text_filter=' + textFilter
 		+ '&time_filter=' + timeFilter
@@ -326,7 +326,7 @@ function showChart() {
 	{
 		return;
 	}
-	const ana2 = selCat() == 'standort2';
+	const ana2 = true;
 	
 	$('#chartdiv1').show();
 

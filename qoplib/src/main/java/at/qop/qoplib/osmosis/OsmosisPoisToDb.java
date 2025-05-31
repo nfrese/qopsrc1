@@ -46,10 +46,11 @@ public class OsmosisPoisToDb implements Sink {
 		filter.add("amenity=*");
 		filter.add("office=*");
 		filter.add("shop=*");
+		filter.add("leisure=*");
 		filter.add("highway=footway");	
 		filter.add("natural=tree");
-		filter.add("leisure=park");
 		filter.add("bridge=yes");
+		filter.add("historic=castle");
 		filter.add("historic=memorial");
 		filter.add("historic=wayside_shrine");
 		filter.add("landuse=cemetery");
@@ -59,10 +60,8 @@ public class OsmosisPoisToDb implements Sink {
 		filter.add("landuse=orchard");
 		filter.add("natural=scrub");
 		filter.add("landuse=forest");
-		filter.add("leisure=pitch");
 		filter.add("tourism=artwork");
 		filter.add("tourism=guest_house");
-		filter.add("leisure=fitness_station");
 		filter.add("emergency=ambulance_station");
 	}
 	
