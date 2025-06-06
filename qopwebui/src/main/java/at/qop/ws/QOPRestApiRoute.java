@@ -538,8 +538,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream());
 
 		writer.write(jsonOut+"");
-		System.out.println("ai-filter request (" + sorted.size() 
-				+ " features): " + jsonOut);
+		//System.out.println("ai-filter request (" + sorted.size() + " features): " + jsonOut);
 		writer.flush();
 
 		try (InputStream is= con.getInputStream()) {
@@ -547,7 +546,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 
 			InputStreamReader ir = new InputStreamReader(is);
 			JsonNode jn = om().readTree(ir);
-			System.out.println("ai-filter response : " + jn);
+			//System.out.println("ai-filter response : " + jn);
 			long t_finished = System.currentTimeMillis();
 
 			System.out.println("ai-filter: (" + sorted.size() 
@@ -560,7 +559,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			{
 				collectedIds.add(n.at("/id").asText());
 			}
-			System.out.println(collectedIds);
+			System.out.println("ai-filter collectedIds: " + collectedIds);
 			writer.close();
 			return collectedIds;
 			
