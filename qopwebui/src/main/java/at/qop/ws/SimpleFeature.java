@@ -41,4 +41,14 @@ public class SimpleFeature {
 		}
 		return false;
 	}
+
+	public SimpleFeature cloneIt() {
+		SimpleFeature clone = new SimpleFeature();
+		clone.id = id;
+		clone.type = type;
+		clone.geom_ = geom_;
+		clone.geometry = geometry != null ? geometry.deepCopy() : null;
+		clone.properties.putAll(properties);
+		return clone;
+	}
 }

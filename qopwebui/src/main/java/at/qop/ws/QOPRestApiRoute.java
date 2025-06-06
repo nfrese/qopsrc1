@@ -598,7 +598,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			{ 
 				continue;
 			}
-			
+
 			SimpleFeature routeResult = new SimpleFeature();
 			String modName;
 			String color;
@@ -613,25 +613,25 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				else {
 					modName="car"; color=colorCar();
 				}
-			
-			break;
+
+				break;
 			default : modName="unexpected " + mode; color="#a0a0a0";
 			}
-			
+
 			if (modes != null && !modes.isEmpty() && !modes.contains(modName)
 					&& !(modName.equals("bike") && modes.contains("eBike"))) {
 				continue;
 			}
-			
+
 			String idStr = idStr0 +  " " + mode;
-			
+
 			routeResult.id=UUID.nameUUIDFromBytes(idStr.getBytes()).toString();
-			
+
 			routeResult.properties.put("mode", modName);
 			routeResult.properties.put("stroke", color);
 			routeResult.properties.put("stroke-width", 3);
 			routeResult.properties.put("stroke-opacity", 1);
-		
+
 
 			try {
 				RouteResult result = router.route(mode, points);
@@ -639,15 +639,31 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				LineString geom = CRSTransform.gfWGS84.createLineString(list.toArray(new Coordinate[list.size()]));
 				JsonNode jo = geomToGeoJson(geom);
 				routeResult.geometry = jo;
-				
+
 				routeResult.properties.put("distanceMeters", result.distanceMeters);
 				routeResult.properties.put("durationMinutes", result.durationSeconds / 60);
+
+
+				if (mode == ModeEnum.bike) {
+					if (modes.contains("eBike")) {
+						SimpleFeature eBikeResult = routeResult.cloneIt();
+						eBikeResult.id=UUID.nameUUIDFromBytes((idStr+"eBike").getBytes()).toString();
+						eBikeResult.properties.put("mode", "eBike");
+						eBikeResult.properties.put("stroke", colorEBike());
+						routeResult.properties.put("durationMinutes", result.durationSeconds*.66 / 60);
+						outFeatures.add(eBikeResult);
+					}
+					if (modes.contains("bike")) {
+						outFeatures.add(routeResult);
+					}
+				}
+				else
+				{
+					outFeatures.add(routeResult);
+				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			
-
-			outFeatures.add(routeResult);
 		}
 		
 		boolean publicTransportEnabled = modes == null || modes.isEmpty() || modes.contains("publicTransport");

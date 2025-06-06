@@ -151,11 +151,12 @@ map.on('click', function(evt) {
 
 		$('#details').html( htmltable(feature.getProperties()));
 
-		if (feature.get('icon')) {
+		if (feature) {
 
 			const routeUrl = baseUrl() + '/qop/rest/api/route?'
 				+ `lat=${window.targetCoord[1]}&lng=${window.targetCoord[0]}`
 				+ `&dest_lat=${poiCoord[1]}&dest_lng=${poiCoord[0]}`
+				+ '&modes='+ selectedModes().join()
 				+ authParams();
 
 			routeLayer.setSource(
@@ -271,6 +272,17 @@ function analysisMode() {
 	return selCat().startsWith('standort');
 }
 
+function selectedModes() {
+	// Get the select element
+	var dnd = document.querySelector('#modesSelect');
+
+	// Get all selected values
+	var selectedModes = Array.from(dnd.options) // Convert options to an array
+	    .filter(option => option.selected)      // Filter selected options
+	    .map(option => option.value); 
+	return selectedModes;
+}
+
 function authParams() {
 	const urlParams = new URLSearchParams(window.location.search);
 	
@@ -280,13 +292,7 @@ function authParams() {
 function getUrl() {
 	const sel = selCat();
 	
-	// Get the select element
-	var dnd = document.querySelector('#modesSelect');
 
-	// Get all selected values
-	var selectedModes = Array.from(dnd.options) // Convert options to an array
-	    .filter(option => option.selected)      // Filter selected options
-	    .map(option => option.value); 
 		
 	var textFilter = $('#text_filter').val();
 	
@@ -295,7 +301,7 @@ function getUrl() {
 	const url = baseUrl() + '/qop/rest/api/traveltime_to_pois?'
 		+ `provide_data_url=true&poi_table=qop.v_pvs_all&cat_id=${sel}`
 		+ (analysisMode() ? `&analysis_id=${selCat()}` : '')
-		+ '&modes='+ selectedModes.join()
+		+ '&modes='+ selectedModes().join()
 		+ '&text_filter=' + textFilter
 		+ '&time_filter=' + timeFilter
 		+ '&routingResultsAsProperties=true'
