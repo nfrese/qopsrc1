@@ -150,8 +150,12 @@ public class Utils {
 	public static String readResourceToString(String resPath) {
 		InputStream resourceAsStream = Utils.class.getResourceAsStream(resPath);
 		if (resourceAsStream == null) throw new RuntimeException("Utils.class.getResourceAsStream(" + resPath +") failed");
-		String str = new Scanner(resourceAsStream, "UTF-8").useDelimiter("\\A").next();
+		String str = readEntireStream(resourceAsStream);
 		return str;
+	}
+
+	public static String readEntireStream(InputStream resourceAsStream) {
+		return new Scanner(resourceAsStream, "UTF-8").useDelimiter("\\A").next();
 	}
 
 	public static Geometry convexHull(List<Geometry> collectGeoms, GeometryFactory gf) {

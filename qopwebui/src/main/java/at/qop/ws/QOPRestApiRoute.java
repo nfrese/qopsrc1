@@ -20,8 +20,16 @@
 
 package at.qop.ws;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -29,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
@@ -386,65 +396,78 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			}
 		}
 		
+		String aiFilterPostUrl = aiFilterPostUrl();
+		
 		List<SimpleFeature> sorted = outFeatures.stream()
 				.filter(f -> f.routingResults.disp())
-				.filter(f -> f.containsText(textFilter))
 				.sorted((f,g) -> new Double(f.routingResults.bike.minutes).compareTo(g.routingResults.bike.minutes))
 				.collect(Collectors.toList());
+		
+		List<SimpleFeature> filtered;
+		
+		if (textFilter == null) {
+			filtered = sorted;
+		}
+		else {
+			if (aiFilterPostUrl == null) {
+				filtered = sorted.stream().filter(f -> f.containsText(textFilter)).collect(Collectors.toList());
+			} else {
+				Set<String> ids = aiFilter(textFilter, sorted, aiFilterPostUrl);
+				filtered = sorted.stream().filter(f -> ids.contains(f.id)).collect(Collectors.toList());
+			}
+		}
 		
 		Map<String, Object> extended = null;
 		if (isStandortAnalysis)
 		{
-			
 
 			Map<String, String> catColorMap = catF.stream().collect(Collectors.toMap(f -> (String)f.properties.get("id"), f -> (String)f.properties.get("color")));
 			Map<String, String> catLabelMap = catF.stream().collect(Collectors.toMap(f -> (String)f.properties.get("id"), f -> (String)f.properties.get("label")));
-
 			
 			extended = new LinkedHashMap<>();
 			
 			if (walkEnabled(modes))
 			{
-				List<Feature> sel = sorted.stream()
+				List<Feature> sel = filtered.stream()
 						.filter(f -> f instanceof Feature)
 						.map(f -> (Feature)f)
 						.filter(f -> f.routingResults.walk.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(sel, "walk", colorWalk());
-				sorted.add(hullFeature);
+				filtered.add(hullFeature);
 			}
 			
 			if (bikeEnabled(modes))
 			{
-				List<Feature> sel = sorted.stream()
+				List<Feature> sel = filtered.stream()
 						.filter(f -> f instanceof Feature)
 						.map(f -> (Feature)f)
 						.filter(f -> f.routingResults.bike.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(sel, "bike", colorBike());
-				sorted.add(hullFeature);
+				filtered.add(hullFeature);
 			}
 			
 			if (eBikeEnabled(modes))
 			{
-				List<Feature> sel = sorted.stream()
+				List<Feature> sel = filtered.stream()
 						.filter(f -> f instanceof Feature)
 						.map(f -> (Feature)f)
 						.filter(f -> f.routingResults.eBike.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(sel, "ebike", colorEBike());
-				sorted.add(hullFeature);
+				filtered.add(hullFeature);
 			}
 			
 			if (publicTransportEnabled(modes))
 			{
-				List<Feature> sel = sorted.stream()
+				List<Feature> sel = filtered.stream()
 						.filter(f -> f instanceof Feature)
 						.map(f -> (Feature)f)
 						.filter(f -> f.routingResults.publicTransport.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(sel, "publicTransport", colorPublicTransport());
-				sorted.add(hullFeature);
+				filtered.add(hullFeature);
 			}
 			
 			//extended.put("isochrone15m", jo);
@@ -458,7 +481,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				}
 			}
 			
-			for (SimpleFeature f : sorted)
+			for (SimpleFeature f : filtered)
 			{
 				String catId = (String) f.properties.get("cat_id");
 				if (catId != null)
@@ -492,8 +515,62 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			extended.put("frequencies", freqs);
 		}	
 		
-		System.out.println(sorted.size() + " results");
-		return returnGeoJson(sorted, extended );
+		System.out.println(filtered.size() + " results");
+		return returnGeoJson(filtered, extended );
+	}
+
+	private Set<String> aiFilter(String textFilter, List<SimpleFeature> sorted, String aiFilterPostUrl)
+			throws JsonProcessingException, MalformedURLException, IOException {
+		Map<String,Object> outFC = new LinkedHashMap<>();
+		outFC.put("type","FeatureCollection");
+		outFC.put("features", sorted);
+
+		Map<String,Object> outRoot = new LinkedHashMap<>();
+		outRoot.put("text_filter",textFilter);
+		outRoot.put("featureCollection", outFC);
+
+		String jsonOut = om().writeValueAsString(outRoot);
+
+		long t_start = System.currentTimeMillis();
+		URL url = new URL(aiFilterPostUrl);
+		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setDoOutput(true);
+		OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream());
+
+		writer.write(jsonOut+"");
+		System.out.println("ai-filter request (" + sorted.size() 
+				+ " features): " + jsonOut);
+		writer.flush();
+
+		try (InputStream is= con.getInputStream()) {
+			long t_callFinished = System.currentTimeMillis();
+
+			InputStreamReader ir = new InputStreamReader(is);
+			JsonNode jn = om().readTree(ir);
+			System.out.println("ai-filter response : " + jn);
+			long t_finished = System.currentTimeMillis();
+
+			System.out.println("ai-filter: (" + sorted.size() 
+					+ " features)"
+					+ " t_call=" + (t_callFinished - t_start) 
+					+ "ms t_parse="+ (t_finished - t_callFinished) + "ms " + url);
+
+			Set<String> collectedIds = new LinkedHashSet<>();
+			for (JsonNode n : jn.at("/features"))
+			{
+				collectedIds.add(n.at("/id").asText());
+			}
+			System.out.println(collectedIds);
+			writer.close();
+			return collectedIds;
+			
+		}
+		catch (Exception ex)
+		{
+			String body = Utils.readEntireStream(con.getErrorStream());
+			throw new RuntimeException("ai filter problem for " + url +" body = " + body, ex);
+		}
+
 	}
 
 	private boolean important(Feature f) {
@@ -521,6 +598,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 
 	private boolean enableR5() {
 		return "true".equalsIgnoreCase(System.getenv("QOP_ENABLE_R5"));
+	}
+	
+	private String aiFilterPostUrl() {
+		return System.getenv("QOP_AI_FILTER_POST_URL");
 	}
 
 	private String myAddress() {
