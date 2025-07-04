@@ -513,6 +513,11 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			}
 			
 			extended.put("frequencies", freqs);
+			
+			String sqlAna = "SELECT * FROM qop.v_pvs_analysis_"+ analysisId + "";
+			List<SimpleFeature> anas = readInt("qop.v_pvs_analysis", sqlAna);
+			extended.put("analysis", anas);
+			
 		}	
 		
 		System.out.println(filtered.size() + " results");

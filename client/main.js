@@ -30,7 +30,8 @@ function styleMarkerTarget(feature) {
 	if (feature.getGeometry() instanceof Point) {
 		if (feature.get("icon") != null) {
 			var icon = feature.get("icon").replace('.svg', '');
-			var color = feature.get("color").replace('#', '');
+			var colorIn = feature.get("color");
+			var color = colorIn != null ? colorIn.replace('#', '') : '000000';
 			var url = `https://cmbaimg.s3.amazonaws.com/map/icons/${icon}%2Bcircle%2B---${color}%2Bwhite.png`
 
 			return new Style({
