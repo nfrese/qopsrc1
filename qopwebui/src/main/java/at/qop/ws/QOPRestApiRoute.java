@@ -433,7 +433,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						.map(f -> (Feature)f)
 						.filter(f -> f.routingResults.walk.withinLimit)
 						.collect(Collectors.toList());
-				SimpleFeature hullFeature = addConvexHullFeature(sel, "walk", colorWalk());
+				SimpleFeature hullFeature = addConvexHullFeature(start, sel, "walk", colorWalk());
 				filtered.add(hullFeature);
 			}
 			
@@ -444,7 +444,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						.map(f -> (Feature)f)
 						.filter(f -> f.routingResults.bike.withinLimit)
 						.collect(Collectors.toList());
-				SimpleFeature hullFeature = addConvexHullFeature(sel, "bike", colorBike());
+				SimpleFeature hullFeature = addConvexHullFeature(start, sel, "bike", colorBike());
 				filtered.add(hullFeature);
 			}
 			
@@ -455,7 +455,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						.map(f -> (Feature)f)
 						.filter(f -> f.routingResults.eBike.withinLimit)
 						.collect(Collectors.toList());
-				SimpleFeature hullFeature = addConvexHullFeature(sel, "ebike", colorEBike());
+				SimpleFeature hullFeature = addConvexHullFeature(start, sel, "ebike", colorEBike());
 				filtered.add(hullFeature);
 			}
 			
@@ -466,7 +466,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						.map(f -> (Feature)f)
 						.filter(f -> f.routingResults.publicTransport.withinLimit)
 						.collect(Collectors.toList());
-				SimpleFeature hullFeature = addConvexHullFeature(sel, "publicTransport", colorPublicTransport());
+				SimpleFeature hullFeature = addConvexHullFeature(start, sel, "publicTransport", colorPublicTransport());
 				filtered.add(hullFeature);
 			}
 			
@@ -581,11 +581,12 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		return Boolean.TRUE.equals(f.properties.get("important"));
 	}
 
-	private SimpleFeature addConvexHullFeature(List<Feature> sorted, String mode, String color)
+	private SimpleFeature addConvexHullFeature(Point start, List<Feature> sorted, String mode, String color)
 			throws JsonProcessingException, JsonMappingException {
 		List<Geometry> collectGeoms = sorted.stream()
 				.map(f -> f.geom_)
-				.filter(g -> g!=null).collect(Collectors.toList());
+				.filter(g -> g!=null).collect(Collectors.toCollection(ArrayList::new));
+		collectGeoms.add(start);
 		Geometry hull = CRSTransform.singleton.bufferWGS84Corr(Utils.convexHull(collectGeoms, CRSTransform.gfWGS84),200);
 		JsonNode jo = geomToGeoJson(hull);
 
