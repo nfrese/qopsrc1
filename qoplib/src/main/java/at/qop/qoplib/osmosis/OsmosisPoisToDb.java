@@ -63,6 +63,8 @@ public class OsmosisPoisToDb implements Sink {
 		filter.add("tourism=artwork");
 		filter.add("tourism=guest_house");
 		filter.add("emergency=ambulance_station");
+		filter.add("healthcare=rehabilitation");
+		
 	}
 	
 	private ObjectMapper om = new ObjectMapper();
