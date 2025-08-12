@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +40,7 @@ import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import at.qop.qoplib.dbconnector.DBUtils;
 import crosby.binary.osmosis.OsmosisReader;
  
 public class OsmosisPoisToDb implements Sink {
@@ -335,5 +339,20 @@ public class OsmosisPoisToDb implements Sink {
         sink.postProcess();
         
     }
+    
+	public static void importScript2DB(String sqlScriptFilename) throws ClassNotFoundException, SQLException {
+		String jdbcUrl = "jdbc:postgresql://" +  System.getenv("QOP_DBHOST") + ":5432/" + System.getenv("QOP_DB");
+		String username = System.getenv("QOP_DBUSER");
+		String password = System.getenv("QOP_DBPASSWD");
+
+		System.out.println("connecting to " + jdbcUrl + " with user " + username);
+
+		Class.forName("org.postgresql.Driver");
+
+		Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+
+		DBUtils.importBatchScript(connection, sqlScriptFilename, 10000);
+		connection.close();
+	}
 
 }

@@ -3,6 +3,7 @@ package at.qop.qoplib.osmosis;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import org.junit.Test;
 import org.openstreetmap.osmosis.core.Osmosis;
@@ -42,18 +43,9 @@ public class ImportOsmPoisTest {
 	@Test
 	public void testScript2Db() throws Exception {
 
-		String jdbcUrl = "jdbc:postgresql://" +  System.getenv("QOP_DBHOST") + ":5432/" + System.getenv("QOP_DB");
-		String username = System.getenv("QOP_DBUSER");
-		String password = System.getenv("QOP_DBPASSWD");
-
-		System.out.println("connecting to " + jdbcUrl + " with user " + username);
-
-		Class.forName("org.postgresql.Driver");
-
-		Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-
-		DBUtils.importBatchScript(connection, userDir() + "/Downloads/pois.sql", 10000);
-		connection.close();
+		String sqlScriptFilename = userDir() + "/Downloads/pois.sql";
+		
+		OsmosisPoisToDb.importScript2DB(sqlScriptFilename);
 
 	}
 

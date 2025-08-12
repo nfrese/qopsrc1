@@ -27,12 +27,16 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import org.openstreetmap.osmosis.core.Osmosis;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import at.qop.qoplib.dbconnector.DBUtils;
 import at.qop.qoplib.osmosis.OsmosisPoisToDb;
 
 @RestController
@@ -47,16 +51,20 @@ public class QOPRestApiUpdatePois extends QOPRestApiBase {
     	
     	String pbfUrl = System.getenv("QOP_COMPLETE_PBF_URL"); // "https://download.geofabrik.de/europe/austria-latest.osm.pbf";
     	
-    	
-		String localPbfPath = System.getenv("QOP_COMPLETE_PBF_PATH");
+    	String qopWorkingDir = System.getenv("QOP_WORKING_DIR");
+		String localPbfPath = qopWorkingDir + System.getenv("QOP_LOCAL_PBF_FILENAME");
 		String localREducedPolyPath = System.getenv("QOP_REDUCE_POLY_PATH");
-		String localREducedPbfPath = System.getenv("QOP_REDUCED_PBF_PATH");
+		String localREducedPbfPath = qopWorkingDir + System.getenv("QOP_REDUCED_PBF_FILENAME");
+		
+		 
+		System.out.println("1) downloading " + pbfUrl + " to " + localPbfPath);
 		
 		InputStream in = new URL(pbfUrl).openStream();
 		Files.copy(in, Paths.get(localPbfPath), StandardCopyOption.REPLACE_EXISTING);
 		
+		System.out.println("2) extracting " + localREducedPbfPath);
 		
-		Osmosis.main(new String[]{
+		Osmosis.run(new String[]{
 				"--read-pbf", 
 				localPbfPath, 
 				"--bounding-polygon", 
@@ -65,13 +73,22 @@ public class QOPRestApiUpdatePois extends QOPRestApiBase {
 				localREducedPbfPath});
 
 		
-		String qopWorkingDir = System.getenv("QOP_WORKING_DIR");
-		OsmosisPoisToDb.importAmenitys(localPbfPath , qopWorkingDir + "/pois.sql", true);
+		String sqlScriptFilename = qopWorkingDir + "/pois.sql";
+		System.out.println("3) creating import sql script " + sqlScriptFilename);
+		
+		OsmosisPoisToDb.importAmenitys(localPbfPath , sqlScriptFilename, true);
+		
+		System.out.println("4) applying sql script " + sqlScriptFilename);
 
-    	
-    	// TODO
-       	return ResponseEntity.ok().header("Content-Type", "application/json").body("{}");
+		try {
+			OsmosisPoisToDb.importScript2DB(sqlScriptFilename);
+		} catch (ClassNotFoundException | SQLException e) {
+			throw new RuntimeException(e);
+		}
+		
+       	return ResponseEntity.ok().header("Content-Type", "application/json").body("{ \"updateFinisheD\": true }");
     }
+    
 
     
 }
