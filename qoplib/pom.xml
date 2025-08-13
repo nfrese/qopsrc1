@@ -184,45 +184,46 @@
     		<version>0.47.3</version>
 		</dependency>
 		<dependency>
-    <groupId>org.openstreetmap.osmosis</groupId>
-    <artifactId>osmosis-pbf</artifactId>
-    <version>0.47.3</version>
-</dependency>
+    		<groupId>org.openstreetmap.osmosis</groupId>
+    		<artifactId>osmosis-pbf</artifactId>
+    		<version>0.47.3</version>
+		</dependency>
 
-<dependency>
-    <groupId>org.openstreetmap.osmosis</groupId>
-    <artifactId>osmosis-tagfilter</artifactId>
-    <version>0.47.3</version>
-</dependency>
-<dependency>
-    <groupId>org.openstreetmap.osmosis</groupId>
-    <artifactId>osmosis-areafilter</artifactId>
-    <version>0.47.3</version>
-</dependency>
+		<dependency>
+    		<groupId>org.openstreetmap.osmosis</groupId>
+    		<artifactId>osmosis-tagfilter</artifactId>
+    		<version>0.47.3</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.openstreetmap.osmosis</groupId>
+			<artifactId>osmosis-areafilter</artifactId>
+			<version>0.47.3</version>
+		</dependency>
 
-<dependency>
-    <groupId>org.openstreetmap.osmosis</groupId>
-    <artifactId>osmosis-xml</artifactId>
-    <version>0.47.3</version>
-</dependency>
+		<dependency>
+			<groupId>org.openstreetmap.osmosis</groupId>
+			<artifactId>osmosis-xml</artifactId>
+			<version>0.47.3</version>
+		</dependency>
 
-<dependency>
-        <groupId>org.openstreetmap.osmosis</groupId>
-        <artifactId>osmosis-osm-binary</artifactId>
-        <version>0.47.3</version>
-    </dependency>
-    
-<dependency>
-        <groupId>org.openstreetmap.osmosis</groupId>
-        <artifactId>osmosis-pgsimple</artifactId>
-        <version>0.47.3</version>
-    </dependency>
-<dependency>
-    <groupId>com.google.protobuf</groupId>
-    <artifactId>protobuf-java</artifactId>
-    <version>3.25.5</version>
-</dependency>
+		<dependency>
+			<groupId>org.openstreetmap.osmosis</groupId>
+			<artifactId>osmosis-osm-binary</artifactId>
+			<version>0.47.3</version>
+		</dependency>
 
+		<dependency>
+			<groupId>org.openstreetmap.osmosis</groupId>
+			<artifactId>osmosis-pgsimple</artifactId>
+			<version>0.47.3</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>3.25.5</version>
+		</dependency>
 		
 	</dependencies>
 

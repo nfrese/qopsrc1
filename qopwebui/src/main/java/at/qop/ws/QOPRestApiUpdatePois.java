@@ -68,7 +68,7 @@ public class QOPRestApiUpdatePois extends QOPRestApiBase {
 		InputStream in = new URL(pbfUrl).openStream();
 		Files.copy(in, Paths.get(localPbfPath), StandardCopyOption.REPLACE_EXISTING);
 		
-		System.out.println("2) extracting " + localREducedPbfPath);
+		System.out.println("2) extracting " + localREducedPbfPath + " with bounding polygon " + localREducedPolyPath);
 		
 		Osmosis.run(new String[]{
 				"--read-pbf", 

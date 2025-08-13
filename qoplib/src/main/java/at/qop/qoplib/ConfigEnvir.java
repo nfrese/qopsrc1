@@ -37,6 +37,13 @@ public class ConfigEnvir extends AbstractConfig {
 	}
 
 	protected String qopEnvKey(String key) {
-		return System.getenv("QOP_" + key.toUpperCase());
+		String r = System.getenv("QOP_" + key.toUpperCase());
+		if (r == null) {
+			return  System.getenv("QOP_" + key.toUpperCase().replace(".", "__"));
+		}
+		else
+		{
+			return r;
+		}
 	}
 }
