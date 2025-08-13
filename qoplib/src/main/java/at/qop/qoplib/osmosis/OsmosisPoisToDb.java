@@ -84,6 +84,9 @@ public class OsmosisPoisToDb implements Sink {
 			if (createTable) {
 				writeDDL();
 			}
+			this.ow.println("INSERT INTO qop.pvs_updatelog "
+					+ "(what, timestamp) "
+					+ "VALUES ('osmpois', now())");
 			this.ow.println("DELETE FROM qop.pvs_osm_poi;");
 			
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
