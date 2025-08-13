@@ -505,6 +505,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 				freq.category = catLabelMap.get(freq.cat_id);
 				freq.label = freq.category;
 				freq.count = stat.getValue();
+				freq.valueDisplayed = freq.count == 0 ? "Default Ring" : (freq.count > 9 ? "10+" : freq.count+"");
 				freq.rating = Math.min(freq.count, 10)*1.0/10.0;
 				freq.color = catColorMap.get(freq.cat_id);
 				
@@ -631,6 +632,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 
 	public static class FrequencyItem {
 
+		public Object valueDisplayed;
 		public String color;
 		public int count;
 		public double rating;
