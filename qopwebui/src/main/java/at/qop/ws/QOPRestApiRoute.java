@@ -434,7 +434,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						.filter(f -> f.routingResults.walk.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(start, sel, "walk", colorWalk());
-				filtered.add(hullFeature);
+				if (hullFeature != null) {
+					filtered.add(hullFeature);
+				}
 			}
 			
 			if (bikeEnabled(modes))
@@ -445,7 +447,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						.filter(f -> f.routingResults.bike.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(start, sel, "bike", colorBike());
-				filtered.add(hullFeature);
+				if (hullFeature != null) {
+					filtered.add(hullFeature);
+				}
 			}
 			
 			if (eBikeEnabled(modes))
@@ -456,7 +460,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						.filter(f -> f.routingResults.eBike.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(start, sel, "ebike", colorEBike());
-				filtered.add(hullFeature);
+				if (hullFeature != null) {
+					filtered.add(hullFeature);
+				}
 			}
 			
 			if (publicTransportEnabled(modes))
@@ -467,7 +473,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 						.filter(f -> f.routingResults.publicTransport.withinLimit)
 						.collect(Collectors.toList());
 				SimpleFeature hullFeature = addConvexHullFeature(start, sel, "publicTransport", colorPublicTransport());
-				filtered.add(hullFeature);
+				if (hullFeature != null) {
+					filtered.add(hullFeature);
+				}
 			}
 			
 			//extended.put("isochrone15m", jo);
@@ -587,6 +595,11 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		List<Geometry> collectGeoms = sorted.stream()
 				.map(f -> f.geom_)
 				.filter(g -> g!=null).collect(Collectors.toCollection(ArrayList::new));
+		
+		if (collectGeoms.size() == 0)
+		{
+			return null;
+		}
 		collectGeoms.add(start);
 		Geometry hull = CRSTransform.singleton.bufferWGS84Corr(Utils.convexHull(collectGeoms, CRSTransform.gfWGS84),200);
 		JsonNode jo = geomToGeoJson(hull);
