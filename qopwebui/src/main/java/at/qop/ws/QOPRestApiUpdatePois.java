@@ -34,6 +34,7 @@ import java.sql.SQLException;
 import org.openstreetmap.osmosis.core.Osmosis;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import at.qop.qoplib.dbconnector.DBUtils;
@@ -46,15 +47,20 @@ public class QOPRestApiUpdatePois extends QOPRestApiBase {
         super();
     }
     
-    @GetMapping("/qop/rest/api/pois/update")
-	protected ResponseEntity<String> updatePois() throws MalformedURLException, IOException {
+    @GetMapping("/qop/rest/api/osmpois/update")
+	protected ResponseEntity<String> updatePois(
+			@RequestParam(name="username") String username, 
+			@RequestParam(name="password") String password
+			) throws MalformedURLException, IOException {
     	
-    	String pbfUrl = System.getenv("QOP_COMPLETE_PBF_URL"); // "https://download.geofabrik.de/europe/austria-latest.osm.pbf";
+    	checkAuth(username, password);
     	
-    	String qopWorkingDir = System.getenv("QOP_WORKING_DIR");
-		String localPbfPath = qopWorkingDir + System.getenv("QOP_LOCAL_PBF_FILENAME");
-		String localREducedPolyPath = System.getenv("QOP_REDUCE_POLY_PATH");
-		String localREducedPbfPath = qopWorkingDir + System.getenv("QOP_REDUCED_PBF_FILENAME");
+    	String pbfUrl = System.getenv("QOP_PVS_COMPLETE_PBF_URL"); // "https://download.geofabrik.de/europe/austria-latest.osm.pbf";
+    	
+    	String qopWorkingDir = System.getenv("QOP_PVS_WORKING_DIR");
+		String localPbfPath = qopWorkingDir + System.getenv("QOP_PVS_LOCAL_PBF_FILENAME");
+		String localREducedPolyPath = System.getenv("QOP_PVS_REDUCE_POLY_PATH");
+		String localREducedPbfPath = qopWorkingDir + System.getenv("QOP_PVS_REDUCED_PBF_FILENAME");
 		
 		 
 		System.out.println("1) downloading " + pbfUrl + " to " + localPbfPath);

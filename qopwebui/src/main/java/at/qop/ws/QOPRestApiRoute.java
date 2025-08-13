@@ -602,15 +602,15 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 	}
 
 	private boolean enableR5() {
-		return "true".equalsIgnoreCase(System.getenv("QOP_ENABLE_R5"));
+		return "true".equalsIgnoreCase(System.getenv("QOP_PVS_ENABLE_R5"));
 	}
 	
 	private String aiFilterPostUrl() {
-		return System.getenv("QOP_AI_FILTER_POST_URL");
+		return System.getenv("QOP_PVS_AI_FILTER_POST_URL");
 	}
 
 	private String myAddress() {
-		return System.getenv("QOP_MY_PUBLIC_ADDRESS");
+		return System.getenv("QOP_PVS_MY_PUBLIC_ADDRESS");
 	}
 	
     private void createDataUrl(Feature outFeature) {
