@@ -219,6 +219,10 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			}
 		}
 		
+		if ("standort_walkability".equals(analysisId)) {
+			modes = Arrays.asList("walk");
+		}
+		
 		Point start = CRSTransform.gfWGS84.createPoint(new Coordinate(start_lng,start_lat));
 		Geometry buffer = CRSTransform.singleton.bufferWGS84Corr(start, radius);
 		String geomField ="geom";
