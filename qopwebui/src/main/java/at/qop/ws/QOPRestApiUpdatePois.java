@@ -20,6 +20,7 @@
 
 package at.qop.ws;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -63,37 +64,12 @@ public class QOPRestApiUpdatePois extends QOPRestApiBase {
 		String localREducedPbfPath = qopWorkingDir + System.getenv("QOP_PVS_REDUCED_PBF_FILENAME");
 		
 		 
-		System.out.println("1) downloading " + pbfUrl + " to " + localPbfPath);
-		
-		InputStream in = new URL(pbfUrl).openStream();
-		Files.copy(in, Paths.get(localPbfPath), StandardCopyOption.REPLACE_EXISTING);
-		
-		System.out.println("2) extracting " + localREducedPbfPath + " with bounding polygon " + localREducedPolyPath);
-		
-		Osmosis.run(new String[]{
-				"--read-pbf", 
-				localPbfPath, 
-				"--bounding-polygon", 
-				"completeWays=yes", "file=" + localREducedPolyPath,
-				"--write-pbf", 
-				localREducedPbfPath});
-
-		
-		String sqlScriptFilename = qopWorkingDir + "/pois.sql";
-		System.out.println("3) creating import sql script " + sqlScriptFilename);
-		
-		OsmosisPoisToDb.importAmenitys(localPbfPath , sqlScriptFilename, true);
-		
-		System.out.println("4) applying sql script " + sqlScriptFilename);
-
-		try {
-			OsmosisPoisToDb.importScript2DB(sqlScriptFilename);
-		} catch (ClassNotFoundException | SQLException e) {
-			throw new RuntimeException(e);
-		}
+		OsmosisPoisToDb.importAll(pbfUrl, qopWorkingDir, localPbfPath, localREducedPolyPath, localREducedPbfPath);
 		
        	return ResponseEntity.ok().header("Content-Type", "application/json").body("{ \"updateFinisheD\": true }");
     }
+
+
     
 
     

@@ -3,10 +3,16 @@ package at.qop.qoplib.osmosis;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -26,6 +32,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Polygon;
+import org.openstreetmap.osmosis.core.Osmosis;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.NodeContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.RelationContainer;
@@ -68,6 +75,23 @@ public class OsmosisPoisToDb implements Sink {
 		filter.add("tourism=guest_house");
 		filter.add("emergency=ambulance_station");
 		filter.add("healthcare=rehabilitation");
+		
+		filter.add("cuisine=buschenschank");
+		filter.add("healthcare=nurse");
+		filter.add("healthcare=centre");
+		filter.add("public_transport=stop_position");
+		filter.add("public_transport=platform");
+		filter.add("building=civic");
+		filter.add("tourism=museum");
+		filter.add("tourism=apartment");
+		filter.add("tourism=chalet");
+		filter.add("tourism=hostel");
+		filter.add("tourism=hotel");
+		filter.add("tourism=motel");
+		filter.add("tourism=theme_park");
+		filter.add("tourism=gallery");
+		filter.add("tourism=picnic_site");
+		filter.add("tourism=information");
 		
 	}
 	
@@ -356,6 +380,38 @@ public class OsmosisPoisToDb implements Sink {
 
 		DBUtils.importBatchScript(connection, sqlScriptFilename, 10000);
 		connection.close();
+	}
+	
+	public static void importAll(String pbfUrl, String qopWorkingDir, String localPbfPath, String localREducedPolyPath,
+			String localREducedPbfPath) throws IOException, MalformedURLException, FileNotFoundException {
+		System.out.println("1) downloading " + pbfUrl + " to " + localPbfPath);
+		
+		InputStream in = new URL(pbfUrl).openStream();
+		Files.copy(in, Paths.get(localPbfPath), StandardCopyOption.REPLACE_EXISTING);
+		
+		System.out.println("2) extracting " + localREducedPbfPath + " with bounding polygon " + localREducedPolyPath);
+		
+		Osmosis.run(new String[]{
+				"--read-pbf", 
+				localPbfPath, 
+				"--bounding-polygon", 
+				"completeWays=yes", "file=" + localREducedPolyPath,
+				"--write-pbf", 
+				localREducedPbfPath});
+
+		
+		String sqlScriptFilename = qopWorkingDir + "/pois.sql";
+		System.out.println("3) creating import sql script " + sqlScriptFilename);
+		
+		OsmosisPoisToDb.importAmenitys(localPbfPath , sqlScriptFilename, true);
+		
+		System.out.println("4) applying sql script " + sqlScriptFilename);
+
+		try {
+			OsmosisPoisToDb.importScript2DB(sqlScriptFilename);
+		} catch (ClassNotFoundException | SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

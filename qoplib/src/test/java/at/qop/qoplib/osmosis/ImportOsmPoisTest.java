@@ -1,6 +1,8 @@
 package at.qop.qoplib.osmosis;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -14,7 +16,7 @@ public class ImportOsmPoisTest {
 
 	@Test
 	public void test() {
-		Osmosis.main(new String[]{"--read-pbf", userDir() + "/Downloads/austria-latest.osm.pbf", "--node-key", "keyList=amenity", "--write-pgsimp-dump", "directory=/Users/norbert/Downloads/"});
+		Osmosis.main(new String[]{"--read-pbf", localPbfFile(), "--node-key", "keyList=amenity", "--write-pgsimp-dump", "directory=/Users/norbert/Downloads/"});
 	}
 
 	@Test
@@ -33,7 +35,11 @@ public class ImportOsmPoisTest {
 	
 	@Test
 	public void testWriteSql() throws FileNotFoundException {
-		OsmosisPoisToDb.importAmenitys(userDir() + "/Downloads/austria-latest.osm.pbf", userDir() + "/Downloads/pois.sql", true);
+		OsmosisPoisToDb.importAmenitys(localPbfFile(), sqlScriptFilename(), true);
+	}
+
+	private String localPbfFile() {
+		return userDir() + "/Downloads/austria-latest.osm.pbf";
 	}
 
 	private String userDir() {
@@ -43,10 +49,29 @@ public class ImportOsmPoisTest {
 	@Test
 	public void testScript2Db() throws Exception {
 
-		String sqlScriptFilename = userDir() + "/Downloads/pois.sql";
+		String sqlScriptFilename = sqlScriptFilename();
 		
 		OsmosisPoisToDb.importScript2DB(sqlScriptFilename);
 
 	}
 
+	private String sqlScriptFilename() {
+		return userDir() + "/Downloads/pois.sql";
+	}
+
+	@Test
+	public void importAll() throws MalformedURLException, FileNotFoundException, IOException {
+		
+		String pbfUrl = "https://download.geofabrik.de/europe/austria-latest.osm.pbf";
+	 	
+	 	String qopWorkingDir = userDir() + "/work/qop/pbf/";
+		String localPbfPath = qopWorkingDir + "austria-latest.osm.pbf";
+		String localREducedPolyPath = userDir() + "/work/qop/pbf/weinviertel.poly";
+		String localREducedPbfPath = qopWorkingDir + "weinviertel-latest.osm.pbf";
+		
+		 
+		OsmosisPoisToDb.importAll(pbfUrl, qopWorkingDir, localPbfPath, localREducedPolyPath, localREducedPbfPath);
+	}
+	
+	
 }
