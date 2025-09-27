@@ -8,8 +8,10 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -92,7 +94,8 @@ public class OsmosisPoisToDb implements Sink {
 		filter.add("tourism=gallery");
 		filter.add("tourism=picnic_site");
 		filter.add("tourism=information");
-		
+		filter.add("drink:wine=retail");
+
 	}
 	
 	private ObjectMapper om = new ObjectMapper();
@@ -385,9 +388,8 @@ public class OsmosisPoisToDb implements Sink {
 	public static void importAll(String pbfUrl, String qopWorkingDir, String localPbfPath, String localREducedPolyPath,
 			String localREducedPbfPath) throws IOException, MalformedURLException, FileNotFoundException {
 		System.out.println("1) downloading " + pbfUrl + " to " + localPbfPath);
-		
-		InputStream in = new URL(pbfUrl).openStream();
-		Files.copy(in, Paths.get(localPbfPath), StandardCopyOption.REPLACE_EXISTING);
+				
+		RedirectAwareDownloader.download(pbfUrl, localPbfPath);
 		
 		System.out.println("2) extracting " + localREducedPbfPath + " with bounding polygon " + localREducedPolyPath);
 		
