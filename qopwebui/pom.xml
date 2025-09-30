@@ -68,17 +68,30 @@
 		</dependency>
 		
 		<dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-spring-boot-starter-jaxrs</artifactId>
-            <version>3.3.1</version>
-        </dependency>
+    		<groupId>org.apache.cxf</groupId>
+    		<artifactId>cxf-spring-boot-starter-jaxrs</artifactId>
+    		<version>3.3.1</version>
+    		<exclusions>
+        		<exclusion>
+            		<groupId>javax.validation</groupId>
+            		<artifactId>validation-api</artifactId>
+        		</exclusion>
+    		</exclusions>
+		</dependency>
+
 		
 		<dependency>
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-data-jpa</artifactId>
     		<version>2.7.9</version>
 		</dependency>
-
+		
+		<!-- Spring Boot JDBC starter -->
+		<dependency>
+  			<groupId>org.springframework.boot</groupId>
+  			<artifactId>spring-boot-starter-jdbc</artifactId>
+  			<version>2.7.9</version>  
+		</dependency>
 		
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -179,13 +192,11 @@
 			<groupId>at.qop</groupId>
 			<artifactId>qoplib</artifactId>
 			<version>${qop.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>at.qop</groupId>
 			<artifactId>client</artifactId>
 			<version>${qop.version}</version>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
@@ -234,6 +245,7 @@
 					</filesets>
 				</configuration>
 			</plugin>
+			<!-- spring boot single jar disabled 
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -245,7 +257,63 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
+    <!-- Copy dependencies -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-dependency-plugin</artifactId>
+      <version>3.6.0</version>
+      <executions>
+        <execution>
+          <id>copy-dependencies</id>
+          <phase>package</phase>
+          <goals>
+            <goal>copy-dependencies</goal>
+          </goals>
+          <configuration>
+            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+            <includeScope>runtime</includeScope>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+
+    <!-- Package app classes into a normal JAR -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.2.2</version>
+      <configuration>
+        <archive>
+          <manifest>
+            <mainClass>at.qop.qopwebui.QopApplication</mainClass>
+          </manifest>
+        </archive>
+      </configuration>
+    </plugin>
+
+    <!-- Call the post-build shell script -->
+    <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>exec-maven-plugin</artifactId>
+      <version>3.1.0</version>
+      <executions>
+        <execution>
+          <id>run-custom-script</id>
+          <phase>package</phase>
+          <goals>
+            <goal>exec</goal>
+          </goals>
+          <configuration>
+            <executable>bash</executable>
+            <arguments>
+              <argument>${project.basedir}/scripts/post-build.sh</argument>
+            </arguments>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+
 		</plugins>
 	</build>
 
