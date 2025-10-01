@@ -22,42 +22,17 @@ package at.qop.ws;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.geojson.GeoJsonWriter;
-
 import at.qop.qoplib.Config;
-import at.qop.qoplib.Constants;
-import at.qop.qoplib.LookupSessionBeans;
-import at.qop.qoplib.calculation.CRSTransform;
-import at.qop.qoplib.calculation.IRouter;
-import at.qop.qoplib.dbconnector.DbRecord;
-import at.qop.qoplib.dbconnector.DbTableReader;
-import at.qop.qoplib.dbconnector.fieldtypes.DbInt4Field;
-import at.qop.qoplib.dbconnector.fieldtypes.DbTextField;
-import at.qop.qoplib.entities.ModeEnum;
-import at.qop.qoplib.osrmclient.LonLat;
-import at.qop.qoplib.osrmclient.OSRMClient;
 
 @RestController
 public class QOPRestApiRead extends QOPRestApiBase {
@@ -107,9 +82,11 @@ public class QOPRestApiRead extends QOPRestApiBase {
 			@RequestParam(name="username") String username, 
 			@RequestParam(name="password") String password, 
 			@RequestParam(name="table") String table,
-			@RequestParam(name="maxFeatures", defaultValue = "10000") Integer maxFeatures
+			@RequestParam(name="maxFeatures", defaultValue = "10000") Integer maxFeatures,
+			@RequestParam(name="format", required = false, defaultValue = "geojson") String format
 		) throws ServletException, IOException, SQLException {
 		
+		@SuppressWarnings("unused")
 		Config cfg = checkAuth(username, password);
 		
 		String sql = "SELECT * FROM " + table;
@@ -119,7 +96,7 @@ public class QOPRestApiRead extends QOPRestApiBase {
 		}
 		
 		List<SimpleFeature> outFeatures = readInt(table, sql);
-		return returnGeoJson(outFeatures);
+		return returnGeoJsonOrHtml(outFeatures, format);
 	}
 
     @GetMapping("/qop/rest/api/readsingle")
@@ -129,6 +106,7 @@ public class QOPRestApiRead extends QOPRestApiBase {
 			@RequestParam(name="id") String id
 		) throws ServletException, IOException, SQLException {
 		
+		@SuppressWarnings("unused")
 		Config cfg = checkAuth(username, password);
 		
 		String[] split = id.split(":");

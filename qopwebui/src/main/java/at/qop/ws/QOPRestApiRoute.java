@@ -198,9 +198,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="time_filter", required = false, defaultValue = "standard") String timeFilter,
 			@RequestParam(name="analysis_id", required = false, defaultValue = "main") String analysisId,
 			@RequestParam(name="provide_data_url", required = false, defaultValue = "false") boolean provideDataUrl,
-			@RequestParam(name="routingResultsAsProperties", required = false, defaultValue = "false") boolean routingResultsAsProperties
-			
-			
+			@RequestParam(name="routingResultsAsProperties", required = false, defaultValue = "false") boolean routingResultsAsProperties,
+			@RequestParam(name="format", required = false, defaultValue = "geojson") String format
 		) throws ServletException, IOException, SQLException {
     	boolean isStandortAnalysis = analysisId != null && !"main".equals(analysisId);
 		
@@ -534,8 +533,9 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 		}	
 		
 		System.out.println(filtered.size() + " results");
-		return returnGeoJson(filtered, extended );
+		return returnGeoJsonOrHtml(filtered, extended, format );
 	}
+
 
 	private Set<String> aiFilter(String textFilter, List<SimpleFeature> sorted, String aiFilterPostUrl)
 			throws JsonProcessingException, MalformedURLException, IOException {
@@ -679,7 +679,8 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			@RequestParam(name="lng") double start_lng,
 			@RequestParam(name="dest_lat") double dest_lat, 
 			@RequestParam(name="dest_lng") double dest_lng,
-			@RequestParam(name="modes", required = false) List<String> modes
+			@RequestParam(name="modes", required = false) List<String> modes,
+			@RequestParam(name="format", required = false, defaultValue = "geojson") String format
 		) throws ServletException, IOException, SQLException {
     
     	Config cfg = checkAuth(username, password);
@@ -836,7 +837,7 @@ public class QOPRestApiRoute extends QOPRestApiBase {
 			feature.geometry=jo;
 			outFeatures.add(feature);
 		}
-		ResponseEntity<String> re = returnGeoJson(outFeatures);
+		ResponseEntity<String> re = returnGeoJsonOrHtml(outFeatures, format);
 		return re;
     }
     

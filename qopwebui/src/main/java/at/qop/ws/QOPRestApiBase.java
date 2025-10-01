@@ -20,6 +20,7 @@ import at.qop.qoplib.LookupSessionBeans;
 import at.qop.qoplib.dbconnector.DbRecord;
 import at.qop.qoplib.dbconnector.DbTableReader;
 import at.qop.qoplib.dbconnector.fieldtypes.DbTextField;
+import at.qop.qoplib.utils.GeoJsonToHtmlTableWithNested;
 
 public abstract class QOPRestApiBase {
 
@@ -41,6 +42,29 @@ public abstract class QOPRestApiBase {
 		return OBJECT_MAPPER;
 	}
 
+	protected ResponseEntity<String> returnGeoJsonOrHtml(List<? extends SimpleFeature> outFeatures, 
+			String format) throws JsonProcessingException {
+			return returnGeoJsonOrHtml(outFeatures, null, format);
+	}
+
+	protected ResponseEntity<String> returnGeoJsonOrHtml(List<? extends SimpleFeature> outFeatures, 
+			Map<String,Object> extended,
+			String format) throws JsonProcessingException {
+		ResponseEntity<String> jsonRe = returnGeoJson(outFeatures, extended);
+		if ("html".equals(format)) {
+			String html = GeoJsonToHtmlTableWithNested.convertGeoJsonToHtmlTable(om().readTree(jsonRe.getBody()));
+			return ResponseEntity.ok()
+					.header("Content-Type", "text/html;charset=UTF-8")
+					.header("Access-Control-Allow-Origin", "*")
+					.body(html);
+		
+		}
+		else
+		{
+			return jsonRe;
+		}
+	}
+	
 	protected ResponseEntity<String> returnGeoJson(List<? extends SimpleFeature> outFeatures) throws JsonProcessingException 
 	{
 		return returnGeoJson(outFeatures, null);
