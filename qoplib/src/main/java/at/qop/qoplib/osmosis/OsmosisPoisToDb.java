@@ -34,6 +34,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.linearref.LengthIndexedLine;
 import org.openstreetmap.osmosis.core.Osmosis;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.NodeContainer;
@@ -49,6 +50,7 @@ import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import at.qop.qoplib.Utils;
 import at.qop.qoplib.dbconnector.DBUtils;
 import crosby.binary.osmosis.OsmosisReader;
  
@@ -154,7 +156,7 @@ public class OsmosisPoisToDb implements Sink {
 			shell.add(new Coordinate(n.getLongitude(), n.getLatitude()));
 		}
 		
-		public Coordinate getCentroid() {
+		public Coordinate getCentroidOrMiddle() {
 			if (shell.size() < 1)
 			{
 				throw new RuntimeException("no coords for way " + way);
@@ -163,10 +165,10 @@ public class OsmosisPoisToDb implements Sink {
 			{
 				return shell.get(0);
 			}
-			else if (shell.size() < 3)
+			else if (shell.size() < 3 || !shell.get(0).equals2D(shell.get(shell.size()-1)))
 			{
 				LineString ls = gf.createLineString(shell.toArray(new Coordinate[shell.size()]));
-				return ls.getCentroid().getCoordinate();
+				return getMidPoint(ls);
 			}
 			else
 			{
@@ -175,6 +177,12 @@ public class OsmosisPoisToDb implements Sink {
 				return poly.getCentroid().getCoordinate();
 			}
 		}
+		
+	    private static Coordinate getMidPoint(LineString line) {
+	        double totalLength = line.getLength();
+	        LengthIndexedLine indexedLine = new LengthIndexedLine(line);
+	        return indexedLine.extractPoint(totalLength / 2.0);
+	    }
 		
 	}
 	
@@ -321,7 +329,7 @@ public class OsmosisPoisToDb implements Sink {
 	}
 	
 	private String geom(WayKeep wk) {
-		Coordinate centroid = wk.getCentroid();
+		Coordinate centroid = wk.getCentroidOrMiddle();
 		return "POINT(" +centroid.x + " " + centroid.y + ")";
 	}
 
@@ -414,6 +422,8 @@ public class OsmosisPoisToDb implements Sink {
 		} catch (ClassNotFoundException | SQLException e) {
 			throw new RuntimeException(e);
 		}
+		
+		System.out.println("finished osm poi update!");
 	}
 
 }

@@ -136,30 +136,34 @@ public class R5PvsClient {
 
 
 		long t_start = System.currentTimeMillis();
+		
 		URL url = new URL(urlSb.toString());
 
-		URLConnection con = url.openConnection();
-		con.setDoOutput(true);
+		try {
+			URLConnection con = url.openConnection();
+			con.setDoOutput(true);
 
-	    OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream());
+			OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream());
 
-	    ObjectNode rn = om.createObjectNode();
-	    rn.set("sources", toArrayNode(sources));
-	    rn.set("destinations", toArrayNode(destinations));
-	    
-	    writer.write(rn+"");
-	    writer.flush();
+			ObjectNode rn = om.createObjectNode();
+			rn.set("sources", toArrayNode(sources));
+			rn.set("destinations", toArrayNode(destinations));
 
-		try (InputStream is= con.getInputStream()) {
-			long t_callFinished = System.currentTimeMillis();
+			writer.write(rn+"");
+			writer.flush();
 
-			parseTableResult(results, new BufferedReader(new InputStreamReader(is)));
-			long t_finished = System.currentTimeMillis();
+			try (InputStream is= con.getInputStream()) {
+				long t_callFinished = System.currentTimeMillis();
 
-			System.out.println(sources.length + "x" + destinations.length 
-					+ " t_call=" + (t_callFinished - t_start) 
-					+ "ms t_parse="+ (t_finished - t_callFinished) + "ms " + url);
-			
+				parseTableResult(results, new BufferedReader(new InputStreamReader(is)));
+				long t_finished = System.currentTimeMillis();
+
+				System.out.println(sources.length + "x" + destinations.length 
+						+ " t_call=" + (t_callFinished - t_start) 
+						+ "ms t_parse="+ (t_finished - t_callFinished) + "ms " + url);
+
+			}
+
 		}
 		catch (Exception ex)
 		{

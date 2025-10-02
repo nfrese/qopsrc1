@@ -170,6 +170,7 @@ public class Utils {
 		return new ConvexHull(coords.toArray(new Coordinate[coords.size()]), gf).getConvexHull();
 	}
 
+
 	public static double round(double d, int i) {
 		double f = 10 ^i;
 		return Math.round(d*f)/f;

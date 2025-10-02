@@ -27,35 +27,60 @@ var styleMarker = new Style({
 });
 
 function styleMarkerTarget(feature) {
-	if (feature.getGeometry() instanceof Point) {
-		if (feature.get("icon") != null) {
-			var icon = feature.get("icon").replace('.svg', '');
-			var colorIn = feature.get("color");
-			var color = colorIn != null ? colorIn.replace('#', '') : '000000';
-			var url = `https://cmbaimg.s3.amazonaws.com/map/icons/${icon}%2Bcircle%2B---${color}%2Bwhite.png`
+    if (feature.getGeometry() instanceof Point) {
+        if (feature.get("icon") != null) {
+            var icon = feature.get("icon").replace('.svg', '');
+            var colorIn = feature.get("color");
+            var color = colorIn != null ? colorIn.replace('#', '') : '000000';
+            var url = `https://cm-img-prod.s3.amazonaws.com/map/icons/${icon}%2Bcircle%2B---${color}%2Bwhite.png`;
+            var fallbackUrl = 'https://upload.wikimedia.org/wikipedia/commons/e/ec/RedDot.svg';
 
-			return new Style({
-				image: new Icon({
-					scale: 1, anchor: [0, 0],
-					src: url
-				})
-			});
-		}
-		else {
-			return new Style({
-				image: new Icon({
-					scale: .3, anchor: [0.3, 1],
-					src: '//raw.githubusercontent.com/jonataswalker/map-utils/master/images/marker.png'
-				})
-			});
-		}
-	}
-	else {
-		const style = new Style({
-			stroke: new Stroke({ color: feature.get("stroke"), width: 2 })
-		});
-		return style;
-	}
+            // Preload image to check if it loads successfully
+            var img = new window.Image();
+            img.crossOrigin = "anonymous";
+            img.src = url;
+
+            // Use a closure to store the style
+            let styleToReturn = null;
+            img.onload = function() {
+                styleToReturn = new Style({
+                    image: new Icon({
+                        scale: 1, anchor: [0.5, 1],
+                        src: url
+                    })
+                });
+                feature.setStyle(styleToReturn);
+            };
+            img.onerror = function() {
+                styleToReturn = new Style({
+                    image: new Icon({
+                        scale: 1, anchor: [0.5, 1],
+                        src: fallbackUrl
+                    })
+                });
+                feature.setStyle(styleToReturn);
+            };
+            // Return a temporary style until image loads
+            return new Style({
+                image: new Icon({
+                    scale: 1, anchor: [0.5, 1],
+                    src: fallbackUrl
+                })
+            });
+        } else {
+            return new Style({
+                image: new Icon({
+                    scale: .3, anchor: [0.5, 1],
+                    src: 'https://raw.githubusercontent.com/jonataswalker/map-utils/master/images/marker.png'
+                })
+            });
+        }
+    } else {
+        const style = new Style({
+            stroke: new Stroke({ color: feature.get("stroke"), width: 2 })
+        });
+        return style;
+    }
 }
 
 window.targetCoord = [16.6000785, 48.4526522];
